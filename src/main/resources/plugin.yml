@@ -1,0 +1,15 @@
+name: ServerMarket
+main: com.blank038.servermarket.ServerMarket
+authors:
+  - Blank038
+depend:
+  - PokemonAPI
+  - Vault
+version: 1.0.1-BETA
+api-version: 1.13
+commands:
+  servermarket:
+    aliases:
+      - market
+      - sale
+    description: Command for ServerMarket.

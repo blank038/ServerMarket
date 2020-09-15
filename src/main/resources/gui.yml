@@ -1,0 +1,30 @@
+# 界面标题
+title: "&8全球市场面板"
+# 界面大小
+size: 54
+# 显示商品的槽位
+# 支持格式:
+#   > 数字(小)-数字(大) 例子: 0-44
+#   > 数字 例子: 0
+sale-item-slots:
+  - 0-44
+# 界面物品设定
+items:
+  up:
+    type: paper
+    amount: 1
+    name: "&f上一页"
+    slot: 45
+    lore: []
+  down:
+    type: paper
+    amount: 1
+    name: "&f下一页"
+    slot: 53
+    lore: []
+  store:
+    type: chest
+    amount: 1
+    name: "&e个人仓库"
+    slot: 49
+    lore: []
