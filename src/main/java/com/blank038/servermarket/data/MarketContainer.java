@@ -1,6 +1,7 @@
 package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.config.LangConfiguration;
 import com.mc9y.blank038api.util.inventory.GuiModel;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -30,7 +31,46 @@ public class MarketContainer {
         HashMap<Integer, ItemStack> items = new HashMap<>();
 
         guiModel.setItem(items);
+        guiModel.execute((e) -> {
+            e.setCancelled(true);
+            if (e.getClickedInventory() == e.getInventory()) {
+                ItemStack itemStack = e.getCurrentItem();
+                String key = ServerMarket.getInstance().getNBTBase().get(itemStack, "SaleUUID"),
+                        action = ServerMarket.getInstance().getNBTBase().get(itemStack, "MarketAction");
+                if (key != null) {
+                    // 购买商品
+                    buySaleItem((Player) e.getWhoClicked(), key);
+                } else if (action != null) {
+                    // 判断交互方式
+                    switch (action) {
+                        case "up":
+                            break;
+                        case "down":
+                            break;
+                        case "":
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        });
         // 打开界面
         guiModel.openInventory(player);
+    }
+
+    public void buySaleItem(Player buyer, String uuid) {
+        // 判断商品是否存在
+        if (!ServerMarket.getInstance().sales.containsKey(uuid)) {
+            buyer.sendMessage(LangConfiguration.getString("error-sale", true));
+            return;
+        }
+        SaleItem saleItem = ServerMarket.getInstance().sales.get(uuid);
+        if(ServerMarket.getInstance().getEconomyBridge().balance(buyer) < saleItem.getPrice()) {
+            buyer.sendMessage(LangConfiguration.getString("lack-money", true));
+            return;
+        }
+        // 继续判断
+
     }
 }

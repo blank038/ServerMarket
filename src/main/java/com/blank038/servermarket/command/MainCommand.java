@@ -16,7 +16,9 @@ public class MainCommand implements CommandExecutor {
         main = serverMarket;
     }
 
-
+    /**
+     * 命令执行器
+     */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
@@ -24,6 +26,7 @@ public class MainCommand implements CommandExecutor {
         } else {
             switch (args[0]) {
                 case "open":
+                    openServerMarket(sender);
                     break;
                 case "help":
                     sendHelp(sender);
@@ -31,7 +34,7 @@ public class MainCommand implements CommandExecutor {
                 default:
                     if (main.getConfig().getBoolean("short-command")) {
                         // 打开全球市场
-
+                        openServerMarket(sender);
                     } else {
                         sendHelp(sender);
                     }
