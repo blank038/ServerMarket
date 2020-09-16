@@ -1,0 +1,6 @@
+# 是否开启短命令打开市场, 例如: /market
+short-command: true
+# 玩家售出物品后的税率, 1% = 0.01
+tax:
+  default: 0.1
+  vip: 0.05

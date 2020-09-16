@@ -1,0 +1,14 @@
+prefix: "&eServerMarket &f"
+unknown-command: "未知命令, 请输入 /%c help 查看命令帮助."
+help:
+  default:
+    - "&bServerMarket:"
+    - "&f/%c open 打开全球市场"
+    - "&f/%c sell <价格> 上架手中物品至市场"
+    - "&f/%c box 查看市场暂存盒"
+  admin:
+    - "&bServerMarket:"
+    - "&f/%c open 打开全球市场"
+    - "&f/%c sell <价格> 上架手中物品至市场"
+    - "&f/%c box 查看市场暂存盒"
+    - "&f/%c reload 重载插件配置文件"
