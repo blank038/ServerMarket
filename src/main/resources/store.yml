@@ -1,0 +1,19 @@
+# 界面标题
+title: "&8暂存库"
+# 界面大小
+size: 54
+# 显示商品的槽位
+# 支持格式:
+#   > 数字(小)-数字(大) 例子: 0-44
+#   > 数字 例子: 0
+store-item-slots:
+  - 0-44
+# 界面物品设定
+items:
+  main:
+    type: torch
+    amount: 1
+    name: "&c全球市场"
+    slot: 49
+    action: market
+    lore: []

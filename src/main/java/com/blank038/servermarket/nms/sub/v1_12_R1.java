@@ -11,7 +11,7 @@ public class v1_12_R1 implements NBTBase {
     @Override
     public String get(ItemStack itemStack, String key) {
         if (itemStack == null || itemStack.getType() == Material.AIR) return null;
-        net.minecraft.server.v1_12_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
+        net.minecraft.server.v1_12_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack.clone());
         NBTTagCompound nbtTagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
         return nbtTagCompound != null && nbtTagCompound.hasKey(key) ? nbtTagCompound.getString(key) : null;
     }
@@ -19,5 +19,16 @@ public class v1_12_R1 implements NBTBase {
     @Override
     public boolean contains(ItemStack itemStack, String key) {
         return get(itemStack, key) != null;
+    }
+
+    @Override
+    public ItemStack addTag(ItemStack itemStack, String key, String value) {
+        net.minecraft.server.v1_12_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack.clone());
+        NBTTagCompound nbtTagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
+        if (nbtTagCompound != null) {
+            nbtTagCompound.setString(key, value);
+        }
+        nmsItem.setTag(nbtTagCompound);
+        return CraftItemStack.asBukkitCopy(nmsItem);
     }
 }

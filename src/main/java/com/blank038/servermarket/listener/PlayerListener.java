@@ -1,11 +1,14 @@
 package com.blank038.servermarket.listener;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.PlayerData;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.text.DecimalFormat;
 
 public class PlayerListener implements Listener {
 
@@ -14,7 +17,15 @@ public class PlayerListener implements Listener {
      */
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        ServerMarket.getInstance().datas.put(event.getPlayer().getName(), new PlayerData(event.getPlayer().getName()));
+        String name = event.getPlayer().getName();
+        ServerMarket.getInstance().datas.put(name, new PlayerData(name));
+        if (ServerMarket.getInstance().results.containsKey(name)) {
+            double price = ServerMarket.getInstance().results.remove(name), last = ServerMarket.getInstance().getApi().getLastMoney(event.getPlayer(), price);
+            DecimalFormat df = new DecimalFormat("#.00");
+            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), last);
+            event.getPlayer().sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(price))
+                    .replace("%last%", df.format(last)));
+        }
     }
 
     /**

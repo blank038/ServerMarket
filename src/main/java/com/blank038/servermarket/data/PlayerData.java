@@ -1,6 +1,7 @@
 package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.gui.SaleItem;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -57,12 +58,46 @@ public class PlayerData {
     }
 
     /**
+     * 判断暂存库是否有物品
+     *
+     * @param uuid 物品编号
+     * @return 是否拥有
+     */
+    public boolean contains(String uuid) {
+        return items.containsKey(uuid);
+    }
+
+    /**
+     * 移除某个物品
+     *
+     * @param uuid 物品编号
+     * @return 移除的物品
+     */
+    public ItemStack remove(String uuid) {
+        return items.remove(uuid);
+    }
+
+    /**
      * 增加暂存物品至暂存箱
      *
      * @param itemStack 增加的物品
      */
     public void addItem(ItemStack itemStack) {
         items.put(UUID.randomUUID().toString(), itemStack.clone());
+    }
+
+    /**
+     * 增加物品至暂存箱且增加购买记录
+     *
+     * @param saleItem 购买的商品
+     */
+    public void addItem(SaleItem saleItem) {
+        ItemStack itemStack = saleItem.getSafeItem();
+        items.put(UUID.randomUUID().toString(), itemStack.clone());
+        String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
+                itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
+        info.add(saleItem.getOwnerName() + "//" + saleItem.getPrice() + "//" + System.currentTimeMillis() + "//" +
+                displayMmae + "//" + itemStack.getAmount() + "//" + saleItem.getSaleUUID());
     }
 
     /**

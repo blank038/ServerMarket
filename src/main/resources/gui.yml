@@ -8,6 +8,12 @@ size: 54
 #   > 数字 例子: 0
 sale-item-slots:
   - 0-44
+# 物品信息
+sale-info:
+  - " "
+  - "&a售卖者: &f%seller%"
+  - "&a价格: &f%price%金币"
+  - "&a上架时间: &f%sdf%"
 # 界面物品设定
 items:
   up:

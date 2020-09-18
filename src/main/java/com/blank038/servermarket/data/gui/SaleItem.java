@@ -1,8 +1,13 @@
-package com.blank038.servermarket.data;
+package com.blank038.servermarket.data.gui;
 
 import com.blank038.servermarket.enums.PayType;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * 全球市场内商品的构建类
+ */
 public class SaleItem {
     // 存储物品的 UUID
     private final String saleUUID, ownerUUID, ownerName;
@@ -15,9 +20,16 @@ public class SaleItem {
     // 发布时间
     private final long postTime;
 
-    /**
-     * 全球市场内商品的构建类
-     */
+    public SaleItem(ConfigurationSection section) {
+        saleUUID = section.getString("sale-uuid");
+        ownerName = section.getString("owner-name");
+        ownerUUID = section.getString("owner-uuid");
+        itemStack = section.getItemStack("sale-item");
+        payType = PayType.valueOf(section.getString("pay-type"));
+        price = section.getInt("price");
+        postTime = section.getLong("post-time");
+    }
+
     public SaleItem(String saleUUID, String ownerUUID, String ownerName, ItemStack itemStack,
                     PayType payType, double price, long postTime) {
         this.saleUUID = saleUUID;
@@ -55,5 +67,17 @@ public class SaleItem {
 
     public PayType getPayType() {
         return payType;
+    }
+
+    public ConfigurationSection toSection() {
+        ConfigurationSection section = new YamlConfiguration();
+        section.set("owner-uuid", ownerUUID);
+        section.set("sale-uuid", getSaleUUID());
+        section.set("owner-name", ownerName);
+        section.set("sale-item", itemStack);
+        section.set("pay-type", payType.name());
+        section.set("price", price);
+        section.set("post-time", postTime);
+        return section;
     }
 }
