@@ -4,8 +4,11 @@ import com.blank038.servermarket.bridge.IBridge;
 import com.blank038.servermarket.bridge.VaultBridge;
 import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.data.SaleItem;
+import com.blank038.servermarket.listener.PlayerListener;
 import com.blank038.servermarket.nms.NBTBase;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -26,6 +29,8 @@ public class ServerMarket extends JavaPlugin {
     private NBTBase nbtBase;
     // 商品列表
     public final HashMap<String, SaleItem> sales = new HashMap<>();
+    // 玩家存档
+    public final HashMap<String, PlayerData> datas = new HashMap<>();
 
     public static ServerMarket getInstance() {
         return serverMarket;
@@ -48,6 +53,8 @@ public class ServerMarket extends JavaPlugin {
         loadConfig();
         // 注册命令
         getCommand("servermarket").setExecutor(new MainCommand(this));
+        // 注册事件监听类
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
     }
 
     /**

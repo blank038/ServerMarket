@@ -1,12 +1,13 @@
 package com.blank038.servermarket.bridge;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public interface IBridge {
 
-    double balance(Player player);
+    double balance(OfflinePlayer player);
 
-    void give(Player player, double amount);
+    void give(OfflinePlayer player, double amount);
 
-    boolean take(Player player, double amount);
+    boolean take(OfflinePlayer player, double amount);
 }

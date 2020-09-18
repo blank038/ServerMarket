@@ -2,7 +2,10 @@ package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.enums.PayType;
 import com.mc9y.blank038api.util.inventory.GuiModel;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -10,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class MarketContainer {
     private final Player player;
@@ -66,11 +70,22 @@ public class MarketContainer {
             return;
         }
         SaleItem saleItem = ServerMarket.getInstance().sales.get(uuid);
-        if(ServerMarket.getInstance().getEconomyBridge().balance(buyer) < saleItem.getPrice()) {
+        if (ServerMarket.getInstance().getEconomyBridge().balance(buyer) < saleItem.getPrice()) {
             buyer.sendMessage(LangConfiguration.getString("lack-money", true));
             return;
         }
-        // 继续判断
+        // 判断货币类型, 不要问我为什么要判断！后续新增货币扩展延伸性好！
+        if (saleItem.getPayType() != PayType.VAULT) {
+            return;
+        }
+        // 先移除, 确保不被重复购买
+        ServerMarket.getInstance().sales.remove(uuid);
+        // 先给玩家钱扣了！
+        ServerMarket.getInstance().getEconomyBridge().take(player, saleItem.getPrice());
+        // 再把钱给出售者
+        OfflinePlayer seller = Bukkit.getOfflinePlayer(UUID.fromString(saleItem.getOwnerUUID()));
+        ServerMarket.getInstance().getEconomyBridge().give(seller, saleItem.getPrice());
+        // 再给购买者物品
 
     }
 }

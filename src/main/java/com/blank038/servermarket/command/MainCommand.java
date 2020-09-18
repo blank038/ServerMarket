@@ -49,7 +49,7 @@ public class MainCommand implements CommandExecutor {
      */
     private void openServerMarket(CommandSender sender) {
         if (sender instanceof Player) {
-            new MarketContainer((Player) sender);
+            new MarketContainer((Player) sender).openGui(1);
         }
     }
 

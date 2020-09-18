@@ -11,7 +11,7 @@ public class SaleItem {
     // 商品对应的货币
     private final PayType payType;
     // 价格
-    private final int price;
+    private final double price;
     // 发布时间
     private final long postTime;
 
@@ -19,7 +19,7 @@ public class SaleItem {
      * 全球市场内商品的构建类
      */
     public SaleItem(String saleUUID, String ownerUUID, String ownerName, ItemStack itemStack,
-                    PayType payType, int price, long postTime) {
+                    PayType payType, double price, long postTime) {
         this.saleUUID = saleUUID;
         this.ownerUUID = ownerUUID;
         this.ownerName = ownerName;
@@ -41,7 +41,7 @@ public class SaleItem {
         return ownerName;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 
