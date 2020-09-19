@@ -43,7 +43,7 @@ public class MarketContainer {
         if (data.contains("items")) {
             for (String key : data.getConfigurationSection("items").getKeys(false)) {
                 ConfigurationSection section = data.getConfigurationSection("items." + key);
-                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type")), section.getInt("amount"));
+                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()), section.getInt("amount"));
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
                 // 开始遍历设置Lore
@@ -55,7 +55,7 @@ public class MarketContainer {
                 itemStack.setItemMeta(itemMeta);
                 // 开始判断是否有交互操作
                 if (section.contains("action")) {
-                    itemStack = ServerMarket.getInstance().getNBTBase().addTag(itemStack, "action", section.getString("action"));
+                    itemStack = ServerMarket.getInstance().getNBTBase().addTag(itemStack, "MarketAction", section.getString("action"));
                 }
                 // 开始判断槽位方向
                 if (section.getStringList("slot").isEmpty()) {
@@ -80,15 +80,15 @@ public class MarketContainer {
         // 获得额外增加的信息
         List<String> extrasLore = data.getStringList("sale-info");
         int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
-        for (int i = start, index = start; i < end; i++, index++) {
-            if (i >= slots.length) break;
+        for (int i = start, index = 0; i < end; i++, index++) {
+            if (index >= slots.length || i >= keys.length) break;
             // 开始设置物品
-            SaleItem saleItem = ServerMarket.getInstance().sales.getOrDefault(keys[index], null);
+            SaleItem saleItem = ServerMarket.getInstance().sales.getOrDefault(keys[i], null);
             if (saleItem == null) {
                 i -= 1;
                 continue;
             }
-            items.put(slots[i], getShowItem(saleItem, extrasLore));
+            items.put(slots[index], getShowItem(saleItem, extrasLore));
         }
         guiModel.setItem(items);
         final int lastPage = currentPage, finalMaxPage = maxPage;
@@ -198,12 +198,12 @@ public class MarketContainer {
             SimpleDateFormat sdf = new SimpleDateFormat(ServerMarket.getInstance().getConfig().getString("simple-date-format"));
             // 设置额外信息
             for (String i : infoLore) {
-                lore.add(i.replace("%seller%", saleItem.getOwnerName()).replace("%price%", String.valueOf(saleItem.getPrice()))
-                        .replace("%time%", sdf.format(date)));
+                lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
+                        .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
             }
             itemMeta.setLore(lore);
             itemStack.setItemMeta(itemMeta);
         }
-        return itemStack;
+        return ServerMarket.getInstance().getNBTBase().addTag(itemStack, "SaleUUID", saleItem.getSaleUUID());
     }
 }

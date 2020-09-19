@@ -119,7 +119,7 @@ public class MainCommand implements CommandExecutor {
                 return;
             }
             // 设置玩家手中物品为空
-            player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+            player.getInventory().setItemInMainHand(null);
             // 上架物品
             String saleUUID = UUID.randomUUID().toString();
             SaleItem saleItem = new SaleItem(saleUUID, player.getUniqueId().toString(), player.getName(),
@@ -130,9 +130,8 @@ public class MainCommand implements CommandExecutor {
             if (main.getConfig().getBoolean("sale-broadcast")) {
                 String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                         itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
-                player.getInventory().addItem(itemStack);
                 player.sendMessage(LangConfiguration.getString("broadcast", true).replace("%item%", displayMmae)
-                        .replace("%amount%", String.valueOf(itemStack.getAmount())));
+                        .replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
             }
         }
     }

@@ -42,7 +42,7 @@ public class StoreContainer {
         if (data.contains("items")) {
             for (String key : data.getConfigurationSection("items").getKeys(false)) {
                 ConfigurationSection section = data.getConfigurationSection("items." + key);
-                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type")), section.getInt("amount"));
+                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()), section.getInt("amount"));
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
                 // 开始遍历设置Lore
@@ -75,9 +75,9 @@ public class StoreContainer {
 //        int maxPage = storeItems.size() / slots.length;
 //        maxPage += storeItems.size() % slots.length == 0 ? 0 : 1;
         int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
-        for (int i = start; i < end; i++) {
-            if (i >= slots.length) break;
-            items.put(slots[i], ServerMarket.getInstance().getNBTBase().addTag(storeItems.get(keys[i]), "StoreID", keys[i]));
+        for (int i = start, index = 0; i < end; i++, index++) {
+            if (index >= slots.length || i >= keys.length) break;
+            items.put(slots[index], ServerMarket.getInstance().getNBTBase().addTag(storeItems.get(keys[i]), "StoreID", keys[i]));
         }
         // 界面物品设置结束
         guiModel.setItem(items);

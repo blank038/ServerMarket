@@ -18,3 +18,5 @@ price:
   max: 2000000
 # 上架物品是否公告
 sale-broadcast: true
+# 是否开启商品额外信息
+sale-info: true

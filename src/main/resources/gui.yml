@@ -13,7 +13,7 @@ sale-info:
   - " "
   - "&a售卖者: &f%seller%"
   - "&a价格: &f%price%金币"
-  - "&a上架时间: &f%sdf%"
+  - "&a上架时间: &f%time%"
 # 界面物品设定
 items:
   up:
