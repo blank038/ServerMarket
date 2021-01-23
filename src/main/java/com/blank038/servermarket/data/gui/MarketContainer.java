@@ -8,7 +8,6 @@ import com.mc9y.blank038api.util.inventory.GuiModel;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,6 +20,9 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * @author Blank038
+ */
 public class MarketContainer {
     private final Player player;
 
@@ -72,7 +74,7 @@ public class MarketContainer {
         String[] keys = ServerMarket.getInstance().sales.keySet().toArray(new String[0]);
         // 计算下标
         int maxPage = ServerMarket.getInstance().sales.size() / slots.length;
-        maxPage += ServerMarket.getInstance().sales.size() % slots.length == 0 ? 0 : 1;
+        maxPage += (ServerMarket.getInstance().sales.size() % slots.length) == 0 ? 0 : 1;
         // 判断页面是否超标, 如果是的话就设置为第一页
         if (currentPage > maxPage) {
             currentPage = 1;
@@ -81,7 +83,9 @@ public class MarketContainer {
         List<String> extrasLore = data.getStringList("sale-info");
         int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
         for (int i = start, index = 0; i < end; i++, index++) {
-            if (index >= slots.length || i >= keys.length) break;
+            if (index >= slots.length || i >= keys.length) {
+                break;
+            }
             // 开始设置物品
             SaleItem saleItem = ServerMarket.getInstance().sales.getOrDefault(keys[i], null);
             if (saleItem == null) {
@@ -110,14 +114,14 @@ public class MarketContainer {
                             if (lastPage == 1) {
                                 clicker.sendMessage(LangConfiguration.getString("no-previous-page", true));
                             } else {
-                                openGui(lastPage + 1);
+                                openGui(lastPage - 1);
                             }
                             break;
                         case "down":
                             if (lastPage >= finalMaxPage) {
                                 clicker.sendMessage(LangConfiguration.getString("no-next-page", true));
                             } else {
-                                openGui(lastPage - 1);
+                                openGui(lastPage + 1);
                             }
                             break;
                         case "store":

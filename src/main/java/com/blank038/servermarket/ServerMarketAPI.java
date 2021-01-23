@@ -48,7 +48,7 @@ public class ServerMarketAPI {
             if (i.contains("-")) {
                 String[] split = i.split("-");
                 int min = Integer.parseInt(split[0]), max = Integer.parseInt(split[1]);
-                for (int x = min; x < max; x++) {
+                for (int x = min; x <= max; x++) {
                     if (!integers.contains(x)) {
                         integers.add(x);
                     }

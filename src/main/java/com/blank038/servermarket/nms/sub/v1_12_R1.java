@@ -6,11 +6,16 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_12_R1.inventory.CraftItemStack;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * @author Blank038
+ */
 public class v1_12_R1 implements NBTBase {
 
     @Override
     public String get(ItemStack itemStack, String key) {
-        if (itemStack == null || itemStack.getType() == Material.AIR) return null;
+        if (itemStack == null || itemStack.getType() == Material.AIR) {
+            return null;
+        }
         net.minecraft.server.v1_12_R1.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack.clone());
         NBTTagCompound nbtTagCompound = nmsItem.hasTag() ? nmsItem.getTag() : new NBTTagCompound();
         return nbtTagCompound != null && nbtTagCompound.hasKey(key) ? nbtTagCompound.getString(key) : null;

@@ -5,7 +5,7 @@ authors:
 depend:
   - PokemonAPI
   - Vault
-version: 1.0.1-BETA
+version: 1.0.2-BETA
 api-version: 1.13
 commands:
   servermarket:
