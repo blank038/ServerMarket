@@ -1,30 +1,49 @@
 package com.blank038.servermarket;
 
+import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.data.gui.SaleItem;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * @author Blank038
+ * @date 2021/03/05
+ */
 public class ServerMarketAPI {
-    private final ServerMarket serverMarket;
+    private final ServerMarket INSTANCE;
 
     public ServerMarketAPI(ServerMarket serverMarket) {
-        this.serverMarket = serverMarket;
+        this.INSTANCE = serverMarket;
     }
 
     public void addItem(String name, SaleItem saleItem) {
-        PlayerData data = serverMarket.datas.getOrDefault(name, new PlayerData(name));
+        PlayerData data = INSTANCE.datas.getOrDefault(name, new PlayerData(name));
         data.addItem(saleItem);
         data.save();
     }
 
     public void addItem(String name, ItemStack itemStack) {
-        PlayerData data = serverMarket.datas.getOrDefault(name, new PlayerData(name));
+        PlayerData data = INSTANCE.datas.getOrDefault(name, new PlayerData(name));
         data.addItem(itemStack);
         data.save();
+    }
+
+    /**
+     * 打开市场, 如果市场编号为 null 则打开默认市场
+     *
+     * @param player 目标玩家
+     * @param key    目标市场编号
+     */
+    public void openMarket(Player player, String key) {
+        MarketData marketData = MarketData.MARKET_DATA.containsKey(key) ? MarketData.MARKET_DATA.get(key)
+                : MarketData.MARKET_DATA.get(INSTANCE.getConfig().getString("default-market"));
+        if (marketData == null) {
+            return;
+        }
+        if (player.hasPermission(marketData.getPermission())) {
+            marketData.openGui(player, 1);
+        }
     }
 
     public double getLastMoney(Player player, double money) {
@@ -39,29 +58,6 @@ public class ServerMarketAPI {
     }
 
     public PlayerData getPlayerData(String name) {
-        return serverMarket.datas.getOrDefault(name, new PlayerData(name));
-    }
-
-    public List<Integer> getInt(List<String> list) {
-        List<Integer> integers = new ArrayList<>();
-        for (String i : list) {
-            if (i.contains("-")) {
-                String[] split = i.split("-");
-                int min = Integer.parseInt(split[0]), max = Integer.parseInt(split[1]);
-                for (int x = min; x <= max; x++) {
-                    if (!integers.contains(x)) {
-                        integers.add(x);
-                    }
-                }
-            } else if (i.contains(",")) {
-                String[] split = i.split(",");
-                for (String x : split) {
-                    integers.add(Integer.parseInt(x));
-                }
-            } else {
-                integers.add(Integer.parseInt(i));
-            }
-        }
-        return integers;
+        return INSTANCE.datas.getOrDefault(name, new PlayerData(name));
     }
 }

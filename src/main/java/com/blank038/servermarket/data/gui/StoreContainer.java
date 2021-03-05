@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * @author Blank038
+ */
 public class StoreContainer {
     private final Player player;
     private final int marketPage;
@@ -72,11 +75,11 @@ public class StoreContainer {
         HashMap<String, ItemStack> storeItems = playerData.getItems();
         String[] keys = storeItems.keySet().toArray(new String[0]);
         // 计算下标
-//        int maxPage = storeItems.size() / slots.length;
-//        maxPage += storeItems.size() % slots.length == 0 ? 0 : 1;
         int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
         for (int i = start, index = 0; i < end; i++, index++) {
-            if (index >= slots.length || i >= keys.length) break;
+            if (index >= slots.length || i >= keys.length) {
+                break;
+            }
             items.put(slots[index], ServerMarket.getInstance().getNBTBase().addTag(storeItems.get(keys[i]), "StoreID", keys[i]));
         }
         // 界面物品设置结束
@@ -90,14 +93,13 @@ public class StoreContainer {
                 ItemStack itemStack = e.getCurrentItem();
                 String storeId = ServerMarket.getInstance().getNBTBase().get(itemStack, "StoreID"),
                         action = ServerMarket.getInstance().getNBTBase().get(itemStack, "action");
-                if (action != null && action.equalsIgnoreCase("market")) {
+                if ("market".equalsIgnoreCase(action)) {
                     new MarketContainer(clicker).openGui(marketPage);
                 } else if (storeId != null) {
-                    getItem(clicker, storeId);
+                    this.getItem(clicker, storeId);
                 }
             }
         });
-
         guiModel.openInventory(player);
     }
 

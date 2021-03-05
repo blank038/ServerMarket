@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * @author Blank038
+ */
 public class PlayerData {
     private final HashMap<String, ItemStack> items = new HashMap<>();
     private final List<String> info;

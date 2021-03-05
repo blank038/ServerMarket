@@ -2,14 +2,21 @@ package com.blank038.servermarket.listener;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.text.DecimalFormat;
+import java.util.Map;
 
+/**
+ * @author Blank038
+ * @date 2021/03/05
+ */
 public class PlayerListener implements Listener {
 
     /**
@@ -35,6 +42,16 @@ public class PlayerListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         if (ServerMarket.getInstance().datas.containsKey(event.getPlayer().getName())) {
             ServerMarket.getInstance().datas.remove(event.getPlayer().getName()).save();
+        }
+    }
+
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent event) {
+        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+            if (entry.getValue().performSellCommand(event.getPlayer(), event.getMessage())) {
+                event.setCancelled(true);
+                break;
+            }
         }
     }
 }

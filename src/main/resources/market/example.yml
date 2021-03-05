@@ -1,0 +1,35 @@
+####################
+#  这是一个市场样例  #
+####################
+# 市场源编号, 设定后请勿修改
+source_id: "example"
+# 支持的货币类型
+# 类型: Vault, PlayerPoints, NyEconomy货币名
+vault-type: "Vault"
+# 市场权限, 有权限才能 查看和上架
+permission: "market.example"
+# 市场展示名
+display-name: "&c奥利给给"
+# 价格范围设定
+# 价格范围
+price:
+  min: 1
+  max: 2000000
+# 上架物品是否公告
+sale-broadcast: true
+# 是否开启商品额外信息
+sale-info: true
+# 短写命令打开市场, 留空则表示不设定
+short-command: "exmarket"
+# 玩家售出物品后的税率, 1% = 0.01
+tax:
+  default: 0.1
+  vip: 0.05
+# 日期格式
+simple-date-format: "yyyy/MM/dd HH:mm:ss"
+# 物品上架黑名单
+black-list:
+  type:
+    - "STONE"
+  lore:
+    - "&f禁止上架"

@@ -4,8 +4,8 @@ import com.blank038.servermarket.bridge.IBridge;
 import com.blank038.servermarket.bridge.VaultBridge;
 import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
-import com.blank038.servermarket.data.gui.SaleItem;
 import com.blank038.servermarket.listener.PlayerListener;
 import com.blank038.servermarket.nms.NBTBase;
 import com.blank038.servermarket.nms.sub.v1_12_R1;
@@ -26,21 +26,32 @@ import java.util.Map;
  *
  * @author Blank038
  */
+@SuppressWarnings(value = {"unused"})
 public class ServerMarket extends JavaPlugin {
     private static ServerMarket serverMarket;
-    // 语言配置类
+    /**
+     * 语言配置类
+     */
     private LangConfiguration lang;
-    // 获取经济桥类
+    /**
+     * 获取经济桥类
+     */
     private IBridge ecoBridge;
-    // NMS 接口
+    /**
+     * NMS 接口
+     */
     private NBTBase nbtBase;
-    // API 接口
+    /**
+     * API 接口
+     */
     private ServerMarketAPI serverMarketAPI;
-    // 商品列表
-    public final HashMap<String, SaleItem> sales = new HashMap<>();
-    // 玩家存档
+    /**
+     * 玩家存档
+     */
     public final HashMap<String, PlayerData> datas = new HashMap<>();
-    // 返还玩家的钱
+    /**
+     * 返还玩家的钱
+     */
     public final HashMap<String, Double> results = new HashMap<>();
 
     public static ServerMarket getInstance() {
@@ -75,7 +86,9 @@ public class ServerMarket extends JavaPlugin {
                 disable = true;
                 this.setEnabled(false);
         }
-        if (disable) return;
+        if (disable) {
+            return;
+        }
         serverMarket = this;
         // 初始化经济桥
         ecoBridge = new VaultBridge();
@@ -95,7 +108,7 @@ public class ServerMarket extends JavaPlugin {
         }
         // 定时存储玩家数据
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::savePlayerData, 1200L, 1200L);
-        getLogger().info("插件加载完成, 已读取 " + sales.size() + " 个商品数据.");
+        getLogger().info("插件加载完成, 已读取 " + MarketData.MARKET_DATA.size() + " 个市场数据.");
         getLogger().info("感谢使用, 作者: Blank038 版本: " + getDescription().getVersion());
     }
 
@@ -113,16 +126,19 @@ public class ServerMarket extends JavaPlugin {
         saveDefaultConfig();
         reloadConfig();
         // 设定语言配置
-        if (lang == null) lang = new LangConfiguration();
-        else lang.reload();
+        if (lang == null) {
+            lang = new LangConfiguration();
+        } else {
+            lang.reload();
+        }
         // 判断玩家存档目录是否存在
         File dataFolder = new File(getDataFolder(), "data");
         dataFolder.mkdirs();
         // 判断资源文件是否存在
-        for (String fileNmae : new String[]{"gui.yml", "store.yml"}) {
-            File f = new File(getDataFolder(), fileNmae);
+        for (String fileName : new String[]{"gui.yml", "store.yml"}) {
+            File f = new File(getDataFolder(), fileName);
             if (!f.exists()) {
-                saveResource(fileNmae, true);
+                saveResource(fileName, true);
             }
         }
         // 重新加载数据中的物品
@@ -147,23 +163,16 @@ public class ServerMarket extends JavaPlugin {
     }
 
     private void reloadSaleItem() {
-        if (!sales.isEmpty()) {
-            saveSaleList();
+        if (!MarketData.MARKET_DATA.isEmpty()) {
+            this.saveSaleList();
         }
-        File file = new File(getDataFolder(), "data.yml");
-        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
+        // 读取市场配置
+        File file = new File(getDataFolder(), "market");
         if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            file.mkdir();
+
         }
-        sales.clear();
-        // 读取配置文件中的物品
-        for (String key : data.getKeys(false)) {
-            sales.put(key, new SaleItem(data.getConfigurationSection(key)));
-        }
+        MarketData.MARKET_DATA.clear();
     }
 
     private void saveResults() {
@@ -180,15 +189,8 @@ public class ServerMarket extends JavaPlugin {
     }
 
     public void saveSaleList() {
-        File file = new File(getDataFolder(), "data.yml");
-        FileConfiguration data = new YamlConfiguration();
-        for (Map.Entry<String, SaleItem> entry : sales.entrySet()) {
-            data.set(entry.getKey(), entry.getValue().toSection());
-        }
-        try {
-            data.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+            entry.getValue().saveSaleData();
         }
     }
 

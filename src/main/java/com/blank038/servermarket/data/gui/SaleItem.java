@@ -7,17 +7,29 @@ import org.bukkit.inventory.ItemStack;
 
 /**
  * 全球市场内商品的构建类
+ *
+ * @author Blank038
  */
 public class SaleItem {
-    // 存储物品的 UUID
+    /**
+     * 存储物品的 UUID
+     */
     private final String saleUUID, ownerUUID, ownerName;
-    // 商品对应的物品
+    /**
+     * 商品对应的物品
+     */
     private final ItemStack itemStack;
-    // 商品对应的货币
+    /**
+     * 商品对应的货币
+     */
     private final PayType payType;
-    // 价格
+    /**
+     * 价格
+     */
     private final double price;
-    // 发布时间
+    /**
+     * 发布时间
+     */
     private final long postTime;
 
     public SaleItem(ConfigurationSection section) {
