@@ -105,6 +105,10 @@ public class StoreContainer {
     public void getItem(Player player, String uuid) {
         PlayerData data = ServerMarket.getInstance().getApi().getPlayerData(player.getUniqueId());
         if (data.contains(uuid)) {
+            if (player.getInventory().firstEmpty() == -1) {
+                player.sendMessage(LangConfiguration.getString("inventory-full", true));
+                return;
+            }
             // 基于玩家物品
             ItemStack itemStack = PlayerData.PLAYER_DATA.get(player.getUniqueId()).remove(uuid);
             String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
