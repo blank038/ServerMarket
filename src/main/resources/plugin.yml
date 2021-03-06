@@ -4,7 +4,10 @@ authors:
   - Blank038
 depend:
   - PokemonAPI
+softdepend:
   - Vault
+  - PlayerPoints
+  - NyEconomy
 version: 1.0.2-BETA
 api-version: 1.13
 commands:

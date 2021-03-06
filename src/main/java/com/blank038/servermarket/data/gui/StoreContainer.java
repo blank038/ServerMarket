@@ -3,6 +3,7 @@ package com.blank038.servermarket.data.gui;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.PlayerData;
+import com.blank038.servermarket.util.CommonUtil;
 import com.mc9y.blank038api.util.inventory.GuiModel;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -22,12 +23,14 @@ import java.util.List;
  * @author Blank038
  */
 public class StoreContainer {
-    private final Player player;
-    private final int marketPage;
+    private final Player PLAYER_TAR;
+    private final int MARKET_PAGE;
+    private final String OLD_MARKET;
 
-    public StoreContainer(Player player, int marketPage) {
-        this.player = player;
-        this.marketPage = marketPage;
+    public StoreContainer(Player player, int marketPage, String oldMarket) {
+        this.PLAYER_TAR = player;
+        this.MARKET_PAGE = marketPage;
+        this.OLD_MARKET = oldMarket;
     }
 
     public void open(int currentPage) {
@@ -37,7 +40,7 @@ public class StoreContainer {
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         GuiModel guiModel = new GuiModel(data.getString("title"), data.getInt("size"));
         // 设置界面状态
-        guiModel.setListener(true);
+        guiModel.registerListener(ServerMarket.getInstance());
         guiModel.setCloseRemove(true);
         // 设置物品
         HashMap<Integer, ItemStack> items = new HashMap<>();
@@ -60,18 +63,14 @@ public class StoreContainer {
                     itemStack = ServerMarket.getInstance().getNBTBase().addTag(itemStack, "action", section.getString("action"));
                 }
                 // 开始判断槽位方向
-                if (section.getStringList("slot").isEmpty()) {
-                    items.put(section.getInt("slot"), itemStack);
-                } else {
-                    for (int i : ServerMarket.getInstance().getApi().getInt(section.getStringList("slot"))) {
-                        items.put(i, itemStack);
-                    }
+                for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
+                    items.put(i, itemStack);
                 }
             }
         }
         // 开始获取玩家仓库
-        PlayerData playerData = ServerMarket.getInstance().getApi().getPlayerData(player.getName());
-        Integer[] slots = ServerMarket.getInstance().getApi().getInt(data.getStringList("store-item-slots")).toArray(new Integer[0]);
+        PlayerData playerData = ServerMarket.getInstance().getApi().getPlayerData(PLAYER_TAR.getName());
+        Integer[] slots = CommonUtil.formatSlots(data.getString("store-item-slots"));
         HashMap<String, ItemStack> storeItems = playerData.getItems();
         String[] keys = storeItems.keySet().toArray(new String[0]);
         // 计算下标
@@ -94,13 +93,13 @@ public class StoreContainer {
                 String storeId = ServerMarket.getInstance().getNBTBase().get(itemStack, "StoreID"),
                         action = ServerMarket.getInstance().getNBTBase().get(itemStack, "action");
                 if ("market".equalsIgnoreCase(action)) {
-                    new MarketContainer(clicker).openGui(marketPage);
+                    ServerMarket.getInstance().getApi().openMarket(clicker, this.OLD_MARKET, this.MARKET_PAGE);
                 } else if (storeId != null) {
                     this.getItem(clicker, storeId);
                 }
             }
         });
-        guiModel.openInventory(player);
+        guiModel.openInventory(PLAYER_TAR);
     }
 
     public void getItem(Player player, String uuid) {
@@ -114,7 +113,7 @@ public class StoreContainer {
             player.sendMessage(LangConfiguration.getString("get-store-item", true).replace("%item%", displayMmae)
                     .replace("%amount%", String.valueOf(itemStack.getAmount())));
             // 刷新玩家界面
-            new StoreContainer(player, marketPage).open(1);
+            ServerMarket.getInstance().getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE);
         } else {
             player.sendMessage(LangConfiguration.getString("error-store", true));
         }

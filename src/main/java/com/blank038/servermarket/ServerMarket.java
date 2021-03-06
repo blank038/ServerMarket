@@ -1,7 +1,6 @@
 package com.blank038.servermarket;
 
-import com.blank038.servermarket.bridge.IBridge;
-import com.blank038.servermarket.bridge.VaultBridge;
+import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.MarketData;
@@ -9,7 +8,9 @@ import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.listener.PlayerListener;
 import com.blank038.servermarket.nms.NBTBase;
 import com.blank038.servermarket.nms.sub.v1_12_R1;
+import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -17,8 +18,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Global market plugin for Bukkit.
@@ -36,7 +39,7 @@ public class ServerMarket extends JavaPlugin {
     /**
      * 获取经济桥类
      */
-    private IBridge ecoBridge;
+    private BaseBridge ecoBridge;
     /**
      * NMS 接口
      */
@@ -58,7 +61,7 @@ public class ServerMarket extends JavaPlugin {
         return serverMarket;
     }
 
-    public IBridge getEconomyBridge() {
+    public BaseBridge getEconomyBridge() {
         return ecoBridge;
     }
 
@@ -72,9 +75,11 @@ public class ServerMarket extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.log(" ");
+        this.log("   &3ServerMarket &bv" + this.getDescription().getVersion());
+        this.log(" ");
         // 检测 NMS 版本
         String version = ((Object) Bukkit.getServer()).getClass().getPackage().getName().split("\\.")[3];
-        boolean disable = false;
         switch (version) {
             case "v1_12_R1":
                 nbtBase = new v1_12_R1();
@@ -82,34 +87,31 @@ public class ServerMarket extends JavaPlugin {
             case "???":
                 break;
             default:
-                this.getLogger().info("服务器版本不支持, 关闭插件");
-                disable = true;
+                this.log("&6 * &c服务器版本不支持, 关闭插件");
                 this.setEnabled(false);
+                break;
         }
-        if (disable) {
+        if (!isEnabled()) {
             return;
         }
+        this.log("&6 * &f检测到核心: &a" + version);
         serverMarket = this;
-        // 初始化经济桥
-        ecoBridge = new VaultBridge();
-        // 初始化 API
         serverMarketAPI = new ServerMarketAPI(this);
-        // 载入插件配置文件
-        loadConfig();
-        // 注册命令
-        getCommand("servermarket").setExecutor(new MainCommand(this));
+        this.loadConfig();
+        // 初始化货币桥
+        BaseBridge.initBridge();
+        // 注册命令、事件及线程
+        super.getCommand("servermarket").setExecutor(new MainCommand(this));
         // 注册事件监听类
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
-        // 建立线程定时保存
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveSaleList, 1200L, 1200L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::savePlayerData, 1200L, 1200L);
         // 载入在线玩家数据
         for (Player player : Bukkit.getOnlinePlayers()) {
-            datas.put(player.getName(), new PlayerData(player.getName()));
+            this.datas.put(player.getName(), new PlayerData(player.getName()));
         }
-        // 定时存储玩家数据
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::savePlayerData, 1200L, 1200L);
-        getLogger().info("插件加载完成, 已读取 " + MarketData.MARKET_DATA.size() + " 个市场数据.");
-        getLogger().info("感谢使用, 作者: Blank038 版本: " + getDescription().getVersion());
+        this.log("&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
+        this.log(" ");
     }
 
     @Override
@@ -135,7 +137,7 @@ public class ServerMarket extends JavaPlugin {
         File dataFolder = new File(getDataFolder(), "data");
         dataFolder.mkdirs();
         // 判断资源文件是否存在
-        for (String fileName : new String[]{"gui.yml", "store.yml"}) {
+        for (String fileName : new String[]{"store.yml"}) {
             File f = new File(getDataFolder(), fileName);
             if (!f.exists()) {
                 saveResource(fileName, true);
@@ -162,31 +164,6 @@ public class ServerMarket extends JavaPlugin {
         }
     }
 
-    private void reloadSaleItem() {
-        if (!MarketData.MARKET_DATA.isEmpty()) {
-            this.saveSaleList();
-        }
-        // 读取市场配置
-        File file = new File(getDataFolder(), "market");
-        if (!file.exists()) {
-            file.mkdir();
-
-        }
-        MarketData.MARKET_DATA.clear();
-    }
-
-    private void saveResults() {
-        File resultFile = new File(getDataFolder(), "results.yml");
-        FileConfiguration resultData = new YamlConfiguration();
-        for (Map.Entry<String, Double> entry : results.entrySet()) {
-            resultData.set(entry.getKey(), entry.getValue());
-        }
-        try {
-            resultData.save(resultFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void saveSaleList() {
         for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
@@ -205,6 +182,39 @@ public class ServerMarket extends JavaPlugin {
             results.replace(name, results.get(name) + moeny);
         } else {
             results.put(name, moeny);
+        }
+    }
+
+    public void log(String message) {
+        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+    }
+
+    private void reloadSaleItem() {
+        if (!MarketData.MARKET_DATA.isEmpty()) {
+            this.saveSaleList();
+        }
+        // 读取市场配置
+        File file = new File(getDataFolder(), "market");
+        if (!file.exists()) {
+            file.mkdir();
+            // 输出
+            CommonUtil.outputFile(this.getResource("market/example.yml"), new File(getDataFolder() + "/market/", "example.yml"));
+        }
+        MarketData.MARKET_DATA.clear();
+        // 读取市场
+        Arrays.stream(Objects.requireNonNull(file.listFiles())).iterator().forEachRemaining(MarketData::new);
+    }
+
+    private void saveResults() {
+        File resultFile = new File(getDataFolder(), "results.yml");
+        FileConfiguration resultData = new YamlConfiguration();
+        for (Map.Entry<String, Double> entry : results.entrySet()) {
+            resultData.set(entry.getKey(), entry.getValue());
+        }
+        try {
+            resultData.save(resultFile);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.gui.SaleItem;
 import com.blank038.servermarket.data.gui.StoreContainer;
@@ -37,7 +38,7 @@ public class MarketData {
      * 商品列表
      */
     private final HashMap<String, SaleItem> SALE_MAP = new HashMap<>();
-    private final String SOURCE_ID, MARKET_KEY, PERMISSION, SHORT_COMMAND, ECO_TYPE;
+    private final String SOURCE_ID, MARKET_KEY, PERMISSION, SHORT_COMMAND, ECO_TYPE, DISPLAY_NAME;
     private final PayType PAY_TYPE;
 
     public MarketData(File file) {
@@ -47,6 +48,7 @@ public class MarketData {
         this.SOURCE_ID = data.getString("source_id");
         this.PERMISSION = data.getString("permission");
         this.SHORT_COMMAND = data.getString("short-command");
+        this.DISPLAY_NAME = ChatColor.translateAlternateColorCodes('&', data.getString("display-name"));
         switch ((ECO_TYPE = data.getString("vault-type").toLowerCase())) {
             case "vault":
                 this.PAY_TYPE = PayType.VAULT;
@@ -58,6 +60,11 @@ public class MarketData {
                 this.PAY_TYPE = PayType.NY_ECONOMY;
                 break;
         }
+        if (!BaseBridge.PAY_TYPES.containsKey(this.PAY_TYPE)) {
+            ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.DISPLAY_NAME + " &f异常, 货币不存在.");
+            return;
+        }
+        MarketData.MARKET_DATA.put(this.getMarketKey(), this);
     }
 
     public HashMap<String, SaleItem> getSales() {
@@ -92,15 +99,6 @@ public class MarketData {
     }
 
     /**
-     * 获取货币类型
-     *
-     * @return 货币类型枚举
-     */
-    public PayType getPayType() {
-        return this.PAY_TYPE;
-    }
-
-    /**
      * 获取货币名
      *
      * @return 货币名
@@ -110,13 +108,30 @@ public class MarketData {
     }
 
     /**
+     * 获取市场展示名
+     *
+     * @return 市场展示名
+     */
+    public String getDisplayName() {
+        return this.DISPLAY_NAME;
+    }
+
+    /**
+     * 获取货币类型
+     *
+     * @return 货币类型枚举
+     */
+    public PayType getPayType() {
+        return this.PAY_TYPE;
+    }
+
+    /**
      * 获得市场展示物品
      *
      * @param saleItem 市场商品信息
-     * @param infoLore 额外增加信息
      * @return 展示物品
      */
-    public ItemStack getShowItem(SaleItem saleItem, List<String> infoLore) {
+    public ItemStack getShowItem(SaleItem saleItem, FileConfiguration data) {
         ItemStack itemStack = saleItem.getSafeItem().clone();
         if (ServerMarket.getInstance().getConfig().getBoolean("sale-info")) {
             ItemMeta itemMeta = itemStack.getItemMeta();
@@ -124,10 +139,12 @@ public class MarketData {
             // 设置物品格式
             Date date = new Date(saleItem.getPostTime());
             SimpleDateFormat sdf = new SimpleDateFormat(ServerMarket.getInstance().getConfig().getString("simple-date-format"));
-            // 设置额外信息
-            for (String i : infoLore) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
-                        .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
+            if (data.getBoolean("show-sale-info")) {
+                // 设置额外信息
+                for (String i : data.getStringList("sale-info")) {
+                    lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
+                            .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
+                }
             }
             itemMeta.setLore(lore);
             itemStack.setItemMeta(itemMeta);
@@ -135,6 +152,12 @@ public class MarketData {
         return ServerMarket.getInstance().getNBTBase().addTag(itemStack, "SaleUUID", saleItem.getSaleUUID());
     }
 
+    /**
+     * 打开市场面板
+     *
+     * @param player      目标玩家
+     * @param currentPage 页码
+     */
     public void openGui(Player player, int currentPage) {
         // 读取配置文件
         FileConfiguration data = YamlConfiguration.loadConfiguration(this.TARGET_FILE);
@@ -176,7 +199,6 @@ public class MarketData {
             currentPage = 1;
         }
         // 获得额外增加的信息
-        List<String> extrasLore = data.getStringList("sale-info");
         int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
         for (int i = start, index = 0; i < end; i++, index++) {
             if (index >= slots.length || i >= keys.length) {
@@ -188,7 +210,7 @@ public class MarketData {
                 i -= 1;
                 continue;
             }
-            items.put(slots[index], getShowItem(saleItem, extrasLore));
+            items.put(slots[index], this.getShowItem(saleItem, data));
         }
         guiModel.setItem(items);
         final int lastPage = currentPage, finalMaxPage = maxPage;
@@ -221,7 +243,7 @@ public class MarketData {
                             }
                             break;
                         case "store":
-                            new StoreContainer(clicker, lastPage).open(1);
+                            new StoreContainer(clicker, lastPage, this.MARKET_KEY).open(1);
                             break;
                         default:
                             break;
@@ -251,7 +273,7 @@ public class MarketData {
             return;
         }
         if (shift) {
-            if (ServerMarket.getInstance().getEconomyBridge().balance(buyer) < saleItem.getPrice()) {
+            if (ServerMarket.getInstance().getEconomyBridge().balance(buyer, null) < saleItem.getPrice()) {
                 buyer.sendMessage(LangConfiguration.getString("lack-money", true));
                 return;
             }
@@ -286,6 +308,7 @@ public class MarketData {
      *
      * @param player  命令执行者
      * @param message 命令
+     * @return 执行结果
      */
     public boolean performSellCommand(Player player, String message) {
         String[] split = message.split(" ");

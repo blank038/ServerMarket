@@ -49,7 +49,7 @@ public class MainCommand implements CommandExecutor {
                     break;
                 case "box":
                     if (sender instanceof Player) {
-                        new StoreContainer((Player) sender, 1).open(1);
+                        new StoreContainer((Player) sender, 1, null).open(1);
                     }
                     break;
                 case "reload":
@@ -73,7 +73,7 @@ public class MainCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return;
         }
-        INSTANCE.getApi().openMarket((Player) sender, key);
+        INSTANCE.getApi().openMarket((Player) sender, key, 1);
     }
 
     /**

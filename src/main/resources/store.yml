@@ -13,7 +13,7 @@ items:
   main:
     type: torch
     amount: 1
-    name: "&c全球市场"
+    name: "&c返回市场"
     slot: 49
     action: market
     lore: []

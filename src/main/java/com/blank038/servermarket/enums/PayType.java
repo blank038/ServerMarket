@@ -1,5 +1,9 @@
 package com.blank038.servermarket.enums;
 
+import com.blank038.servermarket.bridge.NyEcoBridge;
+import com.blank038.servermarket.bridge.PlayerPointBridge;
+import com.blank038.servermarket.bridge.VaultBridge;
+
 /**
  * 支付类型枚举
  * 方便后续扩展额外的支付方式
@@ -11,13 +15,29 @@ public enum PayType {
     /**
      * Vault 插件
      */
-    VAULT,
+    VAULT("Vault", VaultBridge.class),
     /**
      * PlayerPoints 插件
      */
-    PLAYER_POINTS,
+    PLAYER_POINTS("PlayerPoints", PlayerPointBridge.class),
     /**
      * NyEconomy 插件
      */
-    NY_ECONOMY
+    NY_ECONOMY("NyEconomy", NyEcoBridge.class);
+
+    private final String plugin;
+    private final Class<?> aClass;
+
+    PayType(String plugin, Class<?> c) {
+        this.plugin = plugin;
+        this.aClass = c;
+    }
+
+    public String getPlugin() {
+        return plugin;
+    }
+
+    public Class<?> getBridgeClass() {
+        return aClass;
+    }
 }
