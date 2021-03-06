@@ -1,5 +1,6 @@
-package com.blank038.servermarket;
+package com.blank038.servermarket.api;
 
+import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.data.gui.SaleItem;

@@ -10,25 +10,25 @@ import org.bukkit.OfflinePlayer;
  */
 @SuppressWarnings(value = {"unused"})
 public class VaultBridge extends BaseBridge {
-    private final Economy economy;
+    private final Economy ECONOMY_PROVIDER;
 
     public VaultBridge() {
         super(PayType.VAULT);
-        economy = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
+        ECONOMY_PROVIDER = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
     }
 
     @Override
     public double balance(OfflinePlayer player, String key) {
-        return economy.getBalance(player);
+        return ECONOMY_PROVIDER.getBalance(player);
     }
 
     @Override
-    public void give(OfflinePlayer player, double amount) {
-        economy.depositPlayer(player, amount);
+    public void give(OfflinePlayer player, String key, double amount) {
+        ECONOMY_PROVIDER.depositPlayer(player, amount);
     }
 
     @Override
-    public boolean take(OfflinePlayer player, double amount) {
-        return economy.withdrawPlayer(player, amount).transactionSuccess();
+    public boolean take(OfflinePlayer player, String key, double amount) {
+        return ECONOMY_PROVIDER.withdrawPlayer(player, amount).transactionSuccess();
     }
 }

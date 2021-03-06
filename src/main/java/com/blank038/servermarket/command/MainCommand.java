@@ -2,18 +2,15 @@ package com.blank038.servermarket.command;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.config.LangConfiguration;
-import com.blank038.servermarket.data.gui.SaleItem;
+import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.gui.StoreContainer;
-import com.blank038.servermarket.enums.PayType;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.UUID;
+import java.util.Map;
 
 /**
  * @author Blank038
@@ -45,7 +42,7 @@ public class MainCommand implements CommandExecutor {
                     this.openServerMarket(sender, args.length == 1 ? null : args[1]);
                     break;
                 case "show":
-
+                    show(sender);
                     break;
                 case "box":
                     if (sender instanceof Player) {
@@ -74,6 +71,18 @@ public class MainCommand implements CommandExecutor {
             return;
         }
         INSTANCE.getApi().openMarket((Player) sender, key, 1);
+    }
+
+    /**
+     * 发送市场状态
+     */
+    private void show(CommandSender sender) {
+        for (String line : LangConfiguration.getStringList("show")) {
+            for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+
+            }
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+        }
     }
 
     /**

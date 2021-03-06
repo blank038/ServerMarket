@@ -10,6 +10,7 @@ help:
     - "&bServerMarket:"
     - "&f/%c open [市场编号] 打开全球市场"
     - "&f/%c box 查看市场暂存盒"
+    - "&f/%c show 查看市场情况"
     - "&f/%c reload 重载插件配置文件"
 error-sale: "商品已被购买或已被下架."
 no-previous-page: "已经是第一页了."

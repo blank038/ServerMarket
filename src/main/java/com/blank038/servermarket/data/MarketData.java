@@ -1,10 +1,12 @@
 package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.gui.SaleItem;
 import com.blank038.servermarket.data.gui.StoreContainer;
+import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.util.CommonUtil;
 import com.google.common.collect.Lists;
@@ -39,6 +41,7 @@ public class MarketData {
      */
     private final HashMap<String, SaleItem> SALE_MAP = new HashMap<>();
     private final String SOURCE_ID, MARKET_KEY, PERMISSION, SHORT_COMMAND, ECO_TYPE, DISPLAY_NAME;
+    private final MarketStatus MARKET_STATUS;
     private final PayType PAY_TYPE;
 
     public MarketData(File file) {
@@ -61,10 +64,15 @@ public class MarketData {
                 break;
         }
         if (!BaseBridge.PAY_TYPES.containsKey(this.PAY_TYPE)) {
+            this.MARKET_STATUS = MarketStatus.ERROR;
             ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.DISPLAY_NAME + " &f异常, 货币不存在.");
-            return;
+        } else {
+            MarketData.MARKET_DATA.put(this.getMarketKey(), this);
+            this.MARKET_STATUS = MarketStatus.LOADED;
         }
-        MarketData.MARKET_DATA.put(this.getMarketKey(), this);
+        // 唤起加载事件
+        MarketLoadEvent event = new MarketLoadEvent(this);
+        Bukkit.getPluginManager().callEvent(event);
     }
 
     public HashMap<String, SaleItem> getSales() {
@@ -123,6 +131,15 @@ public class MarketData {
      */
     public PayType getPayType() {
         return this.PAY_TYPE;
+    }
+
+    /**
+     * 获取市场加载状态
+     *
+     * @return 市场加载状态
+     */
+    public MarketStatus getmarketStatus() {
+        return this.MARKET_STATUS;
     }
 
     /**
@@ -284,13 +301,13 @@ public class MarketData {
             // 先移除, 确保不被重复购买
             SALE_MAP.remove(uuid);
             // 先给玩家钱扣了！
-            ServerMarket.getInstance().getEconomyBridge().take(buyer, saleItem.getPrice());
+            ServerMarket.getInstance().getEconomyBridge().take(buyer, null, saleItem.getPrice());
             // 再把钱给出售者
             Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
             if (seller != null && seller.isOnline()) {
                 double last = ServerMarket.getInstance().getApi().getLastMoney(seller, saleItem.getPrice());
                 DecimalFormat df = new DecimalFormat("#.00");
-                ServerMarket.getInstance().getEconomyBridge().give(seller, last);
+                ServerMarket.getInstance().getEconomyBridge().give(seller, null, last);
                 seller.sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(saleItem.getPrice()))
                         .replace("%last%", df.format(last)));
             } else {
@@ -315,6 +332,10 @@ public class MarketData {
         String command = split[0].substring(1);
         if (!command.equals(this.SHORT_COMMAND)) {
             return false;
+        }
+        if (split.length == 1) {
+            this.openGui(player, 1);
+            return true;
         }
         if (split.length == 2) {
             player.sendMessage(LangConfiguration.getString("price-null", true));

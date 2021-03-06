@@ -31,18 +31,20 @@ public abstract class BaseBridge {
      * 基于玩家货币
      *
      * @param player 目标玩家
+     * @param key    货币类型
      * @param amount 数量
      */
-    public abstract void give(OfflinePlayer player, double amount);
+    public abstract void give(OfflinePlayer player, String key, double amount);
 
     /**
      * 扣除玩家货币
      *
      * @param player 目标玩家
+     * @param key    货币类型
      * @param amount 数量
      * @return 是否成功
      */
-    public abstract boolean take(OfflinePlayer player, double amount);
+    public abstract boolean take(OfflinePlayer player, String key, double amount);
 
     public static <T extends BaseBridge> T register(Class<T> c) {
         try {

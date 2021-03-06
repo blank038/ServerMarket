@@ -29,7 +29,7 @@ public class PlayerListener implements Listener {
         if (ServerMarket.getInstance().results.containsKey(name)) {
             double price = ServerMarket.getInstance().results.remove(name), last = ServerMarket.getInstance().getApi().getLastMoney(event.getPlayer(), price);
             DecimalFormat df = new DecimalFormat("#.00");
-            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), last);
+            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), null, last);
             event.getPlayer().sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(price))
                     .replace("%last%", df.format(last)));
         }
