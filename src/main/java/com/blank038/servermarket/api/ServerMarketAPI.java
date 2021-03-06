@@ -7,6 +7,8 @@ import com.blank038.servermarket.data.gui.SaleItem;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.UUID;
+
 /**
  * @author Blank038
  * @date 2021/03/05
@@ -18,14 +20,14 @@ public class ServerMarketAPI {
         this.INSTANCE = serverMarket;
     }
 
-    public void addItem(String name, SaleItem saleItem) {
-        PlayerData data = INSTANCE.datas.getOrDefault(name, new PlayerData(name));
+    public void addItem(UUID uuid, SaleItem saleItem) {
+        PlayerData data = PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
         data.addItem(saleItem);
         data.save();
     }
 
-    public void addItem(String name, ItemStack itemStack) {
-        PlayerData data = INSTANCE.datas.getOrDefault(name, new PlayerData(name));
+    public void addItem(UUID uuid, ItemStack itemStack) {
+        PlayerData data =  PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
         data.addItem(itemStack);
         data.save();
     }
@@ -58,7 +60,7 @@ public class ServerMarketAPI {
         return money - money * tax;
     }
 
-    public PlayerData getPlayerData(String name) {
-        return INSTANCE.datas.getOrDefault(name, new PlayerData(name));
+    public PlayerData getPlayerData(UUID uuid) {
+        return PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
     }
 }

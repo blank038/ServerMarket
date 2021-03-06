@@ -69,7 +69,7 @@ public class StoreContainer {
             }
         }
         // 开始获取玩家仓库
-        PlayerData playerData = ServerMarket.getInstance().getApi().getPlayerData(PLAYER_TAR.getName());
+        PlayerData playerData = ServerMarket.getInstance().getApi().getPlayerData(PLAYER_TAR.getUniqueId());
         Integer[] slots = CommonUtil.formatSlots(data.getString("store-item-slots"));
         HashMap<String, ItemStack> storeItems = playerData.getItems();
         String[] keys = storeItems.keySet().toArray(new String[0]);
@@ -103,10 +103,10 @@ public class StoreContainer {
     }
 
     public void getItem(Player player, String uuid) {
-        PlayerData data = ServerMarket.getInstance().getApi().getPlayerData(player.getName());
+        PlayerData data = ServerMarket.getInstance().getApi().getPlayerData(player.getUniqueId());
         if (data.contains(uuid)) {
             // 基于玩家物品
-            ItemStack itemStack = ServerMarket.getInstance().datas.get(player.getName()).remove(uuid);
+            ItemStack itemStack = PlayerData.PLAYER_DATA.get(player.getUniqueId()).remove(uuid);
             String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                     itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
             player.getInventory().addItem(itemStack);

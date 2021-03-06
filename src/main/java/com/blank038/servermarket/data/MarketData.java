@@ -40,9 +40,13 @@ public class MarketData {
      * 商品列表
      */
     private final HashMap<String, SaleItem> SALE_MAP = new HashMap<>();
-    private final String SOURCE_ID, MARKET_KEY, PERMISSION, SHORT_COMMAND, ECO_TYPE, DISPLAY_NAME;
-    private final MarketStatus MARKET_STATUS;
+    private final String SOURCE_ID, MARKET_KEY, PERMISSION, SHORT_COMMAND, ECO_TYPE, DISPLAY_NAME, ECONOMY_NAME;
+    private final List<String> LORE_BLACK_LIST, MATERIAL_BLACK_LIST;
+    private final int MIN, MAX;
     private final PayType PAY_TYPE;
+    private MarketStatus MARKET_STATUS;
+    private boolean showSaleInfo, saleBroadcast;
+    private String dateFormat;
 
     public MarketData(File file) {
         this.TARGET_FILE = file;
@@ -52,6 +56,14 @@ public class MarketData {
         this.PERMISSION = data.getString("permission");
         this.SHORT_COMMAND = data.getString("short-command");
         this.DISPLAY_NAME = ChatColor.translateAlternateColorCodes('&', data.getString("display-name"));
+        this.ECONOMY_NAME = ChatColor.translateAlternateColorCodes('&', data.getString("economy-name"));
+        this.MIN = data.getInt("price.min");
+        this.MAX = data.getInt("price.max");
+        this.MATERIAL_BLACK_LIST = data.getStringList("black-list.type");
+        this.LORE_BLACK_LIST = data.getStringList("black-list.lore");
+        this.showSaleInfo = data.getBoolean("show-sale-info");
+        this.saleBroadcast = data.getBoolean("sale-broadcast");
+        this.dateFormat = data.getString("simple-date-format");
         switch ((ECO_TYPE = data.getString("vault-type").toLowerCase())) {
             case "vault":
                 this.PAY_TYPE = PayType.VAULT;
@@ -65,11 +77,18 @@ public class MarketData {
         }
         if (!BaseBridge.PAY_TYPES.containsKey(this.PAY_TYPE)) {
             this.MARKET_STATUS = MarketStatus.ERROR;
-            ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.DISPLAY_NAME + " &f异常, 货币不存在.");
+            ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.DISPLAY_NAME + " &f异常, 货币不存在");
         } else {
-            MarketData.MARKET_DATA.put(this.getMarketKey(), this);
             this.MARKET_STATUS = MarketStatus.LOADED;
+            try {
+                this.loadSaleData();
+                ServerMarket.getInstance().log("&6 * &f市场 &e" + this.DISPLAY_NAME + " &f加载成功");
+            } catch (Exception ignored) {
+                this.MARKET_STATUS = MarketStatus.ERROR;
+                ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.DISPLAY_NAME + " &f物品异常");
+            }
         }
+        MarketData.MARKET_DATA.put(this.getMarketKey(), this);
         // 唤起加载事件
         MarketLoadEvent event = new MarketLoadEvent(this);
         Bukkit.getPluginManager().callEvent(event);
@@ -138,8 +157,40 @@ public class MarketData {
      *
      * @return 市场加载状态
      */
-    public MarketStatus getmarketStatus() {
+    public MarketStatus getMarketStatus() {
         return this.MARKET_STATUS;
+    }
+
+    public int getMin() {
+        return this.MIN;
+    }
+
+    public int getMax() {
+        return this.MAX;
+    }
+
+    public boolean isShowSaleInfo() {
+        return showSaleInfo;
+    }
+
+    public void setShowSaleInfo(boolean show) {
+        this.showSaleInfo = show;
+    }
+
+    public boolean isSaleBroadcastStatus() {
+        return saleBroadcast;
+    }
+
+    public void setSaleBroadcastStatus(boolean status) {
+        this.saleBroadcast = status;
+    }
+
+    public String getDateFormat() {
+        return this.dateFormat;
+    }
+
+    public void setDateFormat(String format) {
+        this.dateFormat = format;
     }
 
     /**
@@ -150,18 +201,16 @@ public class MarketData {
      */
     public ItemStack getShowItem(SaleItem saleItem, FileConfiguration data) {
         ItemStack itemStack = saleItem.getSafeItem().clone();
-        if (ServerMarket.getInstance().getConfig().getBoolean("sale-info")) {
+        if (this.showSaleInfo) {
             ItemMeta itemMeta = itemStack.getItemMeta();
             List<String> lore = itemMeta.hasLore() ? itemMeta.getLore() : Lists.newArrayList();
             // 设置物品格式
             Date date = new Date(saleItem.getPostTime());
-            SimpleDateFormat sdf = new SimpleDateFormat(ServerMarket.getInstance().getConfig().getString("simple-date-format"));
-            if (data.getBoolean("show-sale-info")) {
-                // 设置额外信息
-                for (String i : data.getStringList("sale-info")) {
-                    lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
-                            .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
-                }
+            SimpleDateFormat sdf = new SimpleDateFormat(this.dateFormat);
+            // 设置额外信息
+            for (String i : data.getStringList("sale-info")) {
+                lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
+                        .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
             }
             itemMeta.setLore(lore);
             itemStack.setItemMeta(itemMeta);
@@ -176,6 +225,14 @@ public class MarketData {
      * @param currentPage 页码
      */
     public void openGui(Player player, int currentPage) {
+        if (this.MARKET_STATUS == MarketStatus.ERROR) {
+            player.sendMessage(LangConfiguration.getString("market-error", true));
+            return;
+        }
+        if (this.PERMISSION != null && !"".equals(this.PERMISSION) && !player.hasPermission(this.PERMISSION)) {
+            player.sendMessage(LangConfiguration.getString("no-permission", true));
+            return;
+        }
         // 读取配置文件
         FileConfiguration data = YamlConfiguration.loadConfiguration(this.TARGET_FILE);
         GuiModel guiModel = new GuiModel(data.getString("title"), data.getInt("size"));
@@ -263,6 +320,17 @@ public class MarketData {
                             new StoreContainer(clicker, lastPage, this.MARKET_KEY).open(1);
                             break;
                         default:
+                            if (action.contains(":")) {
+                                String[] split = action.split(":");
+                                if (split.length < 2) {
+                                    return;
+                                }
+                                if ("player".equalsIgnoreCase(split[0])) {
+                                    Bukkit.getServer().dispatchCommand(player, split[1].replace("%player%", player.getName()));
+                                } else if ("console".equalsIgnoreCase(split[0])) {
+                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), split[1].replace("%player%", player.getName()));
+                                }
+                            }
                             break;
                     }
                 }
@@ -279,7 +347,7 @@ public class MarketData {
             return;
         }
         SaleItem saleItem = SALE_MAP.get(uuid);
-        if (saleItem.getOwnerName().equals(buyer.getName())) {
+        if (saleItem.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
             if (shift) {
                 buyer.getInventory().addItem(SALE_MAP.remove(uuid).getSafeItem().clone());
                 buyer.sendMessage(LangConfiguration.getString("unsale", true));
@@ -290,8 +358,8 @@ public class MarketData {
             return;
         }
         if (shift) {
-            if (ServerMarket.getInstance().getEconomyBridge().balance(buyer, null) < saleItem.getPrice()) {
-                buyer.sendMessage(LangConfiguration.getString("lack-money", true));
+            if (ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).balance(buyer, null) < saleItem.getPrice()) {
+                buyer.sendMessage(LangConfiguration.getString("lack-money", true).replace("%economy%", this.ECONOMY_NAME));
                 return;
             }
             // 判断货币类型, 不要问我为什么要判断！后续新增货币扩展延伸性好！
@@ -301,20 +369,20 @@ public class MarketData {
             // 先移除, 确保不被重复购买
             SALE_MAP.remove(uuid);
             // 先给玩家钱扣了！
-            ServerMarket.getInstance().getEconomyBridge().take(buyer, null, saleItem.getPrice());
+            ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).take(buyer, null, saleItem.getPrice());
             // 再把钱给出售者
             Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
             if (seller != null && seller.isOnline()) {
                 double last = ServerMarket.getInstance().getApi().getLastMoney(seller, saleItem.getPrice());
                 DecimalFormat df = new DecimalFormat("#.00");
-                ServerMarket.getInstance().getEconomyBridge().give(seller, null, last);
-                seller.sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(saleItem.getPrice()))
-                        .replace("%last%", df.format(last)));
+                ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).give(seller, null, last);
+                seller.sendMessage(LangConfiguration.getString("sale-sell", true).replace("%economy%", this.ECONOMY_NAME)
+                        .replace("%money%", df.format(saleItem.getPrice())).replace("%last%", df.format(last)));
             } else {
                 ServerMarket.getInstance().addMoney(saleItem.getOwnerName(), saleItem.getPrice());
             }
             // 再给购买者物品
-            ServerMarket.getInstance().getApi().addItem(buyer.getName(), saleItem);
+            ServerMarket.getInstance().getApi().addItem(buyer.getUniqueId(), saleItem);
         } else {
             buyer.sendMessage(LangConfiguration.getString("shift-buy", true));
         }
@@ -333,6 +401,10 @@ public class MarketData {
         if (!command.equals(this.SHORT_COMMAND)) {
             return false;
         }
+        if (this.PERMISSION != null && !"".equals(this.PERMISSION) && !player.hasPermission(this.PERMISSION)) {
+            player.sendMessage(LangConfiguration.getString("no-permission", true));
+            return true;
+        }
         if (split.length == 1) {
             this.openGui(player, 1);
             return true;
@@ -349,13 +421,13 @@ public class MarketData {
         boolean has = false;
         if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore()) {
             for (String l : itemStack.getItemMeta().getLore()) {
-                if (ServerMarket.getInstance().getConfig().getStringList("black-list.lore").contains(l.replace("§", "&"))) {
+                if (LORE_BLACK_LIST.contains(l.replace("§", "&"))) {
                     has = true;
                     break;
                 }
             }
         }
-        if (ServerMarket.getInstance().getConfig().getStringList("black-list.type").contains(itemStack.getType().name()) || has) {
+        if (MATERIAL_BLACK_LIST.contains(itemStack.getType().name()) || has) {
             player.sendMessage(LangConfiguration.getString("deny-item", true));
             return true;
         }
@@ -366,14 +438,12 @@ public class MarketData {
             player.sendMessage(LangConfiguration.getString("wrong-number", true));
             return true;
         }
-        int min = ServerMarket.getInstance().getConfig().getInt("price.min"),
-                max = ServerMarket.getInstance().getConfig().getInt("price.max");
-        if (price < min) {
-            player.sendMessage(LangConfiguration.getString("min-price", true).replace("%min%", String.valueOf(min)));
+        if (price < this.MIN) {
+            player.sendMessage(LangConfiguration.getString("min-price", true).replace("%min%", String.valueOf(this.MIN)));
             return true;
         }
-        if (price > max) {
-            player.sendMessage(LangConfiguration.getString("max-price", true).replace("%max%", String.valueOf(max)));
+        if (price > this.MAX) {
+            player.sendMessage(LangConfiguration.getString("max-price", true).replace("%max%", String.valueOf(this.MAX)));
             return true;
         }
         // 设置玩家手中物品为空
@@ -381,17 +451,29 @@ public class MarketData {
         // 上架物品
         String saleUUID = UUID.randomUUID().toString();
         SaleItem saleItem = new SaleItem(saleUUID, player.getUniqueId().toString(), player.getName(),
-                itemStack, PayType.VAULT, price, System.currentTimeMillis());
+                itemStack, PayType.VAULT, this.ECO_TYPE, price, System.currentTimeMillis());
         this.SALE_MAP.put(saleUUID, saleItem);
         player.sendMessage(LangConfiguration.getString("sell", true));
         // 判断是否公告
-        if (ServerMarket.getInstance().getConfig().getBoolean("sale-broadcast")) {
+        if (this.saleBroadcast) {
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                     itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
             player.sendMessage(LangConfiguration.getString("broadcast", true).replace("%item%", displayName)
                     .replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
         }
         return true;
+    }
+
+    public void loadSaleData() {
+        if (!this.SALE_MAP.isEmpty()) {
+            this.saveSaleData();
+        }
+        File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", SOURCE_ID + ".yml");
+        FileConfiguration data = new YamlConfiguration();
+        for (String key : data.getKeys(false)) {
+            SaleItem saleItem = new SaleItem(data.getConfigurationSection(key));
+            this.SALE_MAP.put(saleItem.getSaleUUID(), saleItem);
+        }
     }
 
     public void saveSaleData() {

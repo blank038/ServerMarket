@@ -78,10 +78,20 @@ public class MainCommand implements CommandExecutor {
      */
     private void show(CommandSender sender) {
         for (String line : LangConfiguration.getStringList("show")) {
+            String last = line;
             for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
-
+                String value = "%" + entry.getValue().getMarketKey() + "%";
+                if (last.contains(value)) {
+                    // 开始设置变量
+                    String permission = entry.getValue().getPermission();
+                    if (permission != null && !"".equals(permission) && !sender.hasPermission(permission)) {
+                        last = last.replace(value, INSTANCE.getConfig().getString("status-text.no-permission"));
+                        continue;
+                    }
+                    last = last.replace(value, INSTANCE.getConfig().getString("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
+                }
             }
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', line));
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', last));
         }
     }
 

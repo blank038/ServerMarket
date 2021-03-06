@@ -17,13 +17,15 @@ import java.util.UUID;
  * @author Blank038
  */
 public class PlayerData {
+    public static final HashMap<UUID, PlayerData> PLAYER_DATA = new HashMap<>();
+
     private final HashMap<String, ItemStack> items = new HashMap<>();
     private final List<String> info;
-    private final String name;
+    private final UUID PLAYER_UUID;
 
-    public PlayerData(String name) {
-        this.name = name;
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", name + ".yml");
+    public PlayerData(UUID uuid) {
+        this.PLAYER_UUID = uuid;
+        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", uuid + ".yml");
         if (!file.exists()) {
             try {
                 file.createNewFile();
@@ -107,7 +109,7 @@ public class PlayerData {
      * 保存玩家数据
      */
     public void save() {
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", name + ".yml");
+        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", this.PLAYER_UUID.toString() + ".yml");
         FileConfiguration data = new YamlConfiguration();
         data.set("info", info);
         for (Map.Entry<String, ItemStack> entry : items.entrySet()) {

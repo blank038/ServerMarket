@@ -25,11 +25,12 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         String name = event.getPlayer().getName();
-        ServerMarket.getInstance().datas.put(name, new PlayerData(name));
+        PlayerData.PLAYER_DATA.put(event.getPlayer().getUniqueId(), new PlayerData(event.getPlayer().getUniqueId()));
+        // 判断是否有可获得的货币
         if (ServerMarket.getInstance().results.containsKey(name)) {
             double price = ServerMarket.getInstance().results.remove(name), last = ServerMarket.getInstance().getApi().getLastMoney(event.getPlayer(), price);
             DecimalFormat df = new DecimalFormat("#.00");
-            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), null, last);
+//            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), null, last);
             event.getPlayer().sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(price))
                     .replace("%last%", df.format(last)));
         }
@@ -40,8 +41,8 @@ public class PlayerListener implements Listener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        if (ServerMarket.getInstance().datas.containsKey(event.getPlayer().getName())) {
-            ServerMarket.getInstance().datas.remove(event.getPlayer().getName()).save();
+        if (PlayerData.PLAYER_DATA.containsKey(event.getPlayer().getUniqueId())) {
+            PlayerData.PLAYER_DATA.remove(event.getPlayer().getUniqueId()).save();
         }
     }
 

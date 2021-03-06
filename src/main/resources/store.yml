@@ -6,8 +6,7 @@ size: 54
 # 支持格式:
 #   > 数字(小)-数字(大) 例子: 0-44
 #   > 数字 例子: 0
-store-item-slots:
-  - 0-44
+store-item-slots: "0-44"
 # 界面物品设定
 items:
   main:
@@ -16,4 +15,4 @@ items:
     name: "&c返回市场"
     slot: 49
     action: market
-    lore: []
+    lore: [ ]

@@ -6,6 +6,7 @@ import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
+import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.listener.PlayerListener;
 import com.blank038.servermarket.nms.NBTBase;
 import com.blank038.servermarket.nms.sub.v1_12_R1;
@@ -19,10 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Global market plugin for Bukkit.
@@ -38,10 +36,6 @@ public class ServerMarket extends JavaPlugin {
      */
     private LangConfiguration lang;
     /**
-     * 获取经济桥类
-     */
-    private BaseBridge ecoBridge;
-    /**
      * NMS 接口
      */
     private NBTBase nbtBase;
@@ -49,10 +43,6 @@ public class ServerMarket extends JavaPlugin {
      * API 接口
      */
     private ServerMarketAPI serverMarketAPI;
-    /**
-     * 玩家存档
-     */
-    public final HashMap<String, PlayerData> datas = new HashMap<>();
     /**
      * 返还玩家的钱
      */
@@ -62,8 +52,8 @@ public class ServerMarket extends JavaPlugin {
         return serverMarket;
     }
 
-    public BaseBridge getEconomyBridge() {
-        return ecoBridge;
+    public BaseBridge getEconomyBridge(PayType payType) {
+        return BaseBridge.PAY_TYPES.getOrDefault(payType, null);
     }
 
     public NBTBase getNBTBase() {
@@ -98,9 +88,9 @@ public class ServerMarket extends JavaPlugin {
         this.log("&6 * &f检测到核心: &a" + version);
         serverMarket = this;
         serverMarketAPI = new ServerMarketAPI(this);
-        this.loadConfig();
         // 初始化货币桥
         BaseBridge.initBridge();
+        this.loadConfig();
         // 注册命令、事件及线程
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
         // 注册事件监听类
@@ -109,16 +99,15 @@ public class ServerMarket extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::savePlayerData, 1200L, 1200L);
         // 载入在线玩家数据
         for (Player player : Bukkit.getOnlinePlayers()) {
-            this.datas.put(player.getName(), new PlayerData(player.getName()));
+            PlayerData.PLAYER_DATA.put(player.getUniqueId(), new PlayerData(player.getUniqueId()));
         }
-        this.log("&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
         this.log(" ");
     }
 
     @Override
     public void onDisable() {
-        saveSaleList();
-        savePlayerData();
+        this.saveSaleList();
+        this.savePlayerData();
     }
 
     /**
@@ -173,7 +162,7 @@ public class ServerMarket extends JavaPlugin {
     }
 
     public void savePlayerData() {
-        for (Map.Entry<String, PlayerData> entry : datas.entrySet()) {
+        for (Map.Entry<UUID, PlayerData> entry : PlayerData.PLAYER_DATA.entrySet()) {
             entry.getValue().save();
         }
     }
@@ -204,6 +193,7 @@ public class ServerMarket extends JavaPlugin {
         MarketData.MARKET_DATA.clear();
         // 读取市场
         Arrays.stream(Objects.requireNonNull(file.listFiles())).iterator().forEachRemaining(MarketData::new);
+        this.log("&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
     }
 
     private void saveResults() {

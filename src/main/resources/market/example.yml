@@ -10,6 +10,8 @@ vault-type: "Vault"
 permission: "market.example"
 # 市场展示名
 display-name: "&c奥利给给"
+# 货币展示名
+economy-name: "金币"
 # 价格范围设定
 # 价格范围
 price:
@@ -46,8 +48,7 @@ size: 54
 # 支持格式:
 #   > 数字(小)-数字(大) 例子: 0-44
 #   > 数字 例子: 0
-sale-item-slots:
-  - 0-44
+sale-item-slots: "0-44"
 # 物品信息
 sale-info:
   - " "
@@ -62,18 +63,18 @@ items:
     name: "&f上一页"
     slot: 45
     action: up
-    lore: []
+    lore: [ ]
   down:
     type: paper
     amount: 1
     name: "&f下一页"
     slot: 53
     action: down
-    lore: []
+    lore: [ ]
   store:
     type: chest
     amount: 1
     name: "&e个人仓库"
     slot: 49
     action: store
-    lore: []
+    lore: [ ]

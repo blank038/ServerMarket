@@ -5,5 +5,5 @@ command-help: true
 # 市场状态文本
 status-text:
   loaded: "&a已加载"
-  errro: "&c出现异常"
+  error: "&c出现异常"
   no-permission: "&c无权使用"
