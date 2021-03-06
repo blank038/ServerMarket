@@ -1,5 +1,6 @@
 package com.blank038.servermarket.enums;
 
+import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.bridge.NyEcoBridge;
 import com.blank038.servermarket.bridge.PlayerPointBridge;
 import com.blank038.servermarket.bridge.VaultBridge;
@@ -26,9 +27,9 @@ public enum PayType {
     NY_ECONOMY("NyEconomy", NyEcoBridge.class);
 
     private final String plugin;
-    private final Class<?> aClass;
+    private final Class<? extends BaseBridge> aClass;
 
-    PayType(String plugin, Class<?> c) {
+    PayType(String plugin, Class<? extends BaseBridge> c) {
         this.plugin = plugin;
         this.aClass = c;
     }
@@ -37,7 +38,7 @@ public enum PayType {
         return plugin;
     }
 
-    public Class<?> getBridgeClass() {
+    public Class<? extends BaseBridge> getBridgeClass() {
         return aClass;
     }
 }

@@ -44,7 +44,7 @@ public abstract class BaseBridge {
      */
     public abstract boolean take(OfflinePlayer player, double amount);
 
-    public static <T> T register(Class<T> c) {
+    public static <T extends BaseBridge> T register(Class<T> c) {
         try {
             return c.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
