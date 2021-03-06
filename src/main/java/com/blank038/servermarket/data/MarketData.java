@@ -319,7 +319,7 @@ public class MarketData {
                 Player clicker = (Player) e.getWhoClicked();
                 if (key != null) {
                     // 购买商品
-                    this.buySaleItem(clicker, key, e.isShiftClick());
+                    this.buySaleItem(clicker, key, e.isShiftClick(), lastPage);
                 } else if (action != null) {
                     // 判断交互方式
                     switch (action) {
@@ -361,7 +361,7 @@ public class MarketData {
         guiModel.openInventory(player);
     }
 
-    public void buySaleItem(Player buyer, String uuid, boolean shift) {
+    public void buySaleItem(Player buyer, String uuid, boolean shift, int page) {
         // 判断商品是否存在
         if (!SALE_MAP.containsKey(uuid)) {
             buyer.sendMessage(LangConfiguration.getString("error-sale", true));
@@ -391,15 +391,18 @@ public class MarketData {
             Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
             if (seller != null && seller.isOnline()) {
                 double last = this.getLastMoney(seller, saleItem.getPrice());
-                DecimalFormat df = new DecimalFormat("#.00");
+                DecimalFormat df = new DecimalFormat("#0.00");
                 ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).give(seller, this.ECO_TYPE, last);
                 seller.sendMessage(LangConfiguration.getString("sale-sell", true).replace("%economy%", this.ECONOMY_NAME)
                         .replace("%money%", df.format(saleItem.getPrice())).replace("%last%", df.format(last)));
             } else {
-                ServerMarket.getInstance().addMoney(saleItem.getOwnerName(), saleItem.getPrice());
+                ServerMarket.getInstance().addMoney(saleItem.getOwnerUUID(), this.PAY_TYPE, this.ECO_TYPE, saleItem.getPrice(), this.MARKET_KEY);
             }
             // 再给购买者物品
             ServerMarket.getInstance().getApi().addItem(buyer.getUniqueId(), saleItem);
+            // 给购买者发送消息
+            buyer.sendMessage(LangConfiguration.getString("buy-item", true));
+            this.openGui(buyer, page);
         } else {
             buyer.sendMessage(LangConfiguration.getString("shift-buy", true));
         }

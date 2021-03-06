@@ -6,6 +6,7 @@ import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.config.LangConfiguration;
 import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
+import com.blank038.servermarket.data.ResultData;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.listener.PlayerListener;
 import com.blank038.servermarket.nms.NBTBase;
@@ -13,6 +14,7 @@ import com.blank038.servermarket.nms.sub.v1_12_R1;
 import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -43,10 +45,6 @@ public class ServerMarket extends JavaPlugin {
      * API 接口
      */
     private ServerMarketAPI serverMarketAPI;
-    /**
-     * 返还玩家的钱
-     */
-    public final HashMap<String, Double> results = new HashMap<>();
 
     public static ServerMarket getInstance() {
         return serverMarket;
@@ -136,10 +134,10 @@ public class ServerMarket extends JavaPlugin {
         // 重新加载数据中的物品
         reloadSaleItem();
         // 开始读取离线玩家获得金币
-        if (!results.isEmpty()) {
-            saveResults();
+        if (!ResultData.RESULT_DATA.isEmpty()) {
+            this.saveResults();
         }
-        results.clear();
+        ResultData.RESULT_DATA.clear();
         File resultFile = new File(getDataFolder(), "results.yml");
         FileConfiguration resultData = YamlConfiguration.loadConfiguration(resultFile);
         if (!resultFile.exists()) {
@@ -150,7 +148,7 @@ public class ServerMarket extends JavaPlugin {
             }
         }
         for (String key : resultData.getKeys(false)) {
-            results.put(key, resultData.getDouble(key));
+            ResultData.RESULT_DATA.put(key, new ResultData(resultData.getConfigurationSection(key)));
         }
     }
 
@@ -167,12 +165,16 @@ public class ServerMarket extends JavaPlugin {
         }
     }
 
-    public void addMoney(String name, double moeny) {
-        if (results.containsKey(name)) {
-            results.replace(name, results.get(name) + moeny);
-        } else {
-            results.put(name, moeny);
-        }
+    public void addMoney(String uuid, PayType payType, String ectType, double moeny, String sourceMarket) {
+        ConfigurationSection section = new YamlConfiguration();
+        section.set("amount", moeny);
+        section.set("pay-type", payType.name());
+        section.set("owner-uuid", uuid);
+        section.set("eco-type", ectType);
+        section.set("source-market", sourceMarket);
+        // 存入数据
+        ResultData resultData = new ResultData(section);
+        ResultData.RESULT_DATA.put(UUID.randomUUID().toString(), resultData);
     }
 
     public void log(String message) {
@@ -199,8 +201,8 @@ public class ServerMarket extends JavaPlugin {
     private void saveResults() {
         File resultFile = new File(getDataFolder(), "results.yml");
         FileConfiguration resultData = new YamlConfiguration();
-        for (Map.Entry<String, Double> entry : results.entrySet()) {
-            resultData.set(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, ResultData> entry : ResultData.RESULT_DATA.entrySet()) {
+            resultData.set(entry.getKey(), entry.getValue().toSection());
         }
         try {
             resultData.save(resultFile);
