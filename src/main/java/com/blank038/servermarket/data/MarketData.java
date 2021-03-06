@@ -44,6 +44,7 @@ public class MarketData {
     private final List<String> LORE_BLACK_LIST, MATERIAL_BLACK_LIST;
     private final int MIN, MAX;
     private final PayType PAY_TYPE;
+    private final ConfigurationSection TAX_SECTION;
     private MarketStatus MARKET_STATUS;
     private boolean showSaleInfo, saleBroadcast;
     private String dateFormat;
@@ -61,10 +62,11 @@ public class MarketData {
         this.MAX = data.getInt("price.max");
         this.MATERIAL_BLACK_LIST = data.getStringList("black-list.type");
         this.LORE_BLACK_LIST = data.getStringList("black-list.lore");
+        this.TAX_SECTION = data.getConfigurationSection("tax");
         this.showSaleInfo = data.getBoolean("show-sale-info");
         this.saleBroadcast = data.getBoolean("sale-broadcast");
         this.dateFormat = data.getString("simple-date-format");
-        switch ((ECO_TYPE = data.getString("vault-type").toLowerCase())) {
+        switch ((this.ECO_TYPE = data.getString("vault-type").toLowerCase())) {
             case "vault":
                 this.PAY_TYPE = PayType.VAULT;
                 break;
@@ -159,6 +161,25 @@ public class MarketData {
      */
     public MarketStatus getMarketStatus() {
         return this.MARKET_STATUS;
+    }
+
+    /**
+     * 获取扣税后的价格
+     *
+     * @param player 目标玩家
+     * @param money  初始金币
+     * @return 扣税后金币
+     */
+    public double getLastMoney(Player player, double money) {
+        String header = this.TAX_SECTION.getString("header");
+        double tax = this.TAX_SECTION.getDouble("node.default");
+        for (String key : this.TAX_SECTION.getConfigurationSection("node").getKeys(false)) {
+            double tempTax = this.TAX_SECTION.getDouble("node." + key);
+            if (player.hasPermission(header + "." + key) && tempTax < tax) {
+                tax = tempTax;
+            }
+        }
+        return money - money * tax;
     }
 
     public int getMin() {
@@ -358,24 +379,20 @@ public class MarketData {
             return;
         }
         if (shift) {
-            if (ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).balance(buyer, null) < saleItem.getPrice()) {
+            if (ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).balance(buyer, this.ECO_TYPE) < saleItem.getPrice()) {
                 buyer.sendMessage(LangConfiguration.getString("lack-money", true).replace("%economy%", this.ECONOMY_NAME));
-                return;
-            }
-            // 判断货币类型, 不要问我为什么要判断！后续新增货币扩展延伸性好！
-            if (saleItem.getPayType() != PayType.VAULT) {
                 return;
             }
             // 先移除, 确保不被重复购买
             SALE_MAP.remove(uuid);
             // 先给玩家钱扣了！
-            ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).take(buyer, null, saleItem.getPrice());
+            ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).take(buyer, this.ECO_TYPE, saleItem.getPrice());
             // 再把钱给出售者
             Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
             if (seller != null && seller.isOnline()) {
-                double last = ServerMarket.getInstance().getApi().getLastMoney(seller, saleItem.getPrice());
+                double last = this.getLastMoney(seller, saleItem.getPrice());
                 DecimalFormat df = new DecimalFormat("#.00");
-                ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).give(seller, null, last);
+                ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).give(seller, this.ECO_TYPE, last);
                 seller.sendMessage(LangConfiguration.getString("sale-sell", true).replace("%economy%", this.ECONOMY_NAME)
                         .replace("%money%", df.format(saleItem.getPrice())).replace("%last%", df.format(last)));
             } else {
@@ -469,7 +486,7 @@ public class MarketData {
             this.saveSaleData();
         }
         File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", SOURCE_ID + ".yml");
-        FileConfiguration data = new YamlConfiguration();
+        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         for (String key : data.getKeys(false)) {
             SaleItem saleItem = new SaleItem(data.getConfigurationSection(key));
             this.SALE_MAP.put(saleItem.getSaleUUID(), saleItem);

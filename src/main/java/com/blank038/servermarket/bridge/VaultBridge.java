@@ -24,11 +24,11 @@ public class VaultBridge extends BaseBridge {
 
     @Override
     public void give(OfflinePlayer player, String key, double amount) {
-        ECONOMY_PROVIDER.depositPlayer(player, amount);
+        ECONOMY_PROVIDER.depositPlayer(player, Math.max(1, amount));
     }
 
     @Override
     public boolean take(OfflinePlayer player, String key, double amount) {
-        return ECONOMY_PROVIDER.withdrawPlayer(player, amount).transactionSuccess();
+        return ECONOMY_PROVIDER.withdrawPlayer(player, Math.max(1, amount)).transactionSuccess();
     }
 }

@@ -17,17 +17,17 @@ public class NyEcoBridge extends BaseBridge {
 
     @Override
     public double balance(OfflinePlayer player, String key) {
-        return this.NY_ECONOMY_API.getBalance(player.getName(), key);
+        return this.NY_ECONOMY_API.getBalance(key, player.getName());
     }
 
     @Override
     public void give(OfflinePlayer player, String key, double amount) {
-        this.NY_ECONOMY_API.deposit(key, player.getName(), (int) amount);
+        this.NY_ECONOMY_API.deposit(key, player.getName(), (int) Math.max(1, amount));
     }
 
     @Override
     public boolean take(OfflinePlayer player, String key, double amount) {
-        this.NY_ECONOMY_API.withdraw(key, player.getName(), (int) amount);
+        this.NY_ECONOMY_API.withdraw(key, player.getName(), (int) Math.max(1, amount));
         return true;
     }
 }

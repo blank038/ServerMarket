@@ -28,11 +28,11 @@ public class PlayerListener implements Listener {
         PlayerData.PLAYER_DATA.put(event.getPlayer().getUniqueId(), new PlayerData(event.getPlayer().getUniqueId()));
         // 判断是否有可获得的货币
         if (ServerMarket.getInstance().results.containsKey(name)) {
-            double price = ServerMarket.getInstance().results.remove(name), last = ServerMarket.getInstance().getApi().getLastMoney(event.getPlayer(), price);
-            DecimalFormat df = new DecimalFormat("#.00");
-//            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), null, last);
-            event.getPlayer().sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(price))
-                    .replace("%last%", df.format(last)));
+//            double price = ServerMarket.getInstance().results.remove(name), last = ServerMarket.getInstance().getApi().getLastMoney(event.getPlayer(), price);
+//            DecimalFormat df = new DecimalFormat("#.00");
+////            ServerMarket.getInstance().getEconomyBridge().give(event.getPlayer(), null, last);
+//            event.getPlayer().sendMessage(LangConfiguration.getString("sale-sell", true).replace("%money%", df.format(price))
+//                    .replace("%last%", df.format(last)));
         }
     }
 

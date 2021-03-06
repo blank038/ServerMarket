@@ -26,12 +26,12 @@ public class PlayerPointBridge extends BaseBridge {
     @Override
     public void give(OfflinePlayer player, String key, double amount) {
         // 通过 StorageHandler 给予点券, 不会触发事件
-        int total = (int) (this.PLAYER_POINTS_PLUGIN.getAPI().look(player.getUniqueId()) + amount);
+        int total = (int) (this.PLAYER_POINTS_PLUGIN.getAPI().look(player.getUniqueId()) + Math.max(1, amount));
         this.PLAYER_POINTS_PLUGIN.getModuleForClass(StorageHandler.class).setPoints(player.getUniqueId().toString(), total);
     }
 
     @Override
     public boolean take(OfflinePlayer player, String key, double amount) {
-        return this.PLAYER_POINTS_PLUGIN.getAPI().take(player.getUniqueId(), (int) amount);
+        return this.PLAYER_POINTS_PLUGIN.getAPI().take(player.getUniqueId(), (int) Math.max(1, amount));
     }
 }

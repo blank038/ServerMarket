@@ -49,17 +49,6 @@ public class ServerMarketAPI {
         }
     }
 
-    public double getLastMoney(Player player, double money) {
-        double tax = ServerMarket.getInstance().getConfig().getDouble("tax.default");
-        for (String key : ServerMarket.getInstance().getConfig().getConfigurationSection("tax").getKeys(false)) {
-            double tempTax = ServerMarket.getInstance().getConfig().getDouble("tax." + key);
-            if (player.hasPermission("servermarket.tax." + key) && tempTax < tax) {
-                tax = tempTax;
-            }
-        }
-        return money - money * tax;
-    }
-
     public PlayerData getPlayerData(UUID uuid) {
         return PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
     }

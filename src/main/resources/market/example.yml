@@ -24,9 +24,13 @@ show-sale-info: true
 # 短写命令打开市场, 留空则表示不设定
 short-command: "exmarket"
 # 玩家售出物品后的税率, 1% = 0.01
+# 权限: header.node(例如: servermarket.tax.default)
+# 默认玩家拥有 default 节点权限
 tax:
-  default: 0.1
-  vip: 0.05
+  header: "servermarket.tax"
+  node:
+    default: 0.1
+    vip: 0.05
 # 日期格式
 simple-date-format: "yyyy/MM/dd HH:mm:ss"
 # 物品上架黑名单
