@@ -379,6 +379,10 @@ public class MarketData {
             return;
         }
         if (shift) {
+            if (saleItem.getPrice() == 0) {
+                buyer.sendMessage(LangConfiguration.getString("error-sale", true));
+                return;
+            }
             if (ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).balance(buyer, this.ECO_TYPE) < saleItem.getPrice()) {
                 buyer.sendMessage(LangConfiguration.getString("lack-money", true).replace("%economy%", this.ECONOMY_NAME));
                 return;
