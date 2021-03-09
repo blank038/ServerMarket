@@ -483,7 +483,7 @@ public class MarketData {
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                     itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
             Bukkit.getServer().broadcastMessage(LangConfiguration.getString("broadcast", true).replace("%item%", displayName)
-                    .replace("%market_name%", displayName).replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
+                    .replace("%market_name%", this.DISPLAY_NAME).replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
         }
         return true;
     }
