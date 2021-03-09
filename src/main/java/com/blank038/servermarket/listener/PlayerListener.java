@@ -59,19 +59,21 @@ public class PlayerListener implements Listener {
     private synchronized void checkResult(Player player) {
         Set<String> keys = new HashSet<>();
         for (Map.Entry<String, ResultData> entry : ResultData.RESULT_DATA.entrySet()) {
-            // 获取市场数据
-            MarketData marketData = MarketData.MARKET_DATA.getOrDefault(entry.getValue().getSourceMarket(), null);
-            // 获取可获得货币
-            double price = entry.getValue().getResultAmount(),
-                    last = marketData == null ? price : marketData.getLastMoney(player, price);
-            // 判断货币桥是否存在
-            if (BaseBridge.PAY_TYPES.containsKey(entry.getValue().getPayType())) {
-                DecimalFormat df = new DecimalFormat("#0.00");
-                ServerMarket.getInstance().getEconomyBridge(entry.getValue().getPayType()).give(player, null, last);
-                player.sendMessage(LangConfiguration.getString("sale-sell", true)
-                        .replace("%economy%", marketData == null ? "" : marketData.getDisplayName())
-                        .replace("%money%", df.format(price)).replace("%last%", df.format(last)));
-                keys.add(entry.getKey());
+            if (entry.getValue().getOwnerUUID().equals(player.getPlayer().getUniqueId())) {
+                // 获取市场数据
+                MarketData marketData = MarketData.MARKET_DATA.getOrDefault(entry.getValue().getSourceMarket(), null);
+                // 获取可获得货币
+                double price = entry.getValue().getResultAmount(),
+                        last = marketData == null ? price : marketData.getLastMoney(player, price);
+                // 判断货币桥是否存在
+                if (BaseBridge.PAY_TYPES.containsKey(entry.getValue().getPayType())) {
+                    DecimalFormat df = new DecimalFormat("#0.00");
+                    ServerMarket.getInstance().getEconomyBridge(entry.getValue().getPayType()).give(player, entry.getValue().getEconmyType(), last);
+                    player.sendMessage(LangConfiguration.getString("sale-sell", true)
+                            .replace("%economy%", marketData == null ? "" : marketData.getDisplayName())
+                            .replace("%money%", df.format(price)).replace("%last%", df.format(last)));
+                    keys.add(entry.getKey());
+                }
             }
         }
         // 不通过 new HashMap 来执行, 避免过度浪费性能

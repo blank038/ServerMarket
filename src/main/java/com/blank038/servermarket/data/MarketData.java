@@ -482,8 +482,8 @@ public class MarketData {
         if (this.saleBroadcast) {
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                     itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
-            player.sendMessage(LangConfiguration.getString("broadcast", true).replace("%item%", displayName)
-                    .replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
+            Bukkit.getServer().broadcastMessage(LangConfiguration.getString("broadcast", true).replace("%item%", displayName)
+                    .replace("%market_name%", displayName).replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
         }
         return true;
     }

@@ -50,8 +50,8 @@ public class ResultData {
         ConfigurationSection section = new YamlConfiguration();
         section.set("amount", this.RESULT_AMOUNT);
         section.set("pay-type", this.PAY_TYPE.name());
-        section.set("owner-uuid", this.OWNER_UUID);
-        section.set("eco-type", section);
+        section.set("owner-uuid", this.OWNER_UUID.toString());
+        section.set("eco-type", this.ECO_TYPE);
         section.set("source-market", this.SOURCE_MARKET);
         return section;
     }
