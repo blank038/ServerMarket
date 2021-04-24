@@ -33,6 +33,8 @@ tax:
     vip: 0.05
 # 日期格式
 simple-date-format: "yyyy/MM/dd HH:mm:ss"
+# 商品超时时间, 单位: 秒
+effective_time: 259200
 # 物品上架黑名单
 black-list:
   type:

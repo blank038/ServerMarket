@@ -42,7 +42,7 @@ public class MarketData {
     private final HashMap<String, SaleItem> SALE_MAP = new HashMap<>();
     private final String SOURCE_ID, MARKET_KEY, PERMISSION, SHORT_COMMAND, ECO_TYPE, DISPLAY_NAME, ECONOMY_NAME;
     private final List<String> LORE_BLACK_LIST, MATERIAL_BLACK_LIST;
-    private final int MIN, MAX;
+    private final int MIN, MAX, EFFECTIVE_TIME;
     private final PayType PAY_TYPE;
     private final ConfigurationSection TAX_SECTION;
     private MarketStatus MARKET_STATUS;
@@ -60,6 +60,7 @@ public class MarketData {
         this.ECONOMY_NAME = ChatColor.translateAlternateColorCodes('&', data.getString("economy-name"));
         this.MIN = data.getInt("price.min");
         this.MAX = data.getInt("price.max");
+        this.EFFECTIVE_TIME = data.getInt("effective_time");
         this.MATERIAL_BLACK_LIST = data.getStringList("black-list.type");
         this.LORE_BLACK_LIST = data.getStringList("black-list.lore");
         this.TAX_SECTION = data.getConfigurationSection("tax");
@@ -188,6 +189,10 @@ public class MarketData {
 
     public int getMax() {
         return this.MAX;
+    }
+
+    public int getEffectiveTime() {
+        return this.EFFECTIVE_TIME;
     }
 
     public boolean isShowSaleInfo() {
@@ -511,5 +516,23 @@ public class MarketData {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void removeTimeOutItem() {
+        MarketData.MARKET_DATA.forEach((key, value) -> {
+            // 开始计算
+            Iterator<Map.Entry<String, SaleItem>> iterator = value.SALE_MAP.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, SaleItem> entry = iterator.next();
+                int second = (int) ((System.currentTimeMillis() - entry.getValue().getPostTime()) / 1000L);
+                if (second >= value.getEffectiveTime()) {
+                    // 移除
+                    iterator.remove();
+                    // 返回玩家仓库
+                    UUID uuid = UUID.fromString(entry.getValue().getOwnerUUID());
+                    ServerMarket.getInstance().getApi().addItem(uuid, entry.getValue().getSafeItem());
+                }
+            }
+        });
     }
 }
