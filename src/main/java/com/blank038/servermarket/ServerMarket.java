@@ -96,7 +96,7 @@ public class ServerMarket extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveSaleList, 1200L, 1200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::savePlayerData, 1200L, 1200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveResults, 1200L, 1200L);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, MarketData::removeTimeOutItem, 1200L, 1200L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, MarketData::removeTimeOutItem, 200L, 200L);
         // 载入在线玩家数据
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData.PLAYER_DATA.put(player.getUniqueId(), new PlayerData(player.getUniqueId()));
