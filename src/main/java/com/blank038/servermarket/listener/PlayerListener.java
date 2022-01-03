@@ -2,7 +2,7 @@ package com.blank038.servermarket.listener;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.bridge.BaseBridge;
-import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.data.ResultData;
@@ -46,7 +46,7 @@ public class PlayerListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
         for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
             if (entry.getValue().performSellCommand(event.getPlayer(), event.getMessage())) {
@@ -69,7 +69,7 @@ public class PlayerListener implements Listener {
                 if (BaseBridge.PAY_TYPES.containsKey(entry.getValue().getPayType())) {
                     DecimalFormat df = new DecimalFormat("#0.00");
                     ServerMarket.getInstance().getEconomyBridge(entry.getValue().getPayType()).give(player, entry.getValue().getEconmyType(), last);
-                    player.sendMessage(LangConfiguration.getString("sale-sell", true)
+                    player.sendMessage(I18n.getString("sale-sell", true)
                             .replace("%economy%", marketData == null ? "" : marketData.getDisplayName())
                             .replace("%money%", df.format(price)).replace("%last%", df.format(last)));
                     keys.add(entry.getKey());

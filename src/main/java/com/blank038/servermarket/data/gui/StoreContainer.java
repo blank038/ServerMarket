@@ -1,7 +1,7 @@
 package com.blank038.servermarket.data.gui;
 
 import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.util.CommonUtil;
 import com.mc9y.blank038api.util.inventory.GuiModel;
@@ -106,7 +106,7 @@ public class StoreContainer {
         PlayerData data = ServerMarket.getInstance().getApi().getPlayerData(player.getUniqueId());
         if (data.contains(uuid)) {
             if (player.getInventory().firstEmpty() == -1) {
-                player.sendMessage(LangConfiguration.getString("inventory-full", true));
+                player.sendMessage(I18n.getString("inventory-full", true));
                 return;
             }
             // 基于玩家物品
@@ -114,12 +114,12 @@ public class StoreContainer {
             String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                     itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
             player.getInventory().addItem(itemStack);
-            player.sendMessage(LangConfiguration.getString("get-store-item", true).replace("%item%", displayMmae)
+            player.sendMessage(I18n.getString("get-store-item", true).replace("%item%", displayMmae)
                     .replace("%amount%", String.valueOf(itemStack.getAmount())));
             // 刷新玩家界面
             ServerMarket.getInstance().getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE);
         } else {
-            player.sendMessage(LangConfiguration.getString("error-store", true));
+            player.sendMessage(I18n.getString("error-store", true));
         }
     }
 }

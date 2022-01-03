@@ -1,4 +1,4 @@
-package com.blank038.servermarket.config;
+package com.blank038.servermarket.i18n;
 
 import com.blank038.servermarket.ServerMarket;
 import org.bukkit.ChatColor;
@@ -10,11 +10,13 @@ import java.util.List;
 
 /**
  * 语言读取类
+ *
+ * @author Blank038
  */
-public class LangConfiguration {
+public class I18n {
     private static FileConfiguration data;
 
-    public LangConfiguration() {
+    public I18n() {
         reload();
     }
 

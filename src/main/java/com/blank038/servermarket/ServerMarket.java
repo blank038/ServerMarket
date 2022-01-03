@@ -3,7 +3,7 @@ package com.blank038.servermarket;
 import com.blank038.servermarket.api.ServerMarketAPI;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.command.MainCommand;
-import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.data.ResultData;
@@ -36,7 +36,7 @@ public class ServerMarket extends JavaPlugin {
     /**
      * 语言配置类
      */
-    private LangConfiguration lang;
+    private I18n lang;
     /**
      * NMS 接口
      */
@@ -120,7 +120,7 @@ public class ServerMarket extends JavaPlugin {
         reloadConfig();
         // 设定语言配置
         if (lang == null) {
-            lang = new LangConfiguration();
+            lang = new I18n();
         } else {
             lang.reload();
         }

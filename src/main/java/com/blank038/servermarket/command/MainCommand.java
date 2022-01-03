@@ -1,7 +1,7 @@
 package com.blank038.servermarket.command;
 
 import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.config.LangConfiguration;
+import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.MarketData;
 import com.blank038.servermarket.data.gui.StoreContainer;
 import org.bukkit.ChatColor;
@@ -52,7 +52,7 @@ public class MainCommand implements CommandExecutor {
                 case "reload":
                     if (sender.hasPermission("servermarket.admin")) {
                         INSTANCE.loadConfig();
-                        sender.sendMessage(LangConfiguration.getString("reload", true));
+                        sender.sendMessage(I18n.getString("reload", true));
                     }
                     break;
                 default:
@@ -77,7 +77,7 @@ public class MainCommand implements CommandExecutor {
      * 发送市场状态
      */
     private void show(CommandSender sender) {
-        for (String line : LangConfiguration.getStringList("show")) {
+        for (String line : I18n.getStringList("show")) {
             String last = line;
             for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
                 String value = "%" + entry.getValue().getMarketKey() + "%";
@@ -99,7 +99,7 @@ public class MainCommand implements CommandExecutor {
      * 发送命令帮助
      */
     private void sendHelp(CommandSender sender, String label) {
-        for (String text : LangConfiguration.getStringList("help." +
+        for (String text : I18n.getStringList("help." +
                 (sender.hasPermission("servermarket.admin") ? "admin" : "default"))) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', text).replace("%c", label));
         }
