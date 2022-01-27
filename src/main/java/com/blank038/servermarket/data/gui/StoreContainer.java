@@ -48,7 +48,8 @@ public class StoreContainer {
         if (data.contains("items")) {
             for (String key : data.getConfigurationSection("items").getKeys(false)) {
                 ConfigurationSection section = data.getConfigurationSection("items." + key);
-                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()), section.getInt("amount"));
+                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()),
+                        section.getInt("amount"), (short) section.getInt("data"));
                 ItemMeta itemMeta = itemStack.getItemMeta();
                 itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
                 // 开始遍历设置Lore
