@@ -64,7 +64,7 @@ public class PlayerListener implements Listener {
                 MarketData marketData = MarketData.MARKET_DATA.getOrDefault(entry.getValue().getSourceMarket(), null);
                 // 获取可获得货币
                 double price = entry.getValue().getResultAmount(),
-                        last = marketData == null ? price : marketData.getLastMoney(player, price);
+                        last = marketData == null ? price : marketData.getLastMoney(marketData.getTaxSection(), player, price);
                 // 判断货币桥是否存在
                 if (BaseBridge.PAY_TYPES.containsKey(entry.getValue().getPayType())) {
                     DecimalFormat df = new DecimalFormat("#0.00");

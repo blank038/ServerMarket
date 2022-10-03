@@ -27,7 +27,15 @@ short-command: "exmarket"
 # 权限: header.node(例如: servermarket.tax.default)
 # 默认玩家拥有 default 节点权限
 tax:
-  header: "servermarket.tax"
+  header: "servermarket.tax.sell"
+  node:
+    default: 0.1
+    vip: 0.05
+# 玩家上架物品后的税率, 1% = 0.01
+# 权限: header.node(例如: servermarket.tax.default)
+# 默认玩家拥有 default 节点权限
+shout-tax:
+  header: "servermarket.tax.shout"
   node:
     default: 0.1
     vip: 0.05

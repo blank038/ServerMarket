@@ -44,7 +44,7 @@ public class MarketData {
     private final List<String> LORE_BLACK_LIST, MATERIAL_BLACK_LIST;
     private final int MIN, MAX, EFFECTIVE_TIME;
     private final PayType PAY_TYPE;
-    private final ConfigurationSection TAX_SECTION;
+    private final ConfigurationSection TAX_SECTION, shoutTaxSection;
     private MarketStatus MARKET_STATUS;
     private boolean showSaleInfo, saleBroadcast;
     private String dateFormat;
@@ -64,6 +64,7 @@ public class MarketData {
         this.MATERIAL_BLACK_LIST = data.getStringList("black-list.type");
         this.LORE_BLACK_LIST = data.getStringList("black-list.lore");
         this.TAX_SECTION = data.getConfigurationSection("tax");
+        this.shoutTaxSection = data.getConfigurationSection("shout-tax");
         this.showSaleInfo = data.getBoolean("show-sale-info");
         this.saleBroadcast = data.getBoolean("sale-broadcast");
         this.dateFormat = data.getString("simple-date-format");
@@ -171,16 +172,28 @@ public class MarketData {
      * @param money  初始金币
      * @return 扣税后金币
      */
-    public double getLastMoney(Player player, double money) {
-        String header = this.TAX_SECTION.getString("header");
-        double tax = this.TAX_SECTION.getDouble("node.default");
-        for (String key : this.TAX_SECTION.getConfigurationSection("node").getKeys(false)) {
-            double tempTax = this.TAX_SECTION.getDouble("node." + key);
+    public double getLastMoney(ConfigurationSection section, Player player, double money) {
+        String header = section.getString("header");
+        double tax = section.getDouble("node.default");
+        for (String key : section.getConfigurationSection("node").getKeys(false)) {
+            double tempTax = section.getDouble("node." + key);
             if (player.hasPermission(header + "." + key) && tempTax < tax) {
                 tax = tempTax;
             }
         }
         return money - money * tax;
+    }
+
+    public double getTax(ConfigurationSection section, Player player) {
+        String header = section.getString("header");
+        double tax = section.getDouble("node.default");
+        for (String key : section.getConfigurationSection("node").getKeys(false)) {
+            double tempTax = section.getDouble("node." + key);
+            if (player.hasPermission(header + "." + key) && tempTax < tax) {
+                tax = tempTax;
+            }
+        }
+        return tax;
     }
 
     public int getMin() {
@@ -217,6 +230,14 @@ public class MarketData {
 
     public void setDateFormat(String format) {
         this.dateFormat = format;
+    }
+
+    public ConfigurationSection getTaxSection() {
+        return this.TAX_SECTION;
+    }
+
+    public ConfigurationSection getShoutTaxSection() {
+        return this.shoutTaxSection;
     }
 
     /**
@@ -400,7 +421,7 @@ public class MarketData {
             // 再把钱给出售者
             Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
             if (seller != null && seller.isOnline()) {
-                double last = this.getLastMoney(seller, saleItem.getPrice());
+                double last = this.getLastMoney(this.getTaxSection(), seller, saleItem.getPrice());
                 DecimalFormat df = new DecimalFormat("#0.00");
                 ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).give(seller, this.ECO_TYPE, last);
                 seller.sendMessage(I18n.getString("sale-sell", true).replace("%economy%", this.ECONOMY_NAME)
@@ -475,6 +496,15 @@ public class MarketData {
         if (price > this.MAX) {
             player.sendMessage(I18n.getString("max-price", true).replace("%max%", String.valueOf(this.MAX)));
             return true;
+        }
+        double tax = this.getTax(this.getShoutTaxSection(), player);
+        if (ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).balance(player, this.ECO_TYPE) < tax) {
+            player.sendMessage(I18n.getString("shout-tax", true).replace("%economy%", this.ECONOMY_NAME));
+            return true;
+        }
+        // 扣除费率
+        if (tax > 0) {
+            ServerMarket.getInstance().getEconomyBridge(this.PAY_TYPE).take(player, this.ECO_TYPE, tax);
         }
         // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);
