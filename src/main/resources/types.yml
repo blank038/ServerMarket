@@ -1,0 +1,3 @@
+default:
+  all: "全部"
+  other: "其他"

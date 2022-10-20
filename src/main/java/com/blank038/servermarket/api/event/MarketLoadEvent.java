@@ -1,6 +1,6 @@
 package com.blank038.servermarket.api.event;
 
-import com.blank038.servermarket.data.MarketData;
+import com.blank038.servermarket.data.storage.MarketData;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

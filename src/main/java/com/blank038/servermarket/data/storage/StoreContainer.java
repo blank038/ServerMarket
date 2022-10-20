@@ -1,8 +1,8 @@
-package com.blank038.servermarket.data.gui;
+package com.blank038.servermarket.data.storage;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.cache.PlayerData;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.PlayerData;
 import com.blank038.servermarket.util.CommonUtil;
 import com.mc9y.blank038api.util.inventory.GuiModel;
 import org.bukkit.ChatColor;
@@ -94,7 +94,7 @@ public class StoreContainer {
                 String storeId = ServerMarket.getInstance().getNBTBase().get(itemStack, "StoreID"),
                         action = ServerMarket.getInstance().getNBTBase().get(itemStack, "action");
                 if ("market".equalsIgnoreCase(action)) {
-                    ServerMarket.getInstance().getApi().openMarket(clicker, this.OLD_MARKET, this.MARKET_PAGE);
+                    ServerMarket.getInstance().getApi().openMarket(clicker, this.OLD_MARKET, this.MARKET_PAGE, null);
                 } else if (storeId != null) {
                     this.getItem(clicker, storeId);
                 }
@@ -118,7 +118,7 @@ public class StoreContainer {
             player.sendMessage(I18n.getString("get-store-item", true).replace("%item%", displayMmae)
                     .replace("%amount%", String.valueOf(itemStack.getAmount())));
             // 刷新玩家界面
-            ServerMarket.getInstance().getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE);
+            ServerMarket.getInstance().getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE, null);
         } else {
             player.sendMessage(I18n.getString("error-store", true));
         }

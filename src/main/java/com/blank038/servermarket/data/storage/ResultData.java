@@ -1,4 +1,4 @@
-package com.blank038.servermarket.data;
+package com.blank038.servermarket.data.storage;
 
 import com.blank038.servermarket.enums.PayType;
 import org.bukkit.configuration.ConfigurationSection;

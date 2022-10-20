@@ -2,8 +2,8 @@ package com.blank038.servermarket.command;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.MarketData;
-import com.blank038.servermarket.data.gui.StoreContainer;
+import com.blank038.servermarket.data.storage.MarketData;
+import com.blank038.servermarket.data.storage.StoreContainer;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -41,6 +41,9 @@ public class MainCommand implements CommandExecutor {
                 case "open":
                     this.openServerMarket(sender, args.length == 1 ? null : args[1]);
                     break;
+                case "search":
+                    this.searchItemsAndOpenMarket(sender, args);
+                    break;
                 case "show":
                     show(sender);
                     break;
@@ -70,7 +73,25 @@ public class MainCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return;
         }
-        INSTANCE.getApi().openMarket((Player) sender, key, 1);
+        INSTANCE.getApi().openMarket((Player) sender, key, 1, null);
+    }
+
+    /**
+     * 搜索全球市场并打开市场
+     */
+    private void searchItemsAndOpenMarket(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player)) {
+            return;
+        }
+        if (args.length == 1) {
+            sender.sendMessage(I18n.getString("wrong-market", true));
+            return;
+        }
+        if (args.length == 2) {
+            sender.sendMessage(I18n.getString("wrong-key", true));
+            return;
+        }
+        INSTANCE.getApi().openMarket((Player) sender, args[1], 1, args[2]);
     }
 
     /**

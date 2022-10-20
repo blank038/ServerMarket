@@ -1,14 +1,14 @@
-package com.blank038.servermarket.data;
+package com.blank038.servermarket.data.storage;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.gui.SaleItem;
-import com.blank038.servermarket.data.gui.StoreContainer;
+import com.blank038.servermarket.data.sale.SaleItem;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.util.CommonUtil;
+import com.blank038.servermarket.util.ItemUtil;
 import com.google.common.collect.Lists;
 import com.mc9y.blank038api.util.inventory.GuiModel;
 import org.bukkit.Bukkit;
@@ -271,7 +271,7 @@ public class MarketData {
      * @param player      目标玩家
      * @param currentPage 页码
      */
-    public void openGui(Player player, int currentPage) {
+    public void openGui(Player player, int currentPage, String filter) {
         if (this.MARKET_STATUS == MarketStatus.ERROR) {
             player.sendMessage(I18n.getString("market-error", true));
             return;
@@ -328,8 +328,8 @@ public class MarketData {
             }
             // 开始设置物品
             SaleItem saleItem = SALE_MAP.getOrDefault(keys[i], null);
-            if (saleItem == null) {
-                i -= 1;
+            if (saleItem == null || (filter != null && !ItemUtil.isSimilar(saleItem.getSafeItem(), filter))) {
+                --index;
                 continue;
             }
             items.put(slots[index], this.getShowItem(saleItem, data));
@@ -346,7 +346,7 @@ public class MarketData {
                 Player clicker = (Player) e.getWhoClicked();
                 if (key != null) {
                     // 购买商品
-                    this.buySaleItem(clicker, key, e.isShiftClick(), lastPage);
+                    this.buySaleItem(clicker, key, e.isShiftClick(), lastPage, filter);
                 } else if (action != null) {
                     // 判断交互方式
                     switch (action) {
@@ -354,14 +354,14 @@ public class MarketData {
                             if (lastPage == 1) {
                                 clicker.sendMessage(I18n.getString("no-previous-page", true));
                             } else {
-                                this.openGui(player, lastPage - 1);
+                                this.openGui(player, lastPage - 1, filter);
                             }
                             break;
                         case "down":
                             if (lastPage >= finalMaxPage) {
                                 clicker.sendMessage(I18n.getString("no-next-page", true));
                             } else {
-                                this.openGui(player, lastPage + 1);
+                                this.openGui(player, lastPage + 1, filter);
                             }
                             break;
                         case "store":
@@ -388,7 +388,7 @@ public class MarketData {
         guiModel.openInventory(player);
     }
 
-    public void buySaleItem(Player buyer, String uuid, boolean shift, int page) {
+    public void buySaleItem(Player buyer, String uuid, boolean shift, int page, String filter) {
         // 判断商品是否存在
         if (!SALE_MAP.containsKey(uuid)) {
             buyer.sendMessage(I18n.getString("error-sale", true));
@@ -399,7 +399,7 @@ public class MarketData {
             if (shift) {
                 buyer.getInventory().addItem(SALE_MAP.remove(uuid).getSafeItem().clone());
                 buyer.sendMessage(I18n.getString("unsale", true));
-                this.openGui(buyer, 1);
+                this.openGui(buyer, 1, filter);
             } else {
                 buyer.sendMessage(I18n.getString("shift-unsale", true));
             }
@@ -433,7 +433,7 @@ public class MarketData {
             ServerMarket.getInstance().getApi().addItem(buyer.getUniqueId(), saleItem);
             // 给购买者发送消息
             buyer.sendMessage(I18n.getString("buy-item", true));
-            this.openGui(buyer, page);
+            this.openGui(buyer, page, filter);
         } else {
             buyer.sendMessage(I18n.getString("shift-buy", true));
         }
@@ -457,7 +457,7 @@ public class MarketData {
             return true;
         }
         if (split.length == 1) {
-            this.openGui(player, 1);
+            this.openGui(player, 1, null);
             return true;
         }
         if (split.length == 2) {
