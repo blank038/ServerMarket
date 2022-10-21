@@ -4,6 +4,8 @@ import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.storage.MarketData;
 import com.blank038.servermarket.data.cache.PlayerData;
 import com.blank038.servermarket.data.sale.SaleItem;
+import com.blank038.servermarket.filter.FilterBuilder;
+import com.blank038.servermarket.gui.MarketGui;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -38,14 +40,14 @@ public class ServerMarketAPI {
      * @param player 目标玩家
      * @param key    目标市场编号
      */
-    public void openMarket(Player player, String key, int page, String filter) {
+    public void openMarket(Player player, String key, int page, FilterBuilder filter) {
         MarketData marketData = MarketData.MARKET_DATA.containsKey(key) ? MarketData.MARKET_DATA.get(key)
                 : MarketData.MARKET_DATA.get(INSTANCE.getConfig().getString("default-market"));
         if (marketData == null) {
             return;
         }
         if (player.hasPermission(marketData.getPermission())) {
-            marketData.openGui(player, page, filter);
+            new MarketGui(key, page, filter).openGui(player);
         }
     }
 

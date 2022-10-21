@@ -1,15 +1,14 @@
 package com.blank038.servermarket.data.storage;
 
-import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.bridge.BaseBridge;
+import com.blank038.servermarket.filter.FilterBuilder;
+import com.blank038.servermarket.gui.MarketGui;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.sale.SaleItem;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.enums.PayType;
-import com.blank038.servermarket.util.CommonUtil;
-import com.blank038.servermarket.util.ItemUtil;
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -99,8 +98,16 @@ public class MarketData {
         Bukkit.getPluginManager().callEvent(event);
     }
 
+    public File getSourceFile() {
+        return this.sourceFile;
+    }
+
     public HashMap<String, SaleItem> getSales() {
         return saleMap;
+    }
+
+    public SaleItem getSaleItem(String key) {
+        return this.saleMap.getOrDefault(key, null);
     }
 
     public List<String> getSaleTypes() {
@@ -245,155 +252,7 @@ public class MarketData {
         return this.shoutTaxSection;
     }
 
-    /**
-     * 获得市场展示物品
-     *
-     * @param saleItem 市场商品信息
-     * @return 展示物品
-     */
-    public ItemStack getShowItem(SaleItem saleItem, FileConfiguration data) {
-        ItemStack itemStack = saleItem.getSafeItem().clone();
-        if (this.showSaleInfo) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
-            List<String> lore = itemMeta.hasLore() ? itemMeta.getLore() : Lists.newArrayList();
-            // 设置物品格式
-            Date date = new Date(saleItem.getPostTime());
-            SimpleDateFormat sdf = new SimpleDateFormat(this.dateFormat);
-            // 设置额外信息
-            for (String i : data.getStringList("sale-info")) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
-                        .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
-            }
-            itemMeta.setLore(lore);
-            itemStack.setItemMeta(itemMeta);
-        }
-        return ServerMarket.getNMSControl().addNbt(itemStack, "SaleUUID", saleItem.getSaleUUID());
-    }
-
-    /**
-     * 打开市场面板
-     *
-     * @param player      目标玩家
-     * @param currentPage 页码
-     */
-    public void openGui(Player player, int currentPage, String filter) {
-        if (this.marketStatus == MarketStatus.ERROR) {
-            player.sendMessage(I18n.getString("market-error", true));
-            return;
-        }
-        if (this.permission != null && !"".equals(this.permission) && !player.hasPermission(this.permission)) {
-            player.sendMessage(I18n.getString("no-permission", true));
-            return;
-        }
-        // 读取配置文件
-        FileConfiguration data = YamlConfiguration.loadConfiguration(this.sourceFile);
-        GuiModel guiModel = new GuiModel(data.getString("title"), data.getInt("size"));
-        guiModel.registerListener(ServerMarket.getInstance());
-        guiModel.setCloseRemove(true);
-        // 设置界面物品
-        HashMap<Integer, ItemStack> items = new HashMap<>();
-        if (data.contains("items")) {
-            for (String key : data.getConfigurationSection("items").getKeys(false)) {
-                ConfigurationSection section = data.getConfigurationSection("items." + key);
-                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()),
-                        section.getInt("amount"), (short) section.getInt("data"));
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
-                // 开始遍历设置Lore
-                List<String> list = new ArrayList<>();
-                for (String lore : section.getStringList("lore")) {
-                    list.add(ChatColor.translateAlternateColorCodes('&', lore));
-                }
-                itemMeta.setLore(list);
-                itemStack.setItemMeta(itemMeta);
-                // 开始判断是否有交互操作
-                if (section.contains("action")) {
-                    itemStack = ServerMarket.getNMSControl().addNbt(itemStack, "MarketAction", section.getString("action"));
-                }
-                for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
-                    items.put(i, itemStack);
-                }
-            }
-        }
-        // 开始获取全球市场物品
-        Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
-        String[] keys = saleMap.keySet().toArray(new String[0]);
-        // 计算下标
-        int maxPage = saleMap.size() / slots.length;
-        maxPage += (saleMap.size() % slots.length) == 0 ? 0 : 1;
-        // 判断页面是否超标, 如果是的话就设置为第一页
-        if (currentPage > maxPage) {
-            currentPage = 1;
-        }
-        // 获得额外增加的信息
-        int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
-        for (int i = start, index = 0; i < end; i++, index++) {
-            if (index >= slots.length || i >= keys.length) {
-                break;
-            }
-            // 开始设置物品
-            SaleItem saleItem = saleMap.getOrDefault(keys[i], null);
-            if (saleItem == null || (filter != null && !ItemUtil.isSimilar(saleItem.getSafeItem(), filter))) {
-                --index;
-                continue;
-            }
-            items.put(slots[index], this.getShowItem(saleItem, data));
-        }
-        guiModel.setItem(items);
-        final int lastPage = currentPage, finalMaxPage = maxPage;
-        guiModel.execute((e) -> {
-            e.setCancelled(true);
-            if (e.getClickedInventory() == e.getInventory()) {
-                ItemStack itemStack = e.getCurrentItem();
-                String key = ServerMarket.getNMSControl().getValue(itemStack, "SaleUUID"),
-                        action = ServerMarket.getNMSControl().getValue(itemStack, "MarketAction");
-                // 强转玩家
-                Player clicker = (Player) e.getWhoClicked();
-                if (key != null) {
-                    // 购买商品
-                    this.buySaleItem(clicker, key, e.isShiftClick(), lastPage, filter);
-                } else if (action != null) {
-                    // 判断交互方式
-                    switch (action) {
-                        case "up":
-                            if (lastPage == 1) {
-                                clicker.sendMessage(I18n.getString("no-previous-page", true));
-                            } else {
-                                this.openGui(player, lastPage - 1, filter);
-                            }
-                            break;
-                        case "down":
-                            if (lastPage >= finalMaxPage) {
-                                clicker.sendMessage(I18n.getString("no-next-page", true));
-                            } else {
-                                this.openGui(player, lastPage + 1, filter);
-                            }
-                            break;
-                        case "store":
-                            new StoreContainer(clicker, lastPage, this.marketKey).open(1);
-                            break;
-                        default:
-                            if (action.contains(":")) {
-                                String[] split = action.split(":");
-                                if (split.length < 2) {
-                                    return;
-                                }
-                                if ("player".equalsIgnoreCase(split[0])) {
-                                    Bukkit.getServer().dispatchCommand(player, split[1].replace("%player%", player.getName()));
-                                } else if ("console".equalsIgnoreCase(split[0])) {
-                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), split[1].replace("%player%", player.getName()));
-                                }
-                            }
-                            break;
-                    }
-                }
-            }
-        });
-        // 打开界面
-        guiModel.openInventory(player);
-    }
-
-    public void buySaleItem(Player buyer, String uuid, boolean shift, int page, String filter) {
+    public void buySaleItem(Player buyer, String uuid, boolean shift, int page, FilterBuilder filter) {
         // 判断商品是否存在
         if (!saleMap.containsKey(uuid)) {
             buyer.sendMessage(I18n.getString("error-sale", true));
@@ -404,7 +263,7 @@ public class MarketData {
             if (shift) {
                 buyer.getInventory().addItem(saleMap.remove(uuid).getSafeItem().clone());
                 buyer.sendMessage(I18n.getString("unsale", true));
-                this.openGui(buyer, 1, filter);
+                new MarketGui(this.marketKey, page, filter).openGui(buyer);
             } else {
                 buyer.sendMessage(I18n.getString("shift-unsale", true));
             }
@@ -438,7 +297,7 @@ public class MarketData {
             ServerMarket.getApi().addItem(buyer.getUniqueId(), saleItem);
             // 给购买者发送消息
             buyer.sendMessage(I18n.getString("buy-item", true));
-            this.openGui(buyer, page, filter);
+            new MarketGui(this.marketKey, page, filter).openGui(buyer);
         } else {
             buyer.sendMessage(I18n.getString("shift-buy", true));
         }
@@ -462,7 +321,7 @@ public class MarketData {
             return true;
         }
         if (split.length == 1) {
-            this.openGui(player, 1, null);
+            new MarketGui(this.marketKey, 1, null).openGui(player);
             return true;
         }
         if (split.length == 2) {

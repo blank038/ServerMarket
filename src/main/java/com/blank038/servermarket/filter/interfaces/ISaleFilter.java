@@ -4,5 +4,5 @@ import com.blank038.servermarket.data.sale.SaleItem;
 
 public interface ISaleFilter {
 
-    boolean check(SaleItem itemStack);
+    boolean check(SaleItem saleItem);
 }

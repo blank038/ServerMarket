@@ -1,6 +1,8 @@
 package com.blank038.servermarket.command;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.filter.FilterBuilder;
+import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.storage.MarketData;
 import com.blank038.servermarket.data.storage.StoreContainer;
@@ -16,10 +18,10 @@ import java.util.Map;
  * @author Blank038
  */
 public class MainCommand implements CommandExecutor {
-    private final ServerMarket INSTANCE;
+    private final ServerMarket instance;
 
     public MainCommand(ServerMarket serverMarket) {
-        INSTANCE = serverMarket;
+        instance = serverMarket;
     }
 
     /**
@@ -28,7 +30,7 @@ public class MainCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            if (INSTANCE.getConfig().getBoolean("command-help")) {
+            if (instance.getConfig().getBoolean("command-help")) {
                 this.sendHelp(sender, label);
             } else {
                 // 打开全球市场
@@ -54,7 +56,7 @@ public class MainCommand implements CommandExecutor {
                     break;
                 case "reload":
                     if (sender.hasPermission("servermarket.admin")) {
-                        INSTANCE.loadConfig();
+                        instance.loadConfig();
                         sender.sendMessage(I18n.getString("reload", true));
                     }
                     break;
@@ -73,7 +75,7 @@ public class MainCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return;
         }
-        INSTANCE.getApi().openMarket((Player) sender, key, 1, null);
+        ServerMarket.getApi().openMarket((Player) sender, key, 1, null);
     }
 
     /**
@@ -91,7 +93,7 @@ public class MainCommand implements CommandExecutor {
             sender.sendMessage(I18n.getString("wrong-key", true));
             return;
         }
-        INSTANCE.getApi().openMarket((Player) sender, args[1], 1, args[2]);
+        ServerMarket.getApi().openMarket((Player) sender, args[1], 1, new FilterBuilder().addKeyFilter(new KeyFilterImpl(args[2])));
     }
 
     /**
@@ -106,10 +108,10 @@ public class MainCommand implements CommandExecutor {
                     // 开始设置变量
                     String permission = entry.getValue().getPermission();
                     if (permission != null && !"".equals(permission) && !sender.hasPermission(permission)) {
-                        last = last.replace(value, INSTANCE.getConfig().getString("status-text.no-permission"));
+                        last = last.replace(value, instance.getConfig().getString("status-text.no-permission"));
                         continue;
                     }
-                    last = last.replace(value, INSTANCE.getConfig().getString("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
+                    last = last.replace(value, instance.getConfig().getString("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
                 }
             }
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', last));
