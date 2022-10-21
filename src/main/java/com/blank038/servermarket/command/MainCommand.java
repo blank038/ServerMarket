@@ -51,7 +51,7 @@ public class MainCommand implements CommandExecutor {
                     break;
                 case "box":
                     if (sender instanceof Player) {
-                        new StoreContainer((Player) sender, 1, null).open(1);
+                        new StoreContainer((Player) sender, 1, null, null).open(1);
                     }
                     break;
                 case "reload":

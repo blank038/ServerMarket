@@ -9,6 +9,7 @@ import com.blank038.servermarket.gui.MarketGui;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -16,11 +17,7 @@ import java.util.UUID;
  * @date 2021/03/05
  */
 public class ServerMarketAPI {
-    private final ServerMarket INSTANCE;
-
-    public ServerMarketAPI(ServerMarket serverMarket) {
-        this.INSTANCE = serverMarket;
-    }
+    private final ServerMarket instance = ServerMarket.getInstance();
 
     public void addItem(UUID uuid, SaleItem saleItem) {
         PlayerData data = PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
@@ -29,9 +26,18 @@ public class ServerMarketAPI {
     }
 
     public void addItem(UUID uuid, ItemStack itemStack) {
-        PlayerData data =  PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
+        PlayerData data = PlayerData.PLAYER_DATA.getOrDefault(uuid, new PlayerData(uuid));
         data.addItem(itemStack);
         data.save();
+    }
+
+    public MarketData fuzzySearchMarketData(String key) {
+        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+            if (entry.getKey().equals(key) || entry.getValue().getDisplayName().contains(key)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
     /**
@@ -42,12 +48,12 @@ public class ServerMarketAPI {
      */
     public void openMarket(Player player, String key, int page, FilterBuilder filter) {
         MarketData marketData = MarketData.MARKET_DATA.containsKey(key) ? MarketData.MARKET_DATA.get(key)
-                : MarketData.MARKET_DATA.get(INSTANCE.getConfig().getString("default-market"));
+                : MarketData.MARKET_DATA.get(instance.getConfig().getString("default-market"));
         if (marketData == null) {
             return;
         }
         if (player.hasPermission(marketData.getPermission())) {
-            new MarketGui(key, page, filter).openGui(player);
+            new MarketGui(marketData.getMarketKey(), page, filter).openGui(player);
         }
     }
 

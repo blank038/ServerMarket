@@ -46,7 +46,7 @@ public class ServerMarket extends AyPlugin {
     @Override
     public void onEnable() {
         serverMarket = this;
-        serverMarketAPI = new ServerMarketAPI(this);
+        serverMarketAPI = new ServerMarketAPI();
         // 开始载入
         this.log(" ");
         this.log("   &3ServerMarket &bv" + this.getDescription().getVersion());

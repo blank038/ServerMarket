@@ -120,10 +120,10 @@ public class MarketGui {
                         action = ServerMarket.getNMSControl().getValue(itemStack, "MarketAction");
                 // 强转玩家
                 Player clicker = (Player) e.getWhoClicked();
-                if (key != null) {
+                if (key != null && !key.isEmpty()) {
                     // 购买商品
                     marketData.buySaleItem(clicker, key, e.isShiftClick(), lastPage, filter);
-                } else if (action != null) {
+                } else if (action != null && !action.isEmpty()) {
                     // 判断交互方式
                     switch (action) {
                         case "up":
@@ -143,7 +143,7 @@ public class MarketGui {
                             }
                             break;
                         case "store":
-                            new StoreContainer(clicker, lastPage, this.sourceMarketKey).open(1);
+                            new StoreContainer(clicker, lastPage, this.sourceMarketKey, this.filter).open(1);
                             break;
                         default:
                             if (action.contains(":")) {

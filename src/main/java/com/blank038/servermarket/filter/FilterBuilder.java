@@ -25,7 +25,7 @@ public class FilterBuilder {
     }
 
     public boolean check(SaleItem saleItem) {
-        if (this.typeFilter.check(saleItem)) {
+        if (this.typeFilter != null && this.typeFilter.check(saleItem)) {
             return true;
         }
         return this.saleFilters.stream().anyMatch((saleFilter) -> saleFilter.check(saleItem));

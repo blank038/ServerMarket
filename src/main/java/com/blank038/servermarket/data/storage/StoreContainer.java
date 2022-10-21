@@ -3,6 +3,7 @@ package com.blank038.servermarket.data.storage;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.cache.PlayerData;
+import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.ChatColor;
@@ -23,14 +24,16 @@ import java.util.List;
  * @author Blank038
  */
 public class StoreContainer {
-    private final Player PLAYER_TAR;
-    private final int MARKET_PAGE;
-    private final String OLD_MARKET;
+    private final Player target;
+    private final int marketPage;
+    private final String oldMarket;
+    private final FilterBuilder filterBuilder;
 
-    public StoreContainer(Player player, int marketPage, String oldMarket) {
-        this.PLAYER_TAR = player;
-        this.MARKET_PAGE = marketPage;
-        this.OLD_MARKET = oldMarket;
+    public StoreContainer(Player player, int marketPage, String oldMarket, FilterBuilder filterBuilder) {
+        this.target = player;
+        this.marketPage = marketPage;
+        this.oldMarket = oldMarket;
+        this.filterBuilder = filterBuilder;
     }
 
     public void open(int currentPage) {
@@ -70,7 +73,7 @@ public class StoreContainer {
             }
         }
         // 开始获取玩家仓库
-        PlayerData playerData = ServerMarket.getApi().getPlayerData(PLAYER_TAR.getUniqueId());
+        PlayerData playerData = ServerMarket.getApi().getPlayerData(target.getUniqueId());
         Integer[] slots = CommonUtil.formatSlots(data.getString("store-item-slots"));
         HashMap<String, ItemStack> storeItems = playerData.getItems();
         String[] keys = storeItems.keySet().toArray(new String[0]);
@@ -94,13 +97,13 @@ public class StoreContainer {
                 String storeId = ServerMarket.getNMSControl().getValue(itemStack, "StoreID"),
                         action = ServerMarket.getNMSControl().getValue(itemStack, "action");
                 if ("market".equalsIgnoreCase(action)) {
-                    ServerMarket.getApi().openMarket(clicker, this.OLD_MARKET, this.MARKET_PAGE, null);
-                } else if (storeId != null) {
+                    ServerMarket.getApi().openMarket(clicker, this.oldMarket, this.marketPage, this.filterBuilder);
+                } else if (storeId != null && !storeId.isEmpty()) {
                     this.getItem(clicker, storeId);
                 }
             }
         });
-        guiModel.openInventory(PLAYER_TAR);
+        guiModel.openInventory(target);
     }
 
     public void getItem(Player player, String uuid) {
@@ -118,7 +121,7 @@ public class StoreContainer {
             player.sendMessage(I18n.getString("get-store-item", true).replace("%item%", displayMmae)
                     .replace("%amount%", String.valueOf(itemStack.getAmount())));
             // 刷新玩家界面
-            ServerMarket.getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE, null);
+            ServerMarket.getApi().openMarket(player, this.oldMarket, this.marketPage, null);
         } else {
             player.sendMessage(I18n.getString("error-store", true));
         }
