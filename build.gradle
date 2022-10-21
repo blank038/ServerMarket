@@ -3,8 +3,15 @@ plugins {
 }
 
 group 'com.blank038.servermarket'
-version '1.1.7-SNAPSHOT'
+version '1.2.0-SNAPSHOT'
 archivesBaseName = "ServerMarket"
+
+repositories {
+    maven {
+        url = "https://repo.mc9y.com/snapshots"
+        name = "AyStudio's Repositories"
+    }
+}
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -15,7 +22,8 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', includes: ['*.jar'])
+    implementation(fileTree(dir: 'libs', includes: ['*.jar']))
+    implementation("com.aystudio.core:AyCore:1.0.3-BETA")
 }
 
 processResources {

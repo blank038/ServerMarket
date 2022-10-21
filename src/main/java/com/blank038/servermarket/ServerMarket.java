@@ -1,5 +1,6 @@
 package com.blank038.servermarket;
 
+import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.servermarket.api.ServerMarketAPI;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.command.MainCommand;
@@ -9,8 +10,8 @@ import com.blank038.servermarket.data.cache.PlayerData;
 import com.blank038.servermarket.data.storage.ResultData;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.listener.PlayerListener;
-import com.blank038.servermarket.nms.NBTBase;
-import com.blank038.servermarket.nms.sub.v1_12_R1;
+import com.blank038.servermarket.nms.BaseNMSControl;
+import com.blank038.servermarket.nms.impl.DefaultNMSControlImpl;
 import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -18,7 +19,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,61 +31,29 @@ import java.util.*;
  * @author Blank038
  */
 @SuppressWarnings(value = {"unused"})
-public class ServerMarket extends JavaPlugin {
+public class ServerMarket extends AyPlugin {
     private static ServerMarket serverMarket;
-    /**
-     * 语言配置类
-     */
-    private I18n lang;
-    /**
-     * NMS 接口
-     */
-    private NBTBase nbtBase;
     /**
      * API 接口
      */
-    private ServerMarketAPI serverMarketAPI;
+    private static ServerMarketAPI serverMarketAPI;
+    /**
+     * NMS 接口
+     */
+    private static BaseNMSControl baseNMSControl;
 
-    public static ServerMarket getInstance() {
-        return serverMarket;
-    }
-
-    public BaseBridge getEconomyBridge(PayType payType) {
-        return BaseBridge.PAY_TYPES.getOrDefault(payType, null);
-    }
-
-    public NBTBase getNBTBase() {
-        return nbtBase;
-    }
-
-    public ServerMarketAPI getApi() {
-        return serverMarketAPI;
-    }
 
     @Override
     public void onEnable() {
+        serverMarket = this;
+        serverMarketAPI = new ServerMarketAPI(this);
+        // 开始载入
         this.log(" ");
         this.log("   &3ServerMarket &bv" + this.getDescription().getVersion());
         this.log(" ");
         // 检测 NMS 版本
-        String version = ((Object) Bukkit.getServer()).getClass().getPackage().getName().split("\\.")[3];
-        switch (version) {
-            case "v1_12_R1":
-                nbtBase = new v1_12_R1();
-                break;
-            case "???":
-                break;
-            default:
-                this.log("&6 * &c服务器版本不支持, 关闭插件");
-                this.setEnabled(false);
-                break;
-        }
-        if (!isEnabled()) {
-            return;
-        }
-        this.log("&6 * &f检测到核心: &a" + version);
-        serverMarket = this;
-        serverMarketAPI = new ServerMarketAPI(this);
+        baseNMSControl = new DefaultNMSControlImpl();
+        this.log("&6 * &f检测到核心: &a" + baseNMSControl.getVersion());
         // 初始化货币桥
         BaseBridge.initBridge();
         this.loadConfig();
@@ -115,15 +83,10 @@ public class ServerMarket extends JavaPlugin {
      * 检测配置文件是否存在, 并且重载配置文件
      */
     public void loadConfig() {
-        getDataFolder().mkdir();
-        saveDefaultConfig();
-        reloadConfig();
+        this.saveDefaultConfig();
+        this.reloadConfig();
         // 设定语言配置
-        if (lang == null) {
-            lang = new I18n();
-        } else {
-            lang.reload();
-        }
+        new I18n();
         // 判断玩家存档目录是否存在
         File dataFolder = new File(getDataFolder(), "data");
         dataFolder.mkdirs();
@@ -153,6 +116,10 @@ public class ServerMarket extends JavaPlugin {
         for (String key : resultData.getKeys(false)) {
             ResultData.RESULT_DATA.put(key, new ResultData(resultData.getConfigurationSection(key)));
         }
+    }
+
+    public BaseBridge getEconomyBridge(PayType payType) {
+        return BaseBridge.PAY_TYPES.getOrDefault(payType, null);
     }
 
 
@@ -212,5 +179,17 @@ public class ServerMarket extends JavaPlugin {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static ServerMarketAPI getApi() {
+        return serverMarketAPI;
+    }
+
+    public static ServerMarket getInstance() {
+        return serverMarket;
+    }
+
+    public static BaseNMSControl getNMSControl() {
+        return baseNMSControl;
     }
 }

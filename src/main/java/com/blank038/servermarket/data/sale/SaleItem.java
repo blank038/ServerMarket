@@ -1,9 +1,13 @@
 package com.blank038.servermarket.data.sale;
 
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.enums.PayType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 全球市场内商品的构建类
@@ -31,6 +35,7 @@ public class SaleItem {
      * 发布时间
      */
     private final long postTime;
+    private final List<String> saleTypes = new ArrayList<>();
 
     public SaleItem(ConfigurationSection section) {
         this.saleUUID = section.getString("sale-uuid");
@@ -41,6 +46,7 @@ public class SaleItem {
         this.ecoType = section.getString("eco-type", null);
         this.price = section.getInt("price");
         this.postTime = section.getLong("post-time");
+        this.init();
     }
 
     public SaleItem(String saleUUID, String ownerUUID, String ownerName, ItemStack itemStack,
@@ -53,6 +59,11 @@ public class SaleItem {
         this.price = price;
         this.postTime = postTime;
         this.ecoType = ecoType;
+        this.init();
+    }
+
+    private void init() {
+        DataContainer.setSaleTypes(this);
     }
 
     public String getSaleUUID() {
@@ -85,6 +96,15 @@ public class SaleItem {
 
     public String getEcoType() {
         return ecoType;
+    }
+
+    public List<String> getSaleTypes() {
+        return this.saleTypes;
+    }
+
+    public void setSaleTypes(List<String> types) {
+        this.saleTypes.clear();
+        this.saleTypes.addAll(types);
     }
 
     public ConfigurationSection toSection() {

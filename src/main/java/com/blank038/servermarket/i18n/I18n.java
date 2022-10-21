@@ -14,10 +14,11 @@ import java.util.List;
  * @author Blank038
  */
 public class I18n {
+    private static I18n instance;
     private static FileConfiguration data;
 
     public I18n() {
-        reload();
+        this.reload();
     }
 
     public void reload() {

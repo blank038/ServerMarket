@@ -3,7 +3,7 @@ main: com.blank038.servermarket.ServerMarket
 authors:
   - Blank038
 depend:
-  - PokemonAPI
+  - AyCore
 softdepend:
   - Vault
   - PlayerPoints

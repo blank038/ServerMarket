@@ -1,10 +1,10 @@
 package com.blank038.servermarket.data.storage;
 
+import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.cache.PlayerData;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.util.CommonUtil;
-import com.mc9y.blank038api.util.inventory.GuiModel;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -61,7 +61,7 @@ public class StoreContainer {
                 itemStack.setItemMeta(itemMeta);
                 // 开始判断是否有交互操作
                 if (section.contains("action")) {
-                    itemStack = ServerMarket.getInstance().getNBTBase().addTag(itemStack, "action", section.getString("action"));
+                    itemStack = ServerMarket.getNMSControl().addNbt(itemStack, "action", section.getString("action"));
                 }
                 // 开始判断槽位方向
                 for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
@@ -70,7 +70,7 @@ public class StoreContainer {
             }
         }
         // 开始获取玩家仓库
-        PlayerData playerData = ServerMarket.getInstance().getApi().getPlayerData(PLAYER_TAR.getUniqueId());
+        PlayerData playerData = ServerMarket.getApi().getPlayerData(PLAYER_TAR.getUniqueId());
         Integer[] slots = CommonUtil.formatSlots(data.getString("store-item-slots"));
         HashMap<String, ItemStack> storeItems = playerData.getItems();
         String[] keys = storeItems.keySet().toArray(new String[0]);
@@ -80,7 +80,7 @@ public class StoreContainer {
             if (index >= slots.length || i >= keys.length) {
                 break;
             }
-            items.put(slots[index], ServerMarket.getInstance().getNBTBase().addTag(storeItems.get(keys[i]), "StoreID", keys[i]));
+            items.put(slots[index], ServerMarket.getNMSControl().addNbt(storeItems.get(keys[i]), "StoreID", keys[i]));
         }
         // 界面物品设置结束
         guiModel.setItem(items);
@@ -91,10 +91,10 @@ public class StoreContainer {
                 Player clicker = (Player) e.getWhoClicked();
                 // 获取点击的物品和物品的Tag
                 ItemStack itemStack = e.getCurrentItem();
-                String storeId = ServerMarket.getInstance().getNBTBase().get(itemStack, "StoreID"),
-                        action = ServerMarket.getInstance().getNBTBase().get(itemStack, "action");
+                String storeId = ServerMarket.getNMSControl().getValue(itemStack, "StoreID"),
+                        action = ServerMarket.getNMSControl().getValue(itemStack, "action");
                 if ("market".equalsIgnoreCase(action)) {
-                    ServerMarket.getInstance().getApi().openMarket(clicker, this.OLD_MARKET, this.MARKET_PAGE, null);
+                    ServerMarket.getApi().openMarket(clicker, this.OLD_MARKET, this.MARKET_PAGE, null);
                 } else if (storeId != null) {
                     this.getItem(clicker, storeId);
                 }
@@ -104,7 +104,7 @@ public class StoreContainer {
     }
 
     public void getItem(Player player, String uuid) {
-        PlayerData data = ServerMarket.getInstance().getApi().getPlayerData(player.getUniqueId());
+        PlayerData data = ServerMarket.getApi().getPlayerData(player.getUniqueId());
         if (data.contains(uuid)) {
             if (player.getInventory().firstEmpty() == -1) {
                 player.sendMessage(I18n.getString("inventory-full", true));
@@ -118,7 +118,7 @@ public class StoreContainer {
             player.sendMessage(I18n.getString("get-store-item", true).replace("%item%", displayMmae)
                     .replace("%amount%", String.valueOf(itemStack.getAmount())));
             // 刷新玩家界面
-            ServerMarket.getInstance().getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE, null);
+            ServerMarket.getApi().openMarket(player, this.OLD_MARKET, this.MARKET_PAGE, null);
         } else {
             player.sendMessage(I18n.getString("error-store", true));
         }
