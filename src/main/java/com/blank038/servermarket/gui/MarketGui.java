@@ -2,11 +2,13 @@ package com.blank038.servermarket.gui;
 
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.data.sale.SaleItem;
 import com.blank038.servermarket.data.storage.MarketData;
 import com.blank038.servermarket.data.storage.StoreContainer;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.filter.FilterBuilder;
+import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.util.CommonUtil;
 import com.google.common.collect.Lists;
@@ -31,13 +33,22 @@ import java.util.List;
  */
 public class MarketGui {
     private final String sourceMarketKey;
-    private final FilterBuilder filter;
+    private FilterBuilder filter;
     private int currentPage;
+    private String currentType = "all";
 
     public MarketGui(String sourceMarketKey, int currentPage, FilterBuilder filter) {
         this.sourceMarketKey = sourceMarketKey;
         this.currentPage = currentPage;
         this.filter = filter;
+        if (this.filter == null) {
+            this.filter = new FilterBuilder();
+        }
+        if (this.filter.getTypeFilter() == null) {
+            this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
+        } else {
+            this.currentType = this.filter.getTypeFilter().getTypes().get(0);
+        }
     }
 
     /**
@@ -72,7 +83,7 @@ public class MarketGui {
                 // 开始遍历设置Lore
                 List<String> list = new ArrayList<>();
                 for (String lore : section.getStringList("lore")) {
-                    list.add(ChatColor.translateAlternateColorCodes('&', lore));
+                    list.add(ChatColor.translateAlternateColorCodes('&', lore).replace("%saleType%", this.getCurrentTypeDisplayName()));
                 }
                 itemMeta.setLore(list);
                 itemStack.setItemMeta(itemMeta);
@@ -122,7 +133,7 @@ public class MarketGui {
                 Player clicker = (Player) e.getWhoClicked();
                 if (key != null && !key.isEmpty()) {
                     // 购买商品
-                    marketData.buySaleItem(clicker, key, e.isShiftClick(), lastPage, filter);
+                    MarketData.MARKET_DATA.get(this.sourceMarketKey).buySaleItem(clicker, key, e.isShiftClick(), lastPage, filter);
                 } else if (action != null && !action.isEmpty()) {
                     // 判断交互方式
                     switch (action) {
@@ -141,6 +152,21 @@ public class MarketGui {
                                 this.currentPage += 1;
                                 this.openGui(player);
                             }
+                            break;
+                        case "type":
+                            List<String> types = marketData.getSaleTypes();
+                            if (types.size() <= 1) {
+                                return;
+                            }
+                            int index = types.indexOf(currentType);
+                            if (index == -1 || index == types.size() - 1) {
+                                this.currentType = types.get(0);
+                            } else {
+                                this.currentType = types.get(index + 1);
+                            }
+                            this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
+                            this.openGui(clicker);
+                            clicker.sendMessage(I18n.getString("changeSaleType", true).replace("%type%", this.getCurrentTypeDisplayName()));
                             break;
                         case "store":
                             new StoreContainer(clicker, lastPage, this.sourceMarketKey, this.filter).open(1);
@@ -164,6 +190,10 @@ public class MarketGui {
         });
         // 打开界面
         guiModel.openInventory(player);
+    }
+
+    private String getCurrentTypeDisplayName() {
+        return DataContainer.SALE_TYPE_DISPLAY_NAME.getOrDefault(this.currentType, this.currentType);
     }
 
     /**

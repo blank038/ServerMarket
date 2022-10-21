@@ -78,15 +78,15 @@ public class MarketData {
         }
         if (!BaseBridge.PAY_TYPES.containsKey(this.paytype)) {
             this.marketStatus = MarketStatus.ERROR;
-            ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.displayName + " &f异常, 货币不存在");
+            ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f异常, 货币不存在");
         } else {
             this.marketStatus = MarketStatus.LOADED;
             try {
                 this.loadSaleData();
-                ServerMarket.getInstance().log("&6 * &f市场 &e" + this.displayName + " &f加载成功");
+                ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f市场 &e" + this.displayName + " &f加载成功");
             } catch (Exception ignored) {
                 this.marketStatus = MarketStatus.ERROR;
-                ServerMarket.getInstance().log("&6 * &f读取市场 &e" + this.displayName + " &f物品异常");
+                ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f物品异常");
             }
         }
         MarketData.MARKET_DATA.put(this.getMarketKey(), this);

@@ -4,6 +4,7 @@ import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.sale.SaleItem;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -17,6 +18,7 @@ import java.util.Map;
  */
 public class DataContainer {
     public static final Map<String, List<String>> SALE_TYPES = new HashMap<>();
+    public static final Map<String, String> SALE_TYPE_DISPLAY_NAME = new HashMap<>();
 
     public static void loadData() {
         ServerMarket.getInstance().saveResource("types.yml", "types.yml", false, (file) -> {
@@ -25,6 +27,11 @@ public class DataContainer {
             if (data.contains("types")) {
                 for (String key : data.getConfigurationSection("types").getKeys(false)) {
                     DataContainer.SALE_TYPES.put(key, data.getStringList("types." + key));
+                }
+            }
+            if (data.contains("default")) {
+                for (String key : data.getConfigurationSection("default").getKeys(false)) {
+                    DataContainer.SALE_TYPE_DISPLAY_NAME.put(key, ChatColor.translateAlternateColorCodes('&', data.getString("default." + key)));
                 }
             }
         });

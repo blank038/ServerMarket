@@ -1,5 +1,7 @@
 package com.blank038.servermarket.util;
 
+import com.blank038.servermarket.ServerMarket;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -20,5 +22,14 @@ public class ItemUtil {
                     || (itemStack.getItemMeta().hasLore() && itemStack.getItemMeta().getLore().stream().anyMatch((s) -> s.toLowerCase().contains(latestFilter)));
         }
         return false;
+    }
+
+    public static Material valueOf(String type) {
+        try {
+            return Material.valueOf(type.toUpperCase());
+        } catch (Exception ignored) {
+            ServerMarket.getInstance().getConsoleLogger().log("Loaded material error: " + type);
+            return Material.STONE;
+        }
     }
 }

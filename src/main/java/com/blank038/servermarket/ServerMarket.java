@@ -4,6 +4,7 @@ import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.servermarket.api.ServerMarketAPI;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.command.MainCommand;
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.storage.MarketData;
 import com.blank038.servermarket.data.cache.PlayerData;
@@ -14,7 +15,6 @@ import com.blank038.servermarket.nms.BaseNMSControl;
 import com.blank038.servermarket.nms.impl.DefaultNMSControlImpl;
 import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -48,15 +48,10 @@ public class ServerMarket extends AyPlugin {
         serverMarket = this;
         serverMarketAPI = new ServerMarketAPI();
         // 开始载入
-        this.log(" ");
-        this.log("   &3ServerMarket &bv" + this.getDescription().getVersion());
-        this.log(" ");
+        this.getConsoleLogger().setPrefix("&f[&eServerMarket&f] &8");
         // 检测 NMS 版本
         baseNMSControl = new DefaultNMSControlImpl();
-        this.log("&6 * &f检测到核心: &a" + baseNMSControl.getVersion());
-        // 初始化货币桥
-        BaseBridge.initBridge();
-        this.loadConfig();
+        this.loadConfig(true);
         // 注册命令、事件及线程
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
         // 注册事件监听类
@@ -69,7 +64,6 @@ public class ServerMarket extends AyPlugin {
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData.PLAYER_DATA.put(player.getUniqueId(), new PlayerData(player.getUniqueId()));
         }
-        this.log(" ");
     }
 
     @Override
@@ -82,9 +76,18 @@ public class ServerMarket extends AyPlugin {
     /**
      * 检测配置文件是否存在, 并且重载配置文件
      */
-    public void loadConfig() {
+    public void loadConfig(boolean start) {
+        this.getConsoleLogger().log(false, " ");
+        this.getConsoleLogger().log(false, "   &3ServerMarket &bv" + this.getDescription().getVersion());
+        this.getConsoleLogger().log(false, " ");
+        this.getConsoleLogger().log(false, "&6 * &f检测到核心: &a" + baseNMSControl.getVersion());
         this.saveDefaultConfig();
         this.reloadConfig();
+        // 挂钩货币
+        if (start) {
+            // 初始化货币桥
+            BaseBridge.initBridge();
+        }
         // 设定语言配置
         new I18n();
         // 判断玩家存档目录是否存在
@@ -97,8 +100,11 @@ public class ServerMarket extends AyPlugin {
                 saveResource(fileName, true);
             }
         }
+        // 载入数据容器
+        DataContainer.loadData();
         // 重新加载数据中的物品
-        reloadSaleItem();
+        this.reloadSaleItem();
+        this.getConsoleLogger().log(false, "&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
         // 开始读取离线玩家获得金币
         if (!ResultData.RESULT_DATA.isEmpty()) {
             this.saveResults();
@@ -116,6 +122,7 @@ public class ServerMarket extends AyPlugin {
         for (String key : resultData.getKeys(false)) {
             ResultData.RESULT_DATA.put(key, new ResultData(resultData.getConfigurationSection(key)));
         }
+        this.getConsoleLogger().log(false, " ");
     }
 
     public BaseBridge getEconomyBridge(PayType payType) {
@@ -147,10 +154,6 @@ public class ServerMarket extends AyPlugin {
         ResultData.RESULT_DATA.put(UUID.randomUUID().toString(), resultData);
     }
 
-    public void log(String message) {
-        Bukkit.getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', message));
-    }
-
     private void reloadSaleItem() {
         if (!MarketData.MARKET_DATA.isEmpty()) {
             this.saveSaleList();
@@ -165,7 +168,6 @@ public class ServerMarket extends AyPlugin {
         MarketData.MARKET_DATA.clear();
         // 读取市场
         Arrays.stream(Objects.requireNonNull(file.listFiles())).iterator().forEachRemaining(MarketData::new);
-        this.log("&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
     }
 
     private void saveResults() {

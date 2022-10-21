@@ -52,7 +52,6 @@ black-list:
 # 分类
 types:
   - "all"
-  - "其他"
   - "道具"
 ######################
 #
@@ -92,6 +91,16 @@ items:
     slot: 53
     action: down
     lore: [ ]
+  changeType:
+    type: STRING
+    amount: 1
+    data: 0
+    name: "&b切换分类"
+    slot: 46
+    action: "type"
+    lore:
+      - "&f"
+      - "&f当前: &7%saleType%"
   store:
     type: chest
     amount: 1

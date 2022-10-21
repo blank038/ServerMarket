@@ -3,9 +3,11 @@ package com.blank038.servermarket.command;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
+import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.storage.MarketData;
 import com.blank038.servermarket.data.storage.StoreContainer;
+import com.google.common.collect.Lists;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -56,7 +58,7 @@ public class MainCommand implements CommandExecutor {
                     break;
                 case "reload":
                     if (sender.hasPermission("servermarket.admin")) {
-                        instance.loadConfig();
+                        this.instance.loadConfig(false);
                         sender.sendMessage(I18n.getString("reload", true));
                     }
                     break;
@@ -93,7 +95,9 @@ public class MainCommand implements CommandExecutor {
             sender.sendMessage(I18n.getString("wrong-key", true));
             return;
         }
-        ServerMarket.getApi().openMarket((Player) sender, args[1], 1, new FilterBuilder().addKeyFilter(new KeyFilterImpl(args[2])));
+        ServerMarket.getApi().openMarket((Player) sender, args[1], 1, new FilterBuilder()
+                .addKeyFilter(new KeyFilterImpl(args[2]))
+                .setTypeFilter(new TypeFilterImpl(Lists.newArrayList("none"))));
     }
 
     /**

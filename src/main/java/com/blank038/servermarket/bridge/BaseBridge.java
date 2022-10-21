@@ -15,7 +15,7 @@ public abstract class BaseBridge {
 
     public BaseBridge(PayType payType) {
         PAY_TYPES.put(payType, this);
-        ServerMarket.getInstance().log("&6 * &f挂钩货币: &e" + payType.getPlugin());
+        ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f挂钩货币: &e" + payType.getPlugin());
     }
 
     /**

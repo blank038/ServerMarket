@@ -24,6 +24,10 @@ public class FilterBuilder {
         return this;
     }
 
+    public TypeFilterImpl getTypeFilter() {
+        return this.typeFilter;
+    }
+
     public boolean check(SaleItem saleItem) {
         if (this.typeFilter != null && this.typeFilter.check(saleItem)) {
             return true;

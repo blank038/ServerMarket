@@ -40,6 +40,7 @@ market-error: "市场异常, 无法查看."
 no-permission: "你没有权限这么做."
 lack-money: "你没有足够的%economy%来购买这个商品."
 shout-tax: "你没有足够的%economy%来上缴税费."
+changeSaleType: "已切换分类, 当前分类: &b%type%"
 show:
   - "&6市场用法"
   - " "
