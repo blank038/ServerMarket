@@ -23,10 +23,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Blank038
@@ -98,7 +96,9 @@ public class MarketGui {
         }
         // 开始获取全球市场物品
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
-        String[] keys = marketData.getSales().keySet().toArray(new String[0]);
+        String[] keys = marketData.getSales().entrySet().stream()
+                .filter((entry) -> (filter == null || filter.check(entry.getValue())))
+                .map(Map.Entry::getKey).toArray(String[]::new);
         // 计算下标
         int size = marketData.getSales().size();
         int maxPage = size / slots.length;
