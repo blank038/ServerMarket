@@ -17,6 +17,10 @@ economy-name: "金币"
 price:
   min: 1
   max: 2000000
+# 特定物品价格设定(判断: 物品类型、物品昵称、物品描述)
+extra-price:
+  DIAMOND: 1000-10000
+  "道具": 20000-30000
 # 上架物品是否公告
 sale-broadcast: true
 # 是否开启商品额外信息

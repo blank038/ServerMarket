@@ -4,6 +4,7 @@ import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.filter.FilterBuilder;
+import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.gui.MarketGui;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.sale.SaleItem;
@@ -35,7 +36,8 @@ public class MarketData {
     /**
      * 商品列表
      */
-    private final HashMap<String, SaleItem> saleMap = new HashMap<>();
+    private final Map<String, SaleItem> saleMap = new HashMap<>();
+    private final Map<String, String> extraMap = new HashMap<>();
     private final String sourceId, marketKey, permission, shortCommand, ecoType, displayName, economyName;
     private final List<String> loreBlackList, typeBlackList, saleTypes;
     private final int min, max, effectiveTime;
@@ -56,6 +58,11 @@ public class MarketData {
         this.economyName = ChatColor.translateAlternateColorCodes('&', data.getString("economy-name"));
         this.min = data.getInt("price.min");
         this.max = data.getInt("price.max");
+        if (data.contains("extra-price")) {
+            for (String key : data.getConfigurationSection("extra-price").getKeys(false)) {
+                this.extraMap.put(key, data.getString("extra-price." + key));
+            }
+        }
         this.effectiveTime = data.getInt("effective_time");
         this.typeBlackList = data.getStringList("black-list.type");
         this.loreBlackList = data.getStringList("black-list.lore");
@@ -99,7 +106,7 @@ public class MarketData {
         return this.sourceFile;
     }
 
-    public HashMap<String, SaleItem> getSales() {
+    public Map<String, SaleItem> getSales() {
         return saleMap;
     }
 
@@ -305,7 +312,7 @@ public class MarketData {
      *
      * @param player  命令执行者
      * @param message 命令
-     * @return 执行结果
+     * @return 执行结果, 为 true 时取消事件
      */
     public boolean performSellCommand(Player player, String message) {
         String[] split = message.split(" ");
@@ -330,16 +337,16 @@ public class MarketData {
             player.sendMessage(I18n.getString("hand-air", true));
             return true;
         }
-        boolean has = false;
+        boolean denied = false;
         if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore()) {
             for (String l : itemStack.getItemMeta().getLore()) {
                 if (loreBlackList.contains(l.replace("§", "&"))) {
-                    has = true;
+                    denied = true;
                     break;
                 }
             }
         }
-        if (typeBlackList.contains(itemStack.getType().name()) || has) {
+        if (typeBlackList.contains(itemStack.getType().name()) || denied) {
             player.sendMessage(I18n.getString("deny-item", true));
             return true;
         }
@@ -356,6 +363,19 @@ public class MarketData {
         }
         if (price > this.max) {
             player.sendMessage(I18n.getString("max-price", true).replace("%max%", String.valueOf(this.max)));
+            return true;
+        }
+        String extraPrice = this.extraMap.entrySet().stream()
+                .filter((s) -> new FilterBuilder().addKeyFilter(new KeyFilterImpl(s.getKey())).check(itemStack))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElse(null);
+        if (extraPrice != null && price < Integer.parseInt(extraPrice.split("-")[0])) {
+            player.sendMessage(I18n.getString("min-price", true).replace("%min%", extraPrice.split("-")[0]));
+            return true;
+        }
+        if (extraPrice != null && price > Integer.parseInt(extraPrice.split("-")[1])) {
+            player.sendMessage(I18n.getString("max-price", true).replace("%max%", extraPrice.split("-")[1]));
             return true;
         }
         double tax = this.getTax(this.getShoutTaxSection(), player);

@@ -3,6 +3,7 @@ package com.blank038.servermarket.filter;
 import com.blank038.servermarket.data.sale.SaleItem;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,5 +34,9 @@ public class FilterBuilder {
             return true;
         }
         return this.saleFilters.stream().anyMatch((saleFilter) -> saleFilter.check(saleItem));
+    }
+
+    public boolean check(ItemStack itemStack) {
+        return this.saleFilters.stream().anyMatch((saleFilter) -> saleFilter.check(itemStack));
     }
 }

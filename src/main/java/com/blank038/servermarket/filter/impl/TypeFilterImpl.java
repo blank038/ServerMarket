@@ -2,6 +2,7 @@ package com.blank038.servermarket.filter.impl;
 
 import com.blank038.servermarket.data.sale.SaleItem;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,5 +30,10 @@ public class TypeFilterImpl implements ISaleFilter {
             return true;
         }
         return this.types.stream().anyMatch((s) -> saleItem.getSaleTypes().contains(s));
+    }
+
+    @Override
+    public boolean check(ItemStack itemStack) {
+        return false;
     }
 }

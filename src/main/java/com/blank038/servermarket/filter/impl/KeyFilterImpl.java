@@ -23,13 +23,20 @@ public class KeyFilterImpl implements ISaleFilter {
 
     @Override
     public boolean check(SaleItem saleItem) {
-        ItemStack itemStack = saleItem.getSafeItem();
-        if (itemStack == null || !itemStack.hasItemMeta()) {
+        return this.check(saleItem.getSafeItem());
+    }
+
+    @Override
+    public boolean check(ItemStack itemStack) {
+        if (itemStack == null) {
             return false;
         }
         return Arrays.stream(keys).anyMatch((s) -> {
             if (itemStack.getType().name().toLowerCase().contains(s.toLowerCase())) {
                 return true;
+            }
+            if (!itemStack.hasItemMeta()) {
+                return false;
             }
             if (itemStack.getItemMeta().hasDisplayName() && itemStack.getItemMeta().getDisplayName().toLowerCase().contains(s.toLowerCase())) {
                 return true;
