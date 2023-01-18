@@ -4,11 +4,12 @@ authors:
   - Blank038
 depend:
   - AyCore
+  - NBTAPI
 softdepend:
   - Vault
   - PlayerPoints
   - NyEconomy
-version: ${version}
+version: @version@
 api-version: 1.13
 commands:
   servermarket:

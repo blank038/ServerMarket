@@ -6,6 +6,7 @@ import com.blank038.servermarket.data.cache.PlayerData;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.util.CommonUtil;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -64,7 +65,9 @@ public class StoreContainer {
                 itemStack.setItemMeta(itemMeta);
                 // 开始判断是否有交互操作
                 if (section.contains("action")) {
-                    itemStack = ServerMarket.getNMSControl().addNbt(itemStack, "action", section.getString("action"));
+                    NBTItem nbtItem = new NBTItem(itemStack);
+                    nbtItem.setString("action", section.getString("action"));
+                    itemStack = nbtItem.getItem();
                 }
                 // 开始判断槽位方向
                 for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
@@ -83,7 +86,9 @@ public class StoreContainer {
             if (index >= slots.length || i >= keys.length) {
                 break;
             }
-            items.put(slots[index], ServerMarket.getNMSControl().addNbt(storeItems.get(keys[i]), "StoreID", keys[i]));
+            NBTItem nbtItem = new NBTItem(storeItems.get(keys[i]));
+            nbtItem.setString("StoreID", keys[i]);
+            items.put(slots[index], nbtItem.getItem());
         }
         // 界面物品设置结束
         guiModel.setItem(items);
@@ -94,8 +99,11 @@ public class StoreContainer {
                 Player clicker = (Player) e.getWhoClicked();
                 // 获取点击的物品和物品的Tag
                 ItemStack itemStack = e.getCurrentItem();
-                String storeId = ServerMarket.getNMSControl().getValue(itemStack, "StoreID"),
-                        action = ServerMarket.getNMSControl().getValue(itemStack, "action");
+                if (itemStack == null) {
+                    return;
+                }
+                NBTItem nbtItem = new NBTItem(itemStack);
+                String storeId = nbtItem.getString("StoreID"), action = nbtItem.getString("action");
                 if ("market".equalsIgnoreCase(action)) {
                     ServerMarket.getApi().openMarket(clicker, this.oldMarket, this.marketPage, this.filterBuilder);
                 } else if (storeId != null && !storeId.isEmpty()) {

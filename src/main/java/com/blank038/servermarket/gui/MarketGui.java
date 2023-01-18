@@ -12,6 +12,7 @@ import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.util.CommonUtil;
 import com.google.common.collect.Lists;
+import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -86,7 +87,9 @@ public class MarketGui {
                 itemStack.setItemMeta(itemMeta);
                 // 开始判断是否有交互操作
                 if (section.contains("action")) {
-                    itemStack = ServerMarket.getNMSControl().addNbt(itemStack, "MarketAction", section.getString("action"));
+                    NBTItem nbtItem = new NBTItem(itemStack);
+                    nbtItem.setString("MarketAction", section.getString("action"));
+                    itemStack = nbtItem.getItem();
                 }
                 for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
                     items.put(i, itemStack);
@@ -126,8 +129,11 @@ public class MarketGui {
             e.setCancelled(true);
             if (e.getClickedInventory() == e.getInventory()) {
                 ItemStack itemStack = e.getCurrentItem();
-                String key = ServerMarket.getNMSControl().getValue(itemStack, "SaleUUID"),
-                        action = ServerMarket.getNMSControl().getValue(itemStack, "MarketAction");
+                if (itemStack == null) {
+                    return;
+                }
+                NBTItem nbtItem = new NBTItem(itemStack);
+                String key = nbtItem.getString("SaleUUID"), action = nbtItem.getString("MarketAction");
                 // 强转玩家
                 Player clicker = (Player) e.getWhoClicked();
                 if (key != null && !key.isEmpty()) {
@@ -217,6 +223,8 @@ public class MarketGui {
             itemMeta.setLore(lore);
             itemStack.setItemMeta(itemMeta);
         }
-        return ServerMarket.getNMSControl().addNbt(itemStack, "SaleUUID", saleItem.getSaleUUID());
+        NBTItem nbtItem = new NBTItem(itemStack);
+        nbtItem.setString("SaleUUID", saleItem.getSaleUUID());
+        return nbtItem.getItem();
     }
 }

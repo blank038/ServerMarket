@@ -11,8 +11,6 @@ import com.blank038.servermarket.data.cache.PlayerData;
 import com.blank038.servermarket.data.storage.ResultData;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.listener.PlayerListener;
-import com.blank038.servermarket.nms.BaseNMSControl;
-import com.blank038.servermarket.nms.impl.DefaultNMSControlImpl;
 import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -37,10 +35,6 @@ public class ServerMarket extends AyPlugin {
      * API 接口
      */
     private static ServerMarketAPI serverMarketAPI;
-    /**
-     * NMS 接口
-     */
-    private static BaseNMSControl baseNMSControl;
 
 
     @Override
@@ -49,8 +43,6 @@ public class ServerMarket extends AyPlugin {
         serverMarketAPI = new ServerMarketAPI();
         // 开始载入
         this.getConsoleLogger().setPrefix("&f[&eServerMarket&f] &8");
-        // 检测 NMS 版本
-        baseNMSControl = new DefaultNMSControlImpl();
         this.loadConfig(true);
         // 注册命令、事件及线程
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
@@ -80,7 +72,6 @@ public class ServerMarket extends AyPlugin {
         this.getConsoleLogger().log(false, " ");
         this.getConsoleLogger().log(false, "   &3ServerMarket &bv" + this.getDescription().getVersion());
         this.getConsoleLogger().log(false, " ");
-        this.getConsoleLogger().log(false, "&6 * &f检测到核心: &a" + baseNMSControl.getVersion());
         this.saveDefaultConfig();
         this.reloadConfig();
         // 挂钩货币
@@ -189,9 +180,5 @@ public class ServerMarket extends AyPlugin {
 
     public static ServerMarket getInstance() {
         return serverMarket;
-    }
-
-    public static BaseNMSControl getNMSControl() {
-        return baseNMSControl;
     }
 }
