@@ -1,9 +1,18 @@
 ## ServerMarket
 
 ### ❗ 注意 | Warns
+
 此仓库并未单独创建开发分支，提交的代码含有未经调试的代码, 请前往 releases 下载使用。
 
+### ⚙ 依赖 | Dependencies
+
+|  插件名   | 依赖关系 |                                        下载地址                                        |
+|:------:|:----:|:----------------------------------------------------------------------------------:|
+| AyCore | 硬依赖  | https://github.com/Blank038/ServerMarket/blob/master/depends/AyCore-1.0.3-BETA.jar |
+| NBTAPI | 硬依赖  |                    https://modrinth.com/plugin/nbtapi/versions                     |
+
 ### ✨ 功能 | Features
+
 * 高度自定义 Gui 界面
 * 自定义商品原信息是否显示
 * 自定义商品所在槽位
