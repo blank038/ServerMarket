@@ -6,7 +6,7 @@ plugins {
 def versionning = "1.2.2"
 version = "$versionning-${getGitCommitId()}".toString()
 group = "com.blank038.servermarket"
-archivesBaseName = "DGamePass"
+archivesBaseName = "ServerMarket"
 
 repositories {
     maven {
