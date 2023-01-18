@@ -21,10 +21,10 @@ public class PlayerData {
 
     private final HashMap<String, ItemStack> items = new HashMap<>();
     private final List<String> info;
-    private final UUID PLAYER_UUID;
+    private final UUID ownerUUID;
 
     public PlayerData(UUID uuid) {
-        this.PLAYER_UUID = uuid;
+        this.ownerUUID = uuid;
         File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", uuid + ".yml");
         if (!file.exists()) {
             try {
@@ -35,6 +35,17 @@ public class PlayerData {
         }
         // 读取文件
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
+        info = data.getStringList("info");
+        // 读取物品
+        if (data.contains("items")) {
+            for (String key : data.getConfigurationSection("items").getKeys(false)) {
+                items.put(key, data.getItemStack("items." + key));
+            }
+        }
+    }
+
+    public PlayerData(UUID uuid, FileConfiguration data) {
+        this.ownerUUID = uuid;
         info = data.getStringList("info");
         // 读取物品
         if (data.contains("items")) {
@@ -109,7 +120,7 @@ public class PlayerData {
      * 保存玩家数据
      */
     public void save() {
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", this.PLAYER_UUID.toString() + ".yml");
+        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", this.ownerUUID.toString() + ".yml");
         FileConfiguration data = new YamlConfiguration();
         data.set("info", info);
         for (Map.Entry<String, ItemStack> entry : items.entrySet()) {
