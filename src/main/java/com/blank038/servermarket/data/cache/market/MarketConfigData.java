@@ -1,15 +1,15 @@
-package com.blank038.servermarket.data.storage;
+package com.blank038.servermarket.data.cache.market;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.bridge.BaseBridge;
+import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.enums.MarketStatus;
+import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.gui.MarketGui;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.sale.SaleItem;
-import com.blank038.servermarket.enums.MarketStatus;
-import com.blank038.servermarket.enums.PayType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,7 +20,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -29,14 +28,13 @@ import java.util.*;
  * @date 2021/03/05
  */
 @SuppressWarnings(value = {"unused"})
-public class MarketData {
-    public static final HashMap<String, MarketData> MARKET_DATA = new HashMap<>();
+public class MarketConfigData {
+    public static final HashMap<String, MarketConfigData> MARKET_DATA = new HashMap<>();
 
     private final File sourceFile;
     /**
      * 商品列表
      */
-    private final Map<String, SaleItem> saleMap = new HashMap<>();
     private final Map<String, String> extraMap = new HashMap<>();
     private final String sourceId, marketKey, permission, shortCommand, ecoType, displayName, economyName;
     private final List<String> loreBlackList, typeBlackList, saleTypes;
@@ -47,7 +45,7 @@ public class MarketData {
     private boolean showSaleInfo, saleBroadcast;
     private String dateFormat;
 
-    public MarketData(File file) {
+    public MarketConfigData(File file) {
         this.sourceFile = file;
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         this.marketKey = file.getName().replace(".yml", "");
@@ -89,14 +87,14 @@ public class MarketData {
         } else {
             this.marketStatus = MarketStatus.LOADED;
             try {
-                this.loadSaleData();
+                ServerMarket.getStorageHandler().load(this.marketKey);
                 ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f市场 &e" + this.displayName + " &f加载成功");
             } catch (Exception ignored) {
                 this.marketStatus = MarketStatus.ERROR;
                 ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f物品异常");
             }
         }
-        MarketData.MARKET_DATA.put(this.getMarketKey(), this);
+        MarketConfigData.MARKET_DATA.put(this.getMarketKey(), this);
         // 唤起加载事件
         MarketLoadEvent event = new MarketLoadEvent(this);
         Bukkit.getPluginManager().callEvent(event);
@@ -104,14 +102,6 @@ public class MarketData {
 
     public File getSourceFile() {
         return this.sourceFile;
-    }
-
-    public Map<String, SaleItem> getSales() {
-        return saleMap;
-    }
-
-    public SaleItem getSaleItem(String key) {
-        return this.saleMap.getOrDefault(key, null);
     }
 
     public List<String> getSaleTypes() {
@@ -258,14 +248,14 @@ public class MarketData {
 
     public void buySaleItem(Player buyer, String uuid, boolean shift, int page, FilterBuilder filter) {
         // 判断商品是否存在
-        if (!saleMap.containsKey(uuid)) {
+        if (!ServerMarket.getStorageHandler().hasSale(this.sourceId, uuid)) {
             buyer.sendMessage(I18n.getString("error-sale", true));
             return;
         }
-        SaleItem saleItem = saleMap.get(uuid);
+        SaleItem saleItem = ServerMarket.getStorageHandler().getSaleItem(this.sourceId, uuid);
         if (saleItem.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
             if (shift) {
-                buyer.getInventory().addItem(saleMap.remove(uuid).getSafeItem().clone());
+                buyer.getInventory().addItem(ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid).getSafeItem().clone());
                 buyer.sendMessage(I18n.getString("unsale", true));
                 new MarketGui(this.marketKey, page, filter).openGui(buyer);
             } else {
@@ -282,11 +272,8 @@ public class MarketData {
                 buyer.sendMessage(I18n.getString("lack-money", true).replace("%economy%", this.economyName));
                 return;
             }
-            // 先移除, 确保不被重复购买
-            saleMap.remove(uuid);
-            // 先给玩家钱扣了！
+            ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid);
             ServerMarket.getInstance().getEconomyBridge(this.paytype).take(buyer, this.ecoType, saleItem.getPrice());
-            // 再把钱给出售者
             Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
             if (seller != null && seller.isOnline()) {
                 double last = this.getLastMoney(this.getTaxSection(), seller, saleItem.getPrice());
@@ -390,10 +377,9 @@ public class MarketData {
         // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);
         // 上架物品
-        String saleUUID = UUID.randomUUID().toString();
-        SaleItem saleItem = new SaleItem(saleUUID, player.getUniqueId().toString(), player.getName(),
+        SaleItem saleItem = new SaleItem(UUID.randomUUID().toString(), player.getUniqueId().toString(), player.getName(),
                 itemStack, PayType.VAULT, this.ecoType, price, System.currentTimeMillis());
-        this.saleMap.put(saleUUID, saleItem);
+        ServerMarket.getStorageHandler().addSale(this.marketKey, saleItem);
         player.sendMessage(I18n.getString("sell", true));
         // 判断是否公告
         if (this.saleBroadcast) {
@@ -403,48 +389,5 @@ public class MarketData {
                     .replace("%market_name%", this.displayName).replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
         }
         return true;
-    }
-
-    public void loadSaleData() {
-        if (!this.saleMap.isEmpty()) {
-            this.saveSaleData();
-        }
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", sourceId + ".yml");
-        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-        for (String key : data.getKeys(false)) {
-            SaleItem saleItem = new SaleItem(data.getConfigurationSection(key));
-            this.saleMap.put(saleItem.getSaleUUID(), saleItem);
-        }
-    }
-
-    public void saveSaleData() {
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", sourceId + ".yml");
-        FileConfiguration data = new YamlConfiguration();
-        for (Map.Entry<String, SaleItem> entry : saleMap.entrySet()) {
-            data.set(entry.getKey(), entry.getValue().toSection());
-        }
-        try {
-            data.save(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void removeTimeOutItem() {
-        MarketData.MARKET_DATA.forEach((key, value) -> {
-            // 开始计算
-            Iterator<Map.Entry<String, SaleItem>> iterator = value.saleMap.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, SaleItem> entry = iterator.next();
-                int second = (int) ((System.currentTimeMillis() - entry.getValue().getPostTime()) / 1000L);
-                if (second >= value.getEffectiveTime()) {
-                    // 移除
-                    iterator.remove();
-                    // 返回玩家仓库
-                    UUID uuid = UUID.fromString(entry.getValue().getOwnerUUID());
-                    ServerMarket.getApi().addItem(uuid, entry.getValue().getSafeItem());
-                }
-            }
-        });
     }
 }

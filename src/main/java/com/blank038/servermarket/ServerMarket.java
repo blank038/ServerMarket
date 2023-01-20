@@ -5,13 +5,13 @@ import com.blank038.servermarket.api.ServerMarketAPI;
 import com.blank038.servermarket.bridge.BaseBridge;
 import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.data.DataContainer;
+import com.blank038.servermarket.data.handler.AbstractStorageHandler;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.storage.MarketData;
-import com.blank038.servermarket.data.cache.PlayerData;
-import com.blank038.servermarket.data.storage.ResultData;
+import com.blank038.servermarket.data.cache.market.MarketConfigData;
+import com.blank038.servermarket.data.cache.player.PlayerData;
+import com.blank038.servermarket.data.cache.sale.ResultData;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.listener.PlayerListener;
-import com.blank038.servermarket.util.CommonUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,6 +35,7 @@ public class ServerMarket extends AyPlugin {
      * API 接口
      */
     private static ServerMarketAPI serverMarketAPI;
+    private static AbstractStorageHandler storageHandler;
 
 
     @Override
@@ -48,10 +49,10 @@ public class ServerMarket extends AyPlugin {
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
         // 注册事件监听类
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveSaleList, 1200L, 1200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::savePlayerData, 1200L, 1200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, this::saveResults, 1200L, 1200L);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, MarketData::removeTimeOutItem, 200L, 200L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 200L, 200L);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::saveAll, 1200L, 1200L);
         // 载入在线玩家数据
         for (Player player : Bukkit.getOnlinePlayers()) {
             PlayerData.PLAYER_DATA.put(player.getUniqueId(), new PlayerData(player.getUniqueId()));
@@ -60,7 +61,9 @@ public class ServerMarket extends AyPlugin {
 
     @Override
     public void onDisable() {
-        this.saveSaleList();
+        if (storageHandler != null) {
+            storageHandler.saveAll();
+        }
         this.savePlayerData();
         this.saveResults();
     }
@@ -80,7 +83,11 @@ public class ServerMarket extends AyPlugin {
             BaseBridge.initBridge();
         }
         // 设定语言配置
-        new I18n();
+        if (I18n.getInstance() == null) {
+            new I18n();
+        } else {
+            I18n.getInstance().reload();
+        }
         // 判断玩家存档目录是否存在
         File dataFolder = new File(getDataFolder(), "data");
         dataFolder.mkdirs();
@@ -95,7 +102,7 @@ public class ServerMarket extends AyPlugin {
         DataContainer.loadData();
         // 重新加载数据中的物品
         this.reloadSaleItem();
-        this.getConsoleLogger().log(false, "&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
+        this.getConsoleLogger().log(false, "&6 * &f加载完成, 已读取 &a" + MarketConfigData.MARKET_DATA.size() + "&f 个市场");
         // 开始读取离线玩家获得金币
         if (!ResultData.RESULT_DATA.isEmpty()) {
             this.saveResults();
@@ -120,13 +127,6 @@ public class ServerMarket extends AyPlugin {
         return BaseBridge.PAY_TYPES.getOrDefault(payType, null);
     }
 
-
-    public void saveSaleList() {
-        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
-            entry.getValue().saveSaleData();
-        }
-    }
-
     public void savePlayerData() {
         for (Map.Entry<UUID, PlayerData> entry : PlayerData.PLAYER_DATA.entrySet()) {
             entry.getValue().save();
@@ -146,19 +146,19 @@ public class ServerMarket extends AyPlugin {
     }
 
     private void reloadSaleItem() {
-        if (!MarketData.MARKET_DATA.isEmpty()) {
-            this.saveSaleList();
+        if (!MarketConfigData.MARKET_DATA.isEmpty() && storageHandler != null) {
+            storageHandler.saveAll();
         }
         // 读取市场配置
         File file = new File(getDataFolder(), "market");
         if (!file.exists()) {
             file.mkdir();
             // 输出
-            CommonUtil.outputFile(this.getResource("market/example.yml"), new File(getDataFolder() + "/market/", "example.yml"));
+            ServerMarket.getInstance().saveResource("market/example.yml", "market/example.yml");
         }
-        MarketData.MARKET_DATA.clear();
+        MarketConfigData.MARKET_DATA.clear();
         // 读取市场
-        Arrays.stream(Objects.requireNonNull(file.listFiles())).iterator().forEachRemaining(MarketData::new);
+        Arrays.stream(Objects.requireNonNull(file.listFiles())).iterator().forEachRemaining(MarketConfigData::new);
     }
 
     private void saveResults() {
@@ -172,6 +172,10 @@ public class ServerMarket extends AyPlugin {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static AbstractStorageHandler getStorageHandler() {
+        return storageHandler;
     }
 
     public static ServerMarketAPI getApi() {

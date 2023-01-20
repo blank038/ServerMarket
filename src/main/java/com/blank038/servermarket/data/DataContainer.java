@@ -1,7 +1,7 @@
 package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.data.sale.SaleItem;
+import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import org.bukkit.ChatColor;

@@ -1,4 +1,4 @@
-package com.blank038.servermarket.data.sale;
+package com.blank038.servermarket.data.cache.sale;
 
 import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.enums.PayType;

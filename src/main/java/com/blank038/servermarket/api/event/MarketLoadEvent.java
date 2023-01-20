@@ -1,6 +1,6 @@
 package com.blank038.servermarket.api.event;
 
-import com.blank038.servermarket.data.storage.MarketData;
+import com.blank038.servermarket.data.cache.market.MarketConfigData;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -10,14 +10,14 @@ import org.bukkit.event.HandlerList;
 public class MarketLoadEvent extends Event {
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    private final MarketData MARKET_DATA;
+    private final MarketConfigData marketData;
 
-    public MarketLoadEvent(MarketData marketData) {
-        this.MARKET_DATA = marketData;
+    public MarketLoadEvent(MarketConfigData marketData) {
+        this.marketData = marketData;
     }
 
-    public MarketData getmarketData() {
-        return  this.MARKET_DATA;
+    public MarketConfigData getmarketData() {
+        return  this.marketData;
     }
 
     @Override

@@ -18,6 +18,7 @@ public class I18n {
     private static FileConfiguration data;
 
     public I18n() {
+        instance = this;
         this.reload();
     }
 
@@ -36,5 +37,9 @@ public class I18n {
 
     public static List<String> getStringList(String key) {
         return data.getStringList(key);
+    }
+
+    public static I18n getInstance() {
+        return instance;
     }
 }

@@ -1,6 +1,6 @@
 package com.blank038.servermarket.filter;
 
-import com.blank038.servermarket.data.sale.SaleItem;
+import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
 import org.bukkit.inventory.ItemStack;

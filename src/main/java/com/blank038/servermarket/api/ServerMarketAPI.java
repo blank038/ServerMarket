@@ -1,9 +1,9 @@
 package com.blank038.servermarket.api;
 
 import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.data.storage.MarketData;
-import com.blank038.servermarket.data.cache.PlayerData;
-import com.blank038.servermarket.data.sale.SaleItem;
+import com.blank038.servermarket.data.cache.market.MarketConfigData;
+import com.blank038.servermarket.data.cache.player.PlayerData;
+import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.gui.MarketGui;
 import org.bukkit.entity.Player;
@@ -31,8 +31,8 @@ public class ServerMarketAPI {
         data.save();
     }
 
-    public MarketData fuzzySearchMarketData(String key) {
-        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+    public MarketConfigData fuzzySearchMarketData(String key) {
+        for (Map.Entry<String, MarketConfigData> entry : MarketConfigData.MARKET_DATA.entrySet()) {
             if (entry.getKey().equals(key) || entry.getValue().getDisplayName().contains(key)) {
                 return entry.getValue();
             }
@@ -47,8 +47,8 @@ public class ServerMarketAPI {
      * @param key    目标市场编号
      */
     public void openMarket(Player player, String key, int page, FilterBuilder filter) {
-        MarketData marketData = MarketData.MARKET_DATA.containsKey(key) ? MarketData.MARKET_DATA.get(key)
-                : MarketData.MARKET_DATA.get(instance.getConfig().getString("default-market"));
+        MarketConfigData marketData = MarketConfigData.MARKET_DATA.containsKey(key) ? MarketConfigData.MARKET_DATA.get(key)
+                : MarketConfigData.MARKET_DATA.get(instance.getConfig().getString("default-market"));
         if (marketData == null) {
             return;
         }

@@ -1,11 +1,11 @@
-package com.blank038.servermarket.data.storage;
+package com.blank038.servermarket.gui;
 
+import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.data.cache.PlayerData;
+import com.blank038.servermarket.data.cache.player.PlayerData;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.util.CommonUtil;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -24,13 +24,13 @@ import java.util.List;
 /**
  * @author Blank038
  */
-public class StoreContainer {
+public class StoreContainerGui {
     private final Player target;
     private final int marketPage;
     private final String oldMarket;
     private final FilterBuilder filterBuilder;
 
-    public StoreContainer(Player player, int marketPage, String oldMarket, FilterBuilder filterBuilder) {
+    public StoreContainerGui(Player player, int marketPage, String oldMarket, FilterBuilder filterBuilder) {
         this.target = player;
         this.marketPage = marketPage;
         this.oldMarket = oldMarket;
