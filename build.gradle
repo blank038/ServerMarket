@@ -3,8 +3,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'java'
 }
-def versionning = "1.2.2"
-version = "$versionning-${getGitCommitId()}".toString()
+def versioning = "2.0.0"
+version = "$versioning-${getGitCommitId()}".toString()
 group = "com.blank038.servermarket"
 archivesBaseName = "ServerMarket"
 
