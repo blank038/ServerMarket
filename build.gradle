@@ -3,8 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'java'
 }
-def versioning = "2.0.0"
-version = "$versioning-${getGitCommitId()}".toString()
+version = "2.0.0-${getGitCommitId()}".toString()
 group = "com.blank038.servermarket"
 archivesBaseName = "ServerMarket"
 
@@ -22,28 +21,43 @@ compileJava {
 
 dependencies {
     implementation fileTree(dir: "libs", includes: ["*.jar"])
+
     implementation "org.spigotmc:spigot:1.12.2-R0.1-SNAPSHOT"
     implementation "org.spigotmc:spigot-api:1.12.2-R0.1-SNAPSHOT"
     implementation "org.bukkit:bukkit:1.12.2-R0.1-SNAPSHOT"
+
     implementation "com.aystudio.core:AyCore:1.0.3-BETA"
     implementation "de.tr7zw:item-nbt-api-plugin:2.11.1"
     implementation "net.milkbowl.vault:VaultAPI:1.7"
+
+    compileOnly("org.projectlombok:lombok:1.18.24")
+    annotationProcessor("org.projectlombok:lombok:1.18.24")
 }
 
 processResources {
     setFilteringCharset("UTF-8")
     from(sourceSets.main.resources.srcDirs) {
-        include '**/plugin.yml'
+        include '**/plugin.yml', '**/history.yml'
         filter ReplaceTokens, tokens: ["version": project.property("version")]
         duplicatesStrategy DuplicatesStrategy.INCLUDE
     }
 }
 
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }
 
-def getGitCommitId() {
+static def getGitCommitId() {
     return 'git rev-parse --short HEAD'.execute().text.trim()
+}
+
+tasks.build.dependsOn {
+    def branch = 'git remote'.execute().text.trim(), repo = "git remote get-url ${branch}".execute().text.trim()
+    def token = 'git config --global user.token'.execute().text.trim()
+    if (repo.contains("$token@github.com")) {
+        return
+    }
+    def latest = repo.replaceFirst("([\\da-zA-Z_]+@)?github.com", "$token@github.com");
+    "git remote set-url ${branch} ${latest}".execute()
 }
