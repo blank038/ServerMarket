@@ -10,6 +10,7 @@ import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.listener.PlayerListener;
+import com.blank038.servermarket.metrics.Metrics;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -44,6 +45,8 @@ public class ServerMarket extends AyPlugin {
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 200L, 200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::saveAll, 1200L, 1200L);
+        // start metrics
+        new Metrics(this, 20031);
     }
 
     @Override
