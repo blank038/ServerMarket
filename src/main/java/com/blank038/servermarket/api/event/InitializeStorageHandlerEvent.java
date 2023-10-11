@@ -1,7 +1,8 @@
 package com.blank038.servermarket.api.event;
 
-import com.blank038.servermarket.data.cache.market.MarketData;
+import com.blank038.servermarket.data.handler.IStorageHandler;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -9,13 +10,15 @@ import org.bukkit.event.HandlerList;
  * @author Blank038
  */
 @Getter
-public class MarketLoadEvent extends Event {
+@Setter
+public class InitializeStorageHandlerEvent extends Event {
     private static final HandlerList HANDLER_LIST = new HandlerList();
 
-    private final MarketData marketData;
 
-    public MarketLoadEvent(MarketData marketData) {
-        this.marketData = marketData;
+    private IStorageHandler storageHandler;
+
+    public InitializeStorageHandlerEvent(IStorageHandler handler) {
+        this.storageHandler = handler;
     }
 
     @Override

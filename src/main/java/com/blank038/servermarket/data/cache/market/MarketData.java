@@ -2,14 +2,15 @@ package com.blank038.servermarket.data.cache.market;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
-import com.blank038.servermarket.bridge.BaseBridge;
+import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
-import com.blank038.servermarket.gui.MarketGui;
+import com.blank038.servermarket.gui.impl.MarketGui;
 import com.blank038.servermarket.i18n.I18n;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -28,8 +29,9 @@ import java.util.*;
  * @date 2021/03/05
  */
 @SuppressWarnings(value = {"unused"})
-public class MarketConfigData {
-    public static final HashMap<String, MarketConfigData> MARKET_DATA = new HashMap<>();
+@Getter
+public class MarketData {
+    public static final HashMap<String, MarketData> MARKET_DATA = new HashMap<>();
 
     private final File sourceFile;
     /**
@@ -45,32 +47,32 @@ public class MarketConfigData {
     private boolean showSaleInfo, saleBroadcast;
     private String dateFormat;
 
-    public MarketConfigData(File file) {
+    public MarketData(File file) {
+        FileConfiguration options = YamlConfiguration.loadConfiguration(file);
         this.sourceFile = file;
-        FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         this.marketKey = file.getName().replace(".yml", "");
-        this.sourceId = data.getString("source_id");
-        this.permission = data.getString("permission");
-        this.shortCommand = data.getString("short-command");
-        this.displayName = ChatColor.translateAlternateColorCodes('&', data.getString("display-name"));
-        this.economyName = ChatColor.translateAlternateColorCodes('&', data.getString("economy-name"));
-        this.min = data.getInt("price.min");
-        this.max = data.getInt("price.max");
-        if (data.contains("extra-price")) {
-            for (String key : data.getConfigurationSection("extra-price").getKeys(false)) {
-                this.extraMap.put(key, data.getString("extra-price." + key));
+        this.sourceId = options.getString("source_id");
+        this.permission = options.getString("permission");
+        this.shortCommand = options.getString("short-command");
+        this.displayName = ChatColor.translateAlternateColorCodes('&', options.getString("display-name"));
+        this.economyName = ChatColor.translateAlternateColorCodes('&', options.getString("economy-name"));
+        this.min = options.getInt("price.min");
+        this.max = options.getInt("price.max");
+        if (options.contains("extra-price")) {
+            for (String key : options.getConfigurationSection("extra-price").getKeys(false)) {
+                this.extraMap.put(key, options.getString("extra-price." + key));
             }
         }
-        this.effectiveTime = data.getInt("effective_time");
-        this.typeBlackList = data.getStringList("black-list.type");
-        this.loreBlackList = data.getStringList("black-list.lore");
-        this.saleTypes = data.getStringList("types");
-        this.taxSection = data.getConfigurationSection("tax");
-        this.shoutTaxSection = data.getConfigurationSection("shout-tax");
-        this.showSaleInfo = data.getBoolean("show-sale-info");
-        this.saleBroadcast = data.getBoolean("sale-broadcast");
-        this.dateFormat = data.getString("simple-date-format");
-        switch ((this.ecoType = data.getString("vault-type").toLowerCase())) {
+        this.effectiveTime = options.getInt("effective_time");
+        this.typeBlackList = options.getStringList("black-list.type");
+        this.loreBlackList = options.getStringList("black-list.lore");
+        this.saleTypes = options.getStringList("types");
+        this.taxSection = options.getConfigurationSection("tax");
+        this.shoutTaxSection = options.getConfigurationSection("shout-tax");
+        this.showSaleInfo = options.getBoolean("show-sale-info");
+        this.saleBroadcast = options.getBoolean("sale-broadcast");
+        this.dateFormat = options.getString("simple-date-format");
+        switch ((this.ecoType = options.getString("vault-type").toLowerCase())) {
             case "vault":
                 this.paytype = PayType.VAULT;
                 break;
@@ -81,7 +83,7 @@ public class MarketConfigData {
                 this.paytype = PayType.NY_ECONOMY;
                 break;
         }
-        if (!BaseBridge.PAY_TYPES.containsKey(this.paytype)) {
+        if (!BaseEconomy.PAY_TYPES.containsKey(this.paytype)) {
             this.marketStatus = MarketStatus.ERROR;
             ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f异常, 货币不存在");
         } else {
@@ -94,63 +96,10 @@ public class MarketConfigData {
                 ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f物品异常");
             }
         }
-        MarketConfigData.MARKET_DATA.put(this.getMarketKey(), this);
-        // 唤起加载事件
+        MarketData.MARKET_DATA.put(this.getMarketKey(), this);
+        // Call the event MarketLoadEvent
         MarketLoadEvent event = new MarketLoadEvent(this);
         Bukkit.getPluginManager().callEvent(event);
-    }
-
-    public File getSourceFile() {
-        return this.sourceFile;
-    }
-
-    public List<String> getSaleTypes() {
-        return this.saleTypes;
-    }
-
-    /**
-     * 获取市场源id
-     *
-     * @return 市场源id
-     */
-    public String getSourceId() {
-        return this.sourceId;
-    }
-
-    /**
-     * 获取市场编号
-     *
-     * @return 市场编号
-     */
-    public String getMarketKey() {
-        return this.marketKey;
-    }
-
-    /**
-     * 获取市场权限
-     *
-     * @return 市场权限
-     */
-    public String getPermission() {
-        return this.permission;
-    }
-
-    /**
-     * 获取货币名
-     *
-     * @return 货币名
-     */
-    public String getEcoType() {
-        return this.ecoType;
-    }
-
-    /**
-     * 获取市场展示名
-     *
-     * @return 市场展示名
-     */
-    public String getDisplayName() {
-        return this.displayName;
     }
 
     /**
@@ -160,15 +109,6 @@ public class MarketConfigData {
      */
     public PayType getPayType() {
         return this.paytype;
-    }
-
-    /**
-     * 获取市场加载状态
-     *
-     * @return 市场加载状态
-     */
-    public MarketStatus getMarketStatus() {
-        return this.marketStatus;
     }
 
     /**
@@ -202,22 +142,6 @@ public class MarketConfigData {
         return tax;
     }
 
-    public int getMin() {
-        return this.min;
-    }
-
-    public int getMax() {
-        return this.max;
-    }
-
-    public int getEffectiveTime() {
-        return this.effectiveTime;
-    }
-
-    public boolean isShowSaleInfo() {
-        return showSaleInfo;
-    }
-
     public void setShowSaleInfo(boolean show) {
         this.showSaleInfo = show;
     }
@@ -230,67 +154,66 @@ public class MarketConfigData {
         this.saleBroadcast = status;
     }
 
-    public String getDateFormat() {
-        return this.dateFormat;
-    }
-
     public void setDateFormat(String format) {
         this.dateFormat = format;
     }
 
-    public ConfigurationSection getTaxSection() {
-        return this.taxSection;
-    }
-
-    public ConfigurationSection getShoutTaxSection() {
-        return this.shoutTaxSection;
-    }
-
-    public void buySaleItem(Player buyer, String uuid, boolean shift, int page, FilterBuilder filter) {
+    public void tryBuySale(Player buyer, String uuid, boolean shift, int page, FilterBuilder filter) {
         // 判断商品是否存在
         if (!ServerMarket.getStorageHandler().hasSale(this.sourceId, uuid)) {
             buyer.sendMessage(I18n.getString("error-sale", true));
             return;
         }
-        SaleItem saleItem = ServerMarket.getStorageHandler().getSaleItem(this.sourceId, uuid);
-        if (saleItem.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
+        Optional<SaleItem> optionalSaleItem = ServerMarket.getStorageHandler().getSaleItem(this.sourceId, uuid);
+        if (optionalSaleItem.isPresent()) {
+            SaleItem saleItem = optionalSaleItem.get();
+            if (saleItem.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
+                if (shift) {
+                    ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid)
+                            .ifPresent((sale) -> {
+                                buyer.getInventory().addItem(sale.getSaleItem().clone());
+                                buyer.sendMessage(I18n.getString("unsale", true));
+                                new MarketGui(this.marketKey, page, filter).openGui(buyer);
+                            });
+                } else {
+                    buyer.sendMessage(I18n.getString("shift-unsale", true));
+                }
+                return;
+            }
             if (shift) {
-                buyer.getInventory().addItem(ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid).getSafeItem().clone());
-                buyer.sendMessage(I18n.getString("unsale", true));
+                if (saleItem.getPrice() == 0) {
+                    buyer.sendMessage(I18n.getString("error-sale", true));
+                    return;
+                }
+                if (BaseEconomy.getEconomyBridge(this.paytype).balance(buyer, this.ecoType) < saleItem.getPrice()) {
+                    buyer.sendMessage(I18n.getString("lack-money", true)
+                            .replace("%economy%", this.economyName));
+                    return;
+                }
+                ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid);
+                BaseEconomy.getEconomyBridge(this.paytype).take(buyer, this.ecoType, saleItem.getPrice());
+                Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
+                if (seller != null && seller.isOnline()) {
+                    double last = this.getLastMoney(this.getTaxSection(), seller, saleItem.getPrice());
+                    DecimalFormat df = new DecimalFormat("#0.00");
+                    BaseEconomy.getEconomyBridge(this.paytype).give(seller, this.ecoType, last);
+                    seller.sendMessage(I18n.getString("sale-sell", true)
+                            .replace("%economy%", this.economyName)
+                            .replace("%money%", df.format(saleItem.getPrice()))
+                            .replace("%last%", df.format(last)));
+                } else {
+                    ServerMarket.getApi().addOfflineTransaction(saleItem.getOwnerUUID(), this.paytype, this.ecoType, saleItem.getPrice(), this.marketKey);
+                }
+                // 给予购买者物品
+                ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), saleItem);
+                // 发送购买消息至购买者
+                buyer.sendMessage(I18n.getString("buy-item", true));
                 new MarketGui(this.marketKey, page, filter).openGui(buyer);
             } else {
-                buyer.sendMessage(I18n.getString("shift-unsale", true));
+                buyer.sendMessage(I18n.getString("shift-buy", true));
             }
-            return;
-        }
-        if (shift) {
-            if (saleItem.getPrice() == 0) {
-                buyer.sendMessage(I18n.getString("error-sale", true));
-                return;
-            }
-            if (ServerMarket.getInstance().getEconomyBridge(this.paytype).balance(buyer, this.ecoType) < saleItem.getPrice()) {
-                buyer.sendMessage(I18n.getString("lack-money", true).replace("%economy%", this.economyName));
-                return;
-            }
-            ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid);
-            ServerMarket.getInstance().getEconomyBridge(this.paytype).take(buyer, this.ecoType, saleItem.getPrice());
-            Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
-            if (seller != null && seller.isOnline()) {
-                double last = this.getLastMoney(this.getTaxSection(), seller, saleItem.getPrice());
-                DecimalFormat df = new DecimalFormat("#0.00");
-                ServerMarket.getInstance().getEconomyBridge(this.paytype).give(seller, this.ecoType, last);
-                seller.sendMessage(I18n.getString("sale-sell", true).replace("%economy%", this.economyName)
-                        .replace("%money%", df.format(saleItem.getPrice())).replace("%last%", df.format(last)));
-            } else {
-                ServerMarket.getInstance().addMoney(saleItem.getOwnerUUID(), this.paytype, this.ecoType, saleItem.getPrice(), this.marketKey);
-            }
-            // 再给购买者物品
-            ServerMarket.getApi().addItem(buyer.getUniqueId(), saleItem);
-            // 给购买者发送消息
-            buyer.sendMessage(I18n.getString("buy-item", true));
-            new MarketGui(this.marketKey, page, filter).openGui(buyer);
         } else {
-            buyer.sendMessage(I18n.getString("shift-buy", true));
+            buyer.sendMessage(I18n.getString("error-sale", true));
         }
     }
 
@@ -307,7 +230,7 @@ public class MarketConfigData {
         if (!command.equals(this.shortCommand)) {
             return false;
         }
-        if (this.permission != null && !"".equals(this.permission) && !player.hasPermission(this.permission)) {
+        if (this.permission != null && !this.permission.isEmpty() && !player.hasPermission(this.permission)) {
             player.sendMessage(I18n.getString("no-permission", true));
             return true;
         }
@@ -345,11 +268,13 @@ public class MarketConfigData {
             return true;
         }
         if (price < this.min) {
-            player.sendMessage(I18n.getString("min-price", true).replace("%min%", String.valueOf(this.min)));
+            player.sendMessage(I18n.getString("min-price", true)
+                    .replace("%min%", String.valueOf(this.min)));
             return true;
         }
         if (price > this.max) {
-            player.sendMessage(I18n.getString("max-price", true).replace("%max%", String.valueOf(this.max)));
+            player.sendMessage(I18n.getString("max-price", true)
+                    .replace("%max%", String.valueOf(this.max)));
             return true;
         }
         String extraPrice = this.extraMap.entrySet().stream()
@@ -358,21 +283,24 @@ public class MarketConfigData {
                 .map(Map.Entry::getValue)
                 .orElse(null);
         if (extraPrice != null && price < Integer.parseInt(extraPrice.split("-")[0])) {
-            player.sendMessage(I18n.getString("min-price", true).replace("%min%", extraPrice.split("-")[0]));
+            player.sendMessage(I18n.getString("min-price", true)
+                    .replace("%min%", extraPrice.split("-")[0]));
             return true;
         }
         if (extraPrice != null && price > Integer.parseInt(extraPrice.split("-")[1])) {
-            player.sendMessage(I18n.getString("max-price", true).replace("%max%", extraPrice.split("-")[1]));
+            player.sendMessage(I18n.getString("max-price", true)
+                    .replace("%max%", extraPrice.split("-")[1]));
             return true;
         }
         double tax = this.getTax(this.getShoutTaxSection(), player);
-        if (ServerMarket.getInstance().getEconomyBridge(this.paytype).balance(player, this.ecoType) < tax) {
-            player.sendMessage(I18n.getString("shout-tax", true).replace("%economy%", this.economyName));
+        if (BaseEconomy.getEconomyBridge(this.paytype).balance(player, this.ecoType) < tax) {
+            player.sendMessage(I18n.getString("shout-tax", true)
+                    .replace("%economy%", this.economyName));
             return true;
         }
         // 扣除费率
         if (tax > 0) {
-            ServerMarket.getInstance().getEconomyBridge(this.paytype).take(player, this.ecoType, tax);
+            BaseEconomy.getEconomyBridge(this.paytype).take(player, this.ecoType, tax);
         }
         // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);
@@ -385,8 +313,11 @@ public class MarketConfigData {
         if (this.saleBroadcast) {
             String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                     itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
-            Bukkit.getServer().broadcastMessage(I18n.getString("broadcast", true).replace("%item%", displayName)
-                    .replace("%market_name%", this.displayName).replace("%amount%", String.valueOf(itemStack.getAmount())).replace("%player%", player.getName()));
+            Bukkit.getServer().broadcastMessage(I18n.getString("broadcast", true)
+                    .replace("%item%", displayName)
+                    .replace("%market_name%", this.displayName)
+                    .replace("%amount%", String.valueOf(itemStack.getAmount()))
+                    .replace("%player%", player.getName()));
         }
         return true;
     }

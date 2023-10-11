@@ -1,5 +1,6 @@
-package com.blank038.servermarket.bridge;
+package com.blank038.servermarket.economy.impl;
 
+import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.enums.PayType;
 import org.black_ixx.playerpoints.PlayerPoints;
 import org.bukkit.OfflinePlayer;
@@ -9,10 +10,10 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author Blank038
  * @date 2021/03/06
  */
-public class PlayerPointBridge extends BaseBridge {
+public class PlayerPointEconomyImpl extends BaseEconomy {
     private final PlayerPoints playerPoints;
 
-    public PlayerPointBridge() {
+    public PlayerPointEconomyImpl() {
         super(PayType.PLAYER_POINTS);
         this.playerPoints = JavaPlugin.getPlugin(PlayerPoints.class);
     }

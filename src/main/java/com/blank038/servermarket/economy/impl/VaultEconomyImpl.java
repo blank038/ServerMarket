@@ -1,5 +1,6 @@
-package com.blank038.servermarket.bridge;
+package com.blank038.servermarket.economy.impl;
 
+import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.enums.PayType;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
@@ -9,10 +10,10 @@ import org.bukkit.OfflinePlayer;
  * @author Blank038
  */
 @SuppressWarnings(value = {"unused"})
-public class VaultBridge extends BaseBridge {
+public class VaultEconomyImpl extends BaseEconomy {
     private final Economy economyProvider;
 
-    public VaultBridge() {
+    public VaultEconomyImpl() {
         super(PayType.VAULT);
         economyProvider = Bukkit.getServicesManager().getRegistration(Economy.class).getProvider();
     }

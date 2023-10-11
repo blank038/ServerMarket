@@ -1,14 +1,15 @@
-package com.blank038.servermarket.gui;
+package com.blank038.servermarket.gui.impl;
 
 import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.data.cache.sale.SaleItem;
-import com.blank038.servermarket.data.cache.market.MarketConfigData;
+import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
+import com.blank038.servermarket.gui.AbstractGui;
 import com.blank038.servermarket.i18n.I18n;
 import com.google.common.collect.Lists;
 import de.tr7zw.nbtapi.NBTItem;
@@ -28,7 +29,7 @@ import java.util.*;
 /**
  * @author Blank038
  */
-public class MarketGui {
+public class MarketGui extends AbstractGui {
     private final String sourceMarketKey;
     private FilterBuilder filter;
     private int currentPage;
@@ -54,57 +55,34 @@ public class MarketGui {
      * @param player 目标玩家
      */
     public void openGui(Player player) {
-        MarketConfigData marketData = MarketConfigData.MARKET_DATA.get(this.sourceMarketKey);
+        MarketData marketData = MarketData.MARKET_DATA.get(this.sourceMarketKey);
         if (marketData == null || marketData.getMarketStatus() == MarketStatus.ERROR) {
             player.sendMessage(I18n.getString("market-error", true));
             return;
         }
-        if (marketData.getPermission() != null && !"".equals(marketData.getPermission()) && !player.hasPermission(marketData.getPermission())) {
+        if (marketData.getPermission() != null && !marketData.getPermission().isEmpty() && !player.hasPermission(marketData.getPermission())) {
             player.sendMessage(I18n.getString("no-permission", true));
+            return;
+        }
+        if (!ServerMarket.getStorageHandler().getPlayerDataByCache(player.getUniqueId()).isPresent()) {
             return;
         }
         // 读取配置文件
         FileConfiguration data = YamlConfiguration.loadConfiguration(marketData.getSourceFile());
-        GuiModel guiModel = new GuiModel(data.getString("title"), data.getInt("size"));
-        guiModel.registerListener(ServerMarket.getInstance());
-        guiModel.setCloseRemove(true);
+        GuiModel model = new GuiModel(data.getString("title"), data.getInt("size"));
+        model.registerListener(ServerMarket.getInstance());
+        model.setCloseRemove(true);
         // 设置界面物品
-        HashMap<Integer, ItemStack> items = new HashMap<>();
-        if (data.contains("items")) {
-            for (String key : data.getConfigurationSection("items").getKeys(false)) {
-                ConfigurationSection section = data.getConfigurationSection("items." + key);
-                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()),
-                        section.getInt("amount"), (short) section.getInt("data"));
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
-                // 开始遍历设置Lore
-                List<String> list = new ArrayList<>();
-                for (String lore : section.getStringList("lore")) {
-                    list.add(ChatColor.translateAlternateColorCodes('&', lore).replace("%saleType%", this.getCurrentTypeDisplayName()));
-                }
-                itemMeta.setLore(list);
-                itemStack.setItemMeta(itemMeta);
-                // 开始判断是否有交互操作
-                if (section.contains("action")) {
-                    NBTItem nbtItem = new NBTItem(itemStack);
-                    nbtItem.setString("MarketAction", section.getString("action"));
-                    itemStack = nbtItem.getItem();
-                }
-                for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
-                    items.put(i, itemStack);
-                }
-            }
-        }
+        this.initializeDisplayItem(model, data);
         // 开始获取全球市场物品
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
-        String[] keys = ServerMarket.getStorageHandler().getMarketStorageData(this.sourceMarketKey)
-                .getSales().entrySet().stream()
+        String[] keys = ServerMarket.getStorageHandler().getSaleItemsByMarket(this.sourceMarketKey)
+                .entrySet().stream()
                 .filter((entry) -> (filter == null || filter.check(entry.getValue())))
                 .map(Map.Entry::getKey).toArray(String[]::new);
         // 计算下标
-        int size = ServerMarket.getStorageHandler().getMarketStorageData(this.sourceMarketKey).getSales().size();
-        int maxPage = size / slots.length;
-        maxPage += (size % slots.length) == 0 ? 0 : 1;
+        int maxPage = keys.length / slots.length;
+        maxPage += (keys.length % slots.length) == 0 ? 0 : 1;
         // 判断页面是否超标, 如果是的话就设置为第一页
         if (currentPage > maxPage) {
             currentPage = 1;
@@ -116,20 +94,24 @@ public class MarketGui {
                 break;
             }
             // 开始设置物品
-            SaleItem saleItem = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
-            if (saleItem == null || (filter != null && !filter.check(saleItem))) {
+           Optional<SaleItem> saleItemOptional = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
+            if (!saleItemOptional.isPresent()) {
                 --index;
                 continue;
             }
-            items.put(slots[index], this.getShowItem(marketData, saleItem, data));
+            SaleItem saleItem = saleItemOptional.get();
+            if ((filter != null && !filter.check(saleItem))) {
+                --index;
+                continue;
+            }
+            model.setItem(slots[index], this.getShowItem(marketData, saleItem, data));
         }
-        guiModel.setItem(items);
         final int lastPage = currentPage, finalMaxPage = maxPage;
-        guiModel.execute((e) -> {
+        model.execute((e) -> {
             e.setCancelled(true);
             if (e.getClickedInventory() == e.getInventory()) {
                 ItemStack itemStack = e.getCurrentItem();
-                if (itemStack == null) {
+                if (itemStack == null || itemStack.getType() == Material.AIR) {
                     return;
                 }
                 NBTItem nbtItem = new NBTItem(itemStack);
@@ -138,7 +120,7 @@ public class MarketGui {
                 Player clicker = (Player) e.getWhoClicked();
                 if (key != null && !key.isEmpty()) {
                     // 购买商品
-                    MarketConfigData.MARKET_DATA.get(this.sourceMarketKey).buySaleItem(clicker, key, e.isShiftClick(), lastPage, filter);
+                    MarketData.MARKET_DATA.get(this.sourceMarketKey).tryBuySale(clicker, key, e.isShiftClick(), lastPage, filter);
                 } else if (action != null && !action.isEmpty()) {
                     // 判断交互方式
                     switch (action) {
@@ -147,7 +129,7 @@ public class MarketGui {
                                 clicker.sendMessage(I18n.getString("no-previous-page", true));
                             } else {
                                 this.currentPage -= 1;
-                                this.openGui(player);
+                                this.openGui(clicker);
                             }
                             break;
                         case "down":
@@ -155,7 +137,7 @@ public class MarketGui {
                                 clicker.sendMessage(I18n.getString("no-next-page", true));
                             } else {
                                 this.currentPage += 1;
-                                this.openGui(player);
+                                this.openGui(clicker);
                             }
                             break;
                         case "type":
@@ -183,9 +165,9 @@ public class MarketGui {
                                     return;
                                 }
                                 if ("player".equalsIgnoreCase(split[0])) {
-                                    Bukkit.getServer().dispatchCommand(player, split[1].replace("%player%", player.getName()));
+                                    Bukkit.getServer().dispatchCommand(clicker, split[1].replace("%player%", clicker.getName()));
                                 } else if ("console".equalsIgnoreCase(split[0])) {
-                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), split[1].replace("%player%", player.getName()));
+                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), split[1].replace("%player%", clicker.getName()));
                                 }
                             }
                             break;
@@ -194,7 +176,35 @@ public class MarketGui {
             }
         });
         // 打开界面
-        guiModel.openInventory(player);
+        model.openInventory(player);
+    }
+
+    private void initializeDisplayItem(GuiModel model, FileConfiguration data) {
+        if (data.contains("items")) {
+            for (String key : data.getConfigurationSection("items").getKeys(false)) {
+                ConfigurationSection section = data.getConfigurationSection("items." + key);
+                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()),
+                        section.getInt("amount"), (short) section.getInt("data"));
+                ItemMeta itemMeta = itemStack.getItemMeta();
+                itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
+                // 开始遍历设置Lore
+                List<String> list = new ArrayList<>();
+                for (String lore : section.getStringList("lore")) {
+                    list.add(ChatColor.translateAlternateColorCodes('&', lore).replace("%saleType%", this.getCurrentTypeDisplayName()));
+                }
+                itemMeta.setLore(list);
+                itemStack.setItemMeta(itemMeta);
+                // 开始判断是否有交互操作
+                if (section.contains("action")) {
+                    NBTItem nbtItem = new NBTItem(itemStack);
+                    nbtItem.setString("MarketAction", section.getString("action"));
+                    itemStack = nbtItem.getItem();
+                }
+                for (int i : CommonUtil.formatSlots(section.getString("slot"))) {
+                    model.setItem(i, itemStack);
+                }
+            }
+        }
     }
 
     private String getCurrentTypeDisplayName() {
@@ -207,8 +217,8 @@ public class MarketGui {
      * @param saleItem 市场商品信息
      * @return 展示物品
      */
-    private ItemStack getShowItem(MarketConfigData marketData, SaleItem saleItem, FileConfiguration data) {
-        ItemStack itemStack = saleItem.getSafeItem().clone();
+    private ItemStack getShowItem(MarketData marketData, SaleItem saleItem, FileConfiguration data) {
+        ItemStack itemStack = saleItem.getSaleItem().clone();
         if (marketData.isShowSaleInfo()) {
             ItemMeta itemMeta = itemStack.getItemMeta();
             List<String> lore = itemMeta.hasLore() ? itemMeta.getLore() : Lists.newArrayList();

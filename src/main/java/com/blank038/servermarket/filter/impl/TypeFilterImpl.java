@@ -2,6 +2,7 @@ package com.blank038.servermarket.filter.impl;
 
 import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
+import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -10,15 +11,12 @@ import java.util.List;
 /**
  * @author Blank038
  */
+@Getter
 public class TypeFilterImpl implements ISaleFilter {
     private final List<String> types = new ArrayList<>();
 
     public TypeFilterImpl(List<String> keys) {
         this.types.addAll(keys);
-    }
-
-    public List<String> getTypes() {
-        return this.types;
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.blank038.servermarket.i18n;
 
 import com.blank038.servermarket.ServerMarket;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -14,6 +15,7 @@ import java.util.List;
  * @author Blank038
  */
 public class I18n {
+    @Getter
     private static I18n instance;
     private static FileConfiguration data;
 
@@ -39,7 +41,11 @@ public class I18n {
         return data.getStringList(key);
     }
 
-    public static I18n getInstance() {
-        return instance;
+    public static void check() {
+        if (instance == null) {
+            new I18n();
+        } else {
+            instance.reload();
+        }
     }
 }

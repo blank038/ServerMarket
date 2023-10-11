@@ -23,7 +23,7 @@ public class KeyFilterImpl implements ISaleFilter {
 
     @Override
     public boolean check(SaleItem saleItem) {
-        return this.check(saleItem.getSafeItem());
+        return this.check(saleItem.getSaleItem());
     }
 
     @Override

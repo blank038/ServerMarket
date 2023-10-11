@@ -1,4 +1,4 @@
-package com.blank038.servermarket.bridge;
+package com.blank038.servermarket.economy;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.enums.PayType;
@@ -6,14 +6,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.HashMap;
+import java.util.logging.Level;
 
 /**
  * @author Blank038
  */
-public abstract class BaseBridge {
-    public static final HashMap<PayType, BaseBridge> PAY_TYPES = new HashMap<>();
+public abstract class BaseEconomy {
+    public static final HashMap<PayType, BaseEconomy> PAY_TYPES = new HashMap<>();
 
-    public BaseBridge(PayType payType) {
+    public BaseEconomy(PayType payType) {
         PAY_TYPES.put(payType, this);
         ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f挂钩货币: &e" + payType.getPlugin());
     }
@@ -46,11 +47,11 @@ public abstract class BaseBridge {
      */
     public abstract boolean take(OfflinePlayer player, String key, double amount);
 
-    public static <T extends BaseBridge> T register(Class<T> c) {
+    public static <T extends BaseEconomy> T register(Class<T> c) {
         try {
             return c.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
+            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot register economy: " + c.getName());
         }
         return null;
     }
@@ -58,11 +59,17 @@ public abstract class BaseBridge {
     /**
      * 初始化货币桥
      */
-    public static void initBridge() {
-        for (PayType type : PayType.values()) {
-            if (Bukkit.getPluginManager().getPlugin(type.getPlugin()) != null) {
-                BaseBridge.register(type.getBridgeClass());
+    public static void initEconomies() {
+        if (PAY_TYPES.isEmpty()) {
+            for (PayType type : PayType.values()) {
+                if (Bukkit.getPluginManager().getPlugin(type.getPlugin()) != null) {
+                    BaseEconomy.register(type.getBridgeClass());
+                }
             }
         }
+    }
+
+    public static BaseEconomy getEconomyBridge(PayType payType) {
+        return BaseEconomy.PAY_TYPES.getOrDefault(payType, null);
     }
 }

@@ -3,6 +3,7 @@ package com.blank038.servermarket.filter;
 import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
+import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
 /**
  * @author Blank038
  */
+@Getter
 public class FilterBuilder {
     private final List<ISaleFilter> saleFilters = new ArrayList<>();
     private TypeFilterImpl typeFilter;
@@ -23,10 +25,6 @@ public class FilterBuilder {
     public FilterBuilder setTypeFilter(TypeFilterImpl typeFilter) {
         this.typeFilter = typeFilter;
         return this;
-    }
-
-    public TypeFilterImpl getTypeFilter() {
-        return this.typeFilter;
     }
 
     public boolean check(SaleItem saleItem) {

@@ -2,6 +2,7 @@ package com.blank038.servermarket.data.cache.sale;
 
 import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.enums.PayType;
+import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +15,7 @@ import java.util.List;
  *
  * @author Blank038
  */
+@Getter
 public class SaleItem {
     /**
      * 存储物品的 UUID
@@ -22,7 +24,7 @@ public class SaleItem {
     /**
      * 商品对应的物品
      */
-    private final ItemStack itemStack;
+    private final ItemStack saleItem;
     /**
      * 商品对应的货币
      */
@@ -41,7 +43,7 @@ public class SaleItem {
         this.saleUUID = section.getString("sale-uuid");
         this.ownerName = section.getString("owner-name");
         this.ownerUUID = section.getString("owner-uuid");
-        this.itemStack = section.getItemStack("sale-item");
+        this.saleItem = section.getItemStack("sale-item");
         this.payType = PayType.valueOf(section.getString("pay-type"));
         this.ecoType = section.getString("eco-type", null);
         this.price = section.getInt("price");
@@ -54,7 +56,7 @@ public class SaleItem {
         this.saleUUID = saleUUID;
         this.ownerUUID = ownerUUID;
         this.ownerName = ownerName;
-        this.itemStack = itemStack.clone();
+        this.saleItem = itemStack.clone();
         this.payType = payType;
         this.price = price;
         this.postTime = postTime;
@@ -64,42 +66,6 @@ public class SaleItem {
 
     private void init() {
         DataContainer.setSaleTypes(this);
-    }
-
-    public String getSaleUUID() {
-        return saleUUID;
-    }
-
-    public String getOwnerUUID() {
-        return ownerUUID;
-    }
-
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-
-    public ItemStack getSafeItem() {
-        return itemStack;
-    }
-
-    public long getPostTime() {
-        return postTime;
-    }
-
-    public PayType getPayType() {
-        return payType;
-    }
-
-    public String getEcoType() {
-        return ecoType;
-    }
-
-    public List<String> getSaleTypes() {
-        return this.saleTypes;
     }
 
     public void setSaleTypes(List<String> types) {
@@ -112,7 +78,7 @@ public class SaleItem {
         section.set("owner-uuid", ownerUUID);
         section.set("sale-uuid", getSaleUUID());
         section.set("owner-name", ownerName);
-        section.set("sale-item", itemStack);
+        section.set("sale-item", saleItem);
         section.set("pay-type", payType.name());
         section.set("price", price);
         section.set("post-time", postTime);

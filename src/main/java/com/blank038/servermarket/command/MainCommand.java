@@ -5,8 +5,8 @@ import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.cache.market.MarketConfigData;
-import com.blank038.servermarket.gui.StoreContainerGui;
+import com.blank038.servermarket.data.cache.market.MarketData;
+import com.blank038.servermarket.gui.impl.StoreContainerGui;
 import com.google.common.collect.Lists;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -106,12 +106,12 @@ public class MainCommand implements CommandExecutor {
     private void show(CommandSender sender) {
         for (String line : I18n.getStringList("show")) {
             String last = line;
-            for (Map.Entry<String, MarketConfigData> entry : MarketConfigData.MARKET_DATA.entrySet()) {
+            for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
                 String value = "%" + entry.getValue().getMarketKey() + "%";
                 if (last.contains(value)) {
                     // 开始设置变量
                     String permission = entry.getValue().getPermission();
-                    if (permission != null && !"".equals(permission) && !sender.hasPermission(permission)) {
+                    if (permission != null && !permission.isEmpty() && !sender.hasPermission(permission)) {
                         last = last.replace(value, instance.getConfig().getString("status-text.no-permission"));
                         continue;
                     }

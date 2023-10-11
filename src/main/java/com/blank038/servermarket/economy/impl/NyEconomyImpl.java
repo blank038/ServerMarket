@@ -1,5 +1,6 @@
-package com.blank038.servermarket.bridge;
+package com.blank038.servermarket.economy.impl;
 
+import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.enums.PayType;
 import com.mc9y.nyeconomy.api.NyEconomyAPI;
 import org.bukkit.OfflinePlayer;
@@ -7,10 +8,10 @@ import org.bukkit.OfflinePlayer;
 /**
  * @author Blank038
  */
-public class NyEcoBridge extends BaseBridge {
+public class NyEconomyImpl extends BaseEconomy {
     private final NyEconomyAPI nyEconomyApi;
 
-    public NyEcoBridge() {
+    public NyEconomyImpl() {
         super(PayType.NY_ECONOMY);
         this.nyEconomyApi = com.mc9y.nyeconomy.Main.getNyEconomyAPI();
     }

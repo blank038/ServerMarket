@@ -1,6 +1,7 @@
 package com.blank038.servermarket.data;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.data.cache.sale.SaleItem;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
@@ -8,10 +9,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.util.*;
 
 /**
  * @author Blank038
@@ -35,6 +34,19 @@ public class DataContainer {
                 }
             }
         });
+        // Save all data
+        if (!MarketData.MARKET_DATA.isEmpty() && ServerMarket.getStorageHandler() != null) {
+            ServerMarket.getStorageHandler().saveAll();
+        }
+        // Load market data
+        File file = new File(ServerMarket.getInstance().getDataFolder(), "market");
+        if (!file.exists()) {
+            file.mkdir();
+            // 输出
+            ServerMarket.getInstance().saveResource("market/example.yml", "market/example.yml");
+        }
+        MarketData.MARKET_DATA.clear();
+        Arrays.stream(file.listFiles()).iterator().forEachRemaining(MarketData::new);
     }
 
     public static void setSaleTypes(SaleItem saleItem) {

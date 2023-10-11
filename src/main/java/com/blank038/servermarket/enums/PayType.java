@@ -1,9 +1,10 @@
 package com.blank038.servermarket.enums;
 
-import com.blank038.servermarket.bridge.BaseBridge;
-import com.blank038.servermarket.bridge.NyEcoBridge;
-import com.blank038.servermarket.bridge.PlayerPointBridge;
-import com.blank038.servermarket.bridge.VaultBridge;
+import com.blank038.servermarket.economy.BaseEconomy;
+import com.blank038.servermarket.economy.impl.NyEconomyImpl;
+import com.blank038.servermarket.economy.impl.PlayerPointEconomyImpl;
+import com.blank038.servermarket.economy.impl.VaultEconomyImpl;
+import lombok.Getter;
 
 /**
  * 支付类型枚举
@@ -12,33 +13,26 @@ import com.blank038.servermarket.bridge.VaultBridge;
  * @author Blank038
  * @date 2021/03/05
  */
+@Getter
 public enum PayType {
     /**
      * Vault 插件
      */
-    VAULT("Vault", VaultBridge.class),
+    VAULT("Vault", VaultEconomyImpl.class),
     /**
      * PlayerPoints 插件
      */
-    PLAYER_POINTS("PlayerPoints", PlayerPointBridge.class),
+    PLAYER_POINTS("PlayerPoints", PlayerPointEconomyImpl.class),
     /**
      * NyEconomy 插件
      */
-    NY_ECONOMY("NyEconomy", NyEcoBridge.class);
+    NY_ECONOMY("NyEconomy", NyEconomyImpl.class);
 
     private final String plugin;
-    private final Class<? extends BaseBridge> aClass;
+    private final Class<? extends BaseEconomy> bridgeClass;
 
-    PayType(String plugin, Class<? extends BaseBridge> c) {
+    PayType(String plugin, Class<? extends BaseEconomy> c) {
         this.plugin = plugin;
-        this.aClass = c;
-    }
-
-    public String getPlugin() {
-        return plugin;
-    }
-
-    public Class<? extends BaseBridge> getBridgeClass() {
-        return aClass;
+        this.bridgeClass = c;
     }
 }
