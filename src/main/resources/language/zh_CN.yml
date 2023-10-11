@@ -49,3 +49,9 @@ show:
   - " "
   - "&c上架物品前请将物品手持在手上."
 reload: "插件配置重载完成."
+
+# 市场状态文本
+status-text:
+  loaded: "&a已加载"
+  error: "&c出现异常"
+  no-permission: "&c无权使用"

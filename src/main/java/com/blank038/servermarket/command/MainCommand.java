@@ -59,7 +59,7 @@ public class MainCommand implements CommandExecutor {
                 case "reload":
                     if (sender.hasPermission("servermarket.admin")) {
                         this.instance.loadConfig(false);
-                        sender.sendMessage(I18n.getString("reload", true));
+                        sender.sendMessage(I18n.getStrAndHeader("reload"));
                     }
                     break;
                 default:
@@ -88,11 +88,11 @@ public class MainCommand implements CommandExecutor {
             return;
         }
         if (args.length == 1) {
-            sender.sendMessage(I18n.getString("wrong-market", true));
+            sender.sendMessage(I18n.getStrAndHeader("wrong-market"));
             return;
         }
         if (args.length == 2) {
-            sender.sendMessage(I18n.getString("wrong-key", true));
+            sender.sendMessage(I18n.getStrAndHeader("wrong-key"));
             return;
         }
         ServerMarket.getApi().openMarket((Player) sender, args[1], 1, new FilterBuilder()
@@ -104,7 +104,7 @@ public class MainCommand implements CommandExecutor {
      * 发送市场状态
      */
     private void show(CommandSender sender) {
-        for (String line : I18n.getStringList("show")) {
+        for (String line : I18n.getArrayOption("show")) {
             String last = line;
             for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
                 String value = "%" + entry.getValue().getMarketKey() + "%";
@@ -112,10 +112,10 @@ public class MainCommand implements CommandExecutor {
                     // 开始设置变量
                     String permission = entry.getValue().getPermission();
                     if (permission != null && !permission.isEmpty() && !sender.hasPermission(permission)) {
-                        last = last.replace(value, instance.getConfig().getString("status-text.no-permission"));
+                        last = last.replace(value, I18n.getOption("status-text.no-permission"));
                         continue;
                     }
-                    last = last.replace(value, instance.getConfig().getString("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
+                    last = last.replace(value, I18n.getOption("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
                 }
             }
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', last));
@@ -126,8 +126,7 @@ public class MainCommand implements CommandExecutor {
      * 发送命令帮助
      */
     private void sendHelp(CommandSender sender, String label) {
-        for (String text : I18n.getStringList("help." +
-                (sender.hasPermission("servermarket.admin") ? "admin" : "default"))) {
+        for (String text : I18n.getArrayOption("help." + (sender.hasPermission("servermarket.admin") ? "admin" : "default"))) {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', text).replace("%c", label));
         }
     }

@@ -4,7 +4,7 @@ import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.DataContainer;
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.filter.FilterBuilder;
@@ -57,11 +57,11 @@ public class MarketGui extends AbstractGui {
     public void openGui(Player player) {
         MarketData marketData = MarketData.MARKET_DATA.get(this.sourceMarketKey);
         if (marketData == null || marketData.getMarketStatus() == MarketStatus.ERROR) {
-            player.sendMessage(I18n.getString("market-error", true));
+            player.sendMessage(I18n.getStrAndHeader("market-error"));
             return;
         }
         if (marketData.getPermission() != null && !marketData.getPermission().isEmpty() && !player.hasPermission(marketData.getPermission())) {
-            player.sendMessage(I18n.getString("no-permission", true));
+            player.sendMessage(I18n.getStrAndHeader("no-permission"));
             return;
         }
         if (!ServerMarket.getStorageHandler().getPlayerDataByCache(player.getUniqueId()).isPresent()) {
@@ -94,12 +94,12 @@ public class MarketGui extends AbstractGui {
                 break;
             }
             // 开始设置物品
-           Optional<SaleItem> saleItemOptional = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
+           Optional<SaleCache> saleItemOptional = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
             if (!saleItemOptional.isPresent()) {
                 --index;
                 continue;
             }
-            SaleItem saleItem = saleItemOptional.get();
+            SaleCache saleItem = saleItemOptional.get();
             if ((filter != null && !filter.check(saleItem))) {
                 --index;
                 continue;
@@ -126,7 +126,7 @@ public class MarketGui extends AbstractGui {
                     switch (action) {
                         case "up":
                             if (lastPage == 1) {
-                                clicker.sendMessage(I18n.getString("no-previous-page", true));
+                                clicker.sendMessage(I18n.getStrAndHeader("no-previous-page"));
                             } else {
                                 this.currentPage -= 1;
                                 this.openGui(clicker);
@@ -134,7 +134,7 @@ public class MarketGui extends AbstractGui {
                             break;
                         case "down":
                             if (lastPage >= finalMaxPage) {
-                                clicker.sendMessage(I18n.getString("no-next-page", true));
+                                clicker.sendMessage(I18n.getStrAndHeader("no-next-page"));
                             } else {
                                 this.currentPage += 1;
                                 this.openGui(clicker);
@@ -153,7 +153,7 @@ public class MarketGui extends AbstractGui {
                             }
                             this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
                             this.openGui(clicker);
-                            clicker.sendMessage(I18n.getString("changeSaleType", true).replace("%type%", this.getCurrentTypeDisplayName()));
+                            clicker.sendMessage(I18n.getStrAndHeader("changeSaleType").replace("%type%", this.getCurrentTypeDisplayName()));
                             break;
                         case "store":
                             new StoreContainerGui(clicker, lastPage, this.sourceMarketKey, this.filter).open(1);
@@ -217,7 +217,7 @@ public class MarketGui extends AbstractGui {
      * @param saleItem 市场商品信息
      * @return 展示物品
      */
-    private ItemStack getShowItem(MarketData marketData, SaleItem saleItem, FileConfiguration data) {
+    private ItemStack getShowItem(MarketData marketData, SaleCache saleItem, FileConfiguration data) {
         ItemStack itemStack = saleItem.getSaleItem().clone();
         if (marketData.isShowSaleInfo()) {
             ItemMeta itemMeta = itemStack.getItemMeta();

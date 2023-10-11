@@ -1,8 +1,9 @@
 package com.blank038.servermarket.data.handler;
 
 import com.blank038.servermarket.data.cache.other.OfflineTransactionData;
-import com.blank038.servermarket.data.cache.player.PlayerData;
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.data.cache.other.SaleLog;
+import com.blank038.servermarket.data.cache.player.PlayerCache;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
@@ -47,7 +48,7 @@ public interface IStorageHandler {
      * @param saleId 商品编号
      * @return 商品数据
      */
-    Optional<SaleItem> getSaleItem(String market, String saleId);
+    Optional<SaleCache> getSaleItem(String market, String saleId);
 
     /**
      * 获取指定市场所有商品
@@ -55,7 +56,7 @@ public interface IStorageHandler {
      * @param market 目标市场
      * @return 市场商品集合
      */
-    Map<String, SaleItem> getSaleItemsByMarket(String market);
+    Map<String, SaleCache> getSaleItemsByMarket(String market);
 
     /**
      * 从市场中移除商品并返回商品数据, 如果不存在则返回 null
@@ -64,7 +65,7 @@ public interface IStorageHandler {
      * @param saleId 商品编号
      * @return 商品数据
      */
-    Optional<SaleItem> removeSaleItem(String market, String saleId);
+    Optional<SaleCache> removeSaleItem(String market, String saleId);
 
     /**
      * 增加商品至市场
@@ -72,7 +73,14 @@ public interface IStorageHandler {
      * @param market   市场编号
      * @param saleItem 商品数据
      */
-    boolean addSale(String market, SaleItem saleItem);
+    boolean addSale(String market, SaleCache saleItem);
+
+    /**
+     * Add a sale log
+     *
+     * @param log sale log
+     */
+    void addLog(SaleLog log);
 
     /**
      * 保存商品数据, 仅 YAML 模式下生效
@@ -80,7 +88,7 @@ public interface IStorageHandler {
      * @param market 市场名
      * @param map    商品数据
      */
-    void save(String market, Map<String, SaleItem> map);
+    void save(String market, Map<String, SaleCache> map);
 
     /**
      * 移除超时商品
@@ -104,9 +112,9 @@ public interface IStorageHandler {
     /**
      * 存储玩家数据
      *
-     * @param playerData 玩家数据
+     * @param playerCache 玩家数据
      */
-    void savePlayerData(PlayerData playerData, boolean removeCache);
+    void savePlayerData(PlayerCache playerCache, boolean removeCache);
 
     /**
      * 获取玩家缓存数据，如果数据不存在则载入
@@ -114,7 +122,7 @@ public interface IStorageHandler {
      * @param uuid 目标玩家
      * @return 玩家数据
      */
-    PlayerData getOrLoadPlayerCache(UUID uuid);
+    PlayerCache getOrLoadPlayerCache(UUID uuid);
 
     /**
      * 从缓存中获取玩家数据，如果数据不存在则返回 Optional.empty()
@@ -122,7 +130,7 @@ public interface IStorageHandler {
      * @param uuid 目标玩家
      * @return 玩家数据
      */
-    Optional<PlayerData> getPlayerDataByCache(UUID uuid);
+    Optional<PlayerCache> getPlayerDataByCache(UUID uuid);
 
     /**
      * 增加物品至玩家暂存箱
@@ -131,7 +139,7 @@ public interface IStorageHandler {
      * @param itemStack 存储物品
      * @return 是否成功
      */
-    boolean addItemToStore(UUID uuid, ItemStack itemStack);
+    boolean addItemToStore(UUID uuid, ItemStack itemStack, String reason);
 
     /**
      * 增加物品至玩家暂存箱并记录
@@ -140,7 +148,7 @@ public interface IStorageHandler {
      * @param saleItem 存储商品
      * @return 是否成功
      */
-    boolean addItemToStore(UUID uuid, SaleItem saleItem);
+    boolean addItemToStore(UUID uuid, SaleCache saleItem, String reason);
 
     /**
      * 从玩家暂存库中移除物品

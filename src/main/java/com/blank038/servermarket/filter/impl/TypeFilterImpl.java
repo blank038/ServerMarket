@@ -1,6 +1,6 @@
 package com.blank038.servermarket.filter.impl;
 
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
@@ -20,7 +20,7 @@ public class TypeFilterImpl implements ISaleFilter {
     }
 
     @Override
-    public boolean check(SaleItem saleItem) {
+    public boolean check(SaleCache saleItem) {
         if (this.types.contains("none")) {
             return false;
         }

@@ -1,12 +1,13 @@
 package com.blank038.servermarket.data.cache.player;
 
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.api.event.PlayerStoreItemAddEvent;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -14,14 +15,12 @@ import java.util.UUID;
  * @author Blank038
  */
 @Getter
-public class PlayerData {
+public class PlayerCache {
     private final Map<String, ItemStack> storeItems = new HashMap<>();
-    private final List<String> records;
     private final UUID ownerUniqueId;
 
-    public PlayerData(UUID uuid, FileConfiguration data) {
+    public PlayerCache(UUID uuid, FileConfiguration data) {
         this.ownerUniqueId = uuid;
-        records = data.getStringList("info");
         // 读取物品
         if (data.contains("items")) {
             for (String key : data.getConfigurationSection("items").getKeys(false)) {
@@ -55,8 +54,13 @@ public class PlayerData {
      *
      * @param itemStack 增加的物品
      */
-    public void addStoreItem(ItemStack itemStack) {
-        storeItems.put(UUID.randomUUID().toString(), itemStack.clone());
+    public void addStoreItem(ItemStack itemStack, String reason) {
+        // call PlayerStoreItemAddEvent
+        PlayerStoreItemAddEvent event = new PlayerStoreItemAddEvent(this.getOwnerUniqueId(), itemStack, reason);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.getItemStack() != null) {
+            storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
+        }
     }
 
     /**
@@ -64,12 +68,12 @@ public class PlayerData {
      *
      * @param saleItem 购买的商品
      */
-    public void addStoreItem(SaleItem saleItem) {
-        ItemStack itemStack = saleItem.getSaleItem();
-        storeItems.put(UUID.randomUUID().toString(), itemStack.clone());
-        String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
-                itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
-        records.add(saleItem.getOwnerName() + "//" + saleItem.getPrice() + "//" + System.currentTimeMillis() + "//" +
-                displayMmae + "//" + itemStack.getAmount() + "//" + saleItem.getSaleUUID());
+    public void addStoreItem(SaleCache saleItem, String reason) {
+        // call PlayerStoreItemAddEvent
+        PlayerStoreItemAddEvent event = new PlayerStoreItemAddEvent(this.getOwnerUniqueId(), saleItem.getSaleItem(), reason);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.getItemStack() != null) {
+            storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
+        }
     }
 }

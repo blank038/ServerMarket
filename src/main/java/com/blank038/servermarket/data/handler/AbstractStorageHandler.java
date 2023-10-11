@@ -2,7 +2,7 @@ package com.blank038.servermarket.data.handler;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.InitializeStorageHandlerEvent;
-import com.blank038.servermarket.data.cache.player.PlayerData;
+import com.blank038.servermarket.data.cache.player.PlayerCache;
 import com.blank038.servermarket.data.handler.impl.YamlStorageHandlerImpl;
 import org.bukkit.Bukkit;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
  * @author Blank038
  */
 public abstract class AbstractStorageHandler implements IStorageHandler {
-    protected static final HashMap<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
+    protected static final HashMap<UUID, PlayerCache> PLAYER_DATA_MAP = new HashMap<>();
 
     protected final ServerMarket pluign = ServerMarket.getInstance();
 

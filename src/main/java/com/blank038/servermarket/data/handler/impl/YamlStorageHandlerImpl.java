@@ -4,15 +4,19 @@ import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.data.cache.market.MarketStorageData;
 import com.blank038.servermarket.data.cache.other.OfflineTransactionData;
-import com.blank038.servermarket.data.cache.player.PlayerData;
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.data.cache.other.SaleLog;
+import com.blank038.servermarket.data.cache.player.PlayerCache;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.data.handler.AbstractStorageHandler;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -84,7 +88,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
         File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", market + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         for (String key : data.getKeys(false)) {
-            SaleItem saleItem = new SaleItem(data.getConfigurationSection(key));
+            SaleCache saleItem = new SaleCache(data.getConfigurationSection(key));
             marketStorageData.addSale(saleItem.getSaleUUID(), saleItem);
         }
         MARKET_STORAGE_DATA_MAP.put(market, marketStorageData);
@@ -99,7 +103,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public Optional<SaleItem> getSaleItem(String market, String saleId) {
+    public Optional<SaleCache> getSaleItem(String market, String saleId) {
         if (MARKET_STORAGE_DATA_MAP.containsKey(market)) {
             return MARKET_STORAGE_DATA_MAP.get(market).getSale(saleId);
         }
@@ -107,7 +111,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public Map<String, SaleItem> getSaleItemsByMarket(String market) {
+    public Map<String, SaleCache> getSaleItemsByMarket(String market) {
         if (!MARKET_STORAGE_DATA_MAP.containsKey(market)) {
             MarketStorageData marketStorageData = new MarketStorageData(market);
             MARKET_STORAGE_DATA_MAP.put(market, marketStorageData);
@@ -116,7 +120,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public Optional<SaleItem> removeSaleItem(String market, String saleId) {
+    public Optional<SaleCache> removeSaleItem(String market, String saleId) {
         if (MARKET_STORAGE_DATA_MAP.containsKey(market)) {
             return MARKET_STORAGE_DATA_MAP.get(market).removeSale(saleId);
         }
@@ -124,7 +128,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public boolean addSale(String market, SaleItem saleItem) {
+    public boolean addSale(String market, SaleCache saleItem) {
         if (MARKET_STORAGE_DATA_MAP.containsKey(market)) {
             MARKET_STORAGE_DATA_MAP.get(market).addSale(saleItem.getSaleUUID(), saleItem);
             return true;
@@ -133,10 +137,42 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public void save(String market, Map<String, SaleItem> map) {
+    public void addLog(SaleLog log) {
+        // TODO: 待增加日志流写入以提升性能
+        File logFolder = new File(ServerMarket.getInstance().getDataFolder(), "logs");
+        logFolder.mkdir();
+
+        LocalDate localDate = LocalDate.now();
+        String format = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+        File logFile = new File(logFolder, format + ".yml");
+        FileConfiguration data = YamlConfiguration.loadConfiguration(logFile);
+
+        try {
+            SaleCache saleCache = log.getSaleCache();
+            ConfigurationSection section = new YamlConfiguration(), sale = new YamlConfiguration();
+            section.set("triggerPlayerUUID", log.getTriggerPlayerUUID().toString());
+            section.set("triggerTime", log.getTriggerTime());
+            sale.set("saleUUID", saleCache.getSaleUUID());
+            sale.set("ownerUUID", saleCache.getOwnerUUID());
+            sale.set("ownerName", saleCache.getOwnerName());
+            sale.set("payType", saleCache.getPayType().name());
+            sale.set("price", saleCache.getPrice());
+            sale.set("postTime", saleCache.getPostTime());
+            sale.set("saleItem", saleCache.getSaleItem());
+            section.set("sale", sale);
+            data.set(String.valueOf(log.getTriggerTime()), section);
+            data.save(logFile);
+        } catch (IOException e) {
+            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save log data: " + format + ".yml");
+        }
+    }
+
+    @Override
+    public void save(String market, Map<String, SaleCache> map) {
         File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", market + ".yml");
         FileConfiguration data = new YamlConfiguration();
-        for (Map.Entry<String, SaleItem> entry : map.entrySet()) {
+        for (Map.Entry<String, SaleCache> entry : map.entrySet()) {
             data.set(entry.getKey(), entry.getValue().toSection());
         }
         try {
@@ -154,14 +190,14 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
                 return;
             }
             // 开始计算
-            Iterator<Map.Entry<String, SaleItem>> iterator = v.getSales().entrySet().iterator();
+            Iterator<Map.Entry<String, SaleCache>> iterator = v.getSales().entrySet().iterator();
             while (iterator.hasNext()) {
-                Map.Entry<String, SaleItem> entry = iterator.next();
+                Map.Entry<String, SaleCache> entry = iterator.next();
                 int second = (int) ((System.currentTimeMillis() - entry.getValue().getPostTime()) / 1000L);
                 if (second >= marketConfigData.getEffectiveTime()) {
                     iterator.remove();
                     UUID uuid = UUID.fromString(entry.getValue().getOwnerUUID());
-                    ServerMarket.getStorageHandler().addItemToStore(uuid, entry.getValue().getSaleItem());
+                    ServerMarket.getStorageHandler().addItemToStore(uuid, entry.getValue().getSaleItem(), "timeout");
                 }
             }
         });
@@ -178,47 +214,46 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
 
     @Override
     public void saveAllPlayerData() {
-        for (Map.Entry<UUID, PlayerData> entry : PLAYER_DATA_MAP.entrySet()) {
+        for (Map.Entry<UUID, PlayerCache> entry : PLAYER_DATA_MAP.entrySet()) {
             this.savePlayerData(entry.getValue(), false);
         }
     }
 
     @Override
     public void savePlayerData(UUID uuid, boolean removeCache) {
-        this.getPlayerDataByCache(uuid).ifPresent((playerData) -> this.savePlayerData(playerData, removeCache));
+        this.getPlayerDataByCache(uuid).ifPresent((playerCache) -> this.savePlayerData(playerCache, removeCache));
     }
 
     @Override
-    public void savePlayerData(PlayerData playerData, boolean removeCache) {
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", playerData.getOwnerUniqueId().toString() + ".yml");
+    public void savePlayerData(PlayerCache playerCache, boolean removeCache) {
+        File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", playerCache.getOwnerUniqueId().toString() + ".yml");
         FileConfiguration data = new YamlConfiguration();
-        data.set("info", playerData.getRecords());
-        for (Map.Entry<String, ItemStack> entry : playerData.getStoreItems().entrySet()) {
+        for (Map.Entry<String, ItemStack> entry : playerCache.getStoreItems().entrySet()) {
             data.set("items." + entry.getKey(), entry.getValue());
         }
         try {
             data.save(file);
         } catch (IOException e) {
-            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save player data: " + playerData.getOwnerUniqueId().toString());
+            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save player data: " + playerCache.getOwnerUniqueId().toString());
         }
         if (removeCache) {
-            PLAYER_DATA_MAP.remove(playerData.getOwnerUniqueId());
+            PLAYER_DATA_MAP.remove(playerCache.getOwnerUniqueId());
         }
     }
 
     @Override
-    public PlayerData getOrLoadPlayerCache(UUID uuid) {
+    public PlayerCache getOrLoadPlayerCache(UUID uuid) {
         if (PLAYER_DATA_MAP.containsKey(uuid)) {
             return PLAYER_DATA_MAP.get(uuid);
         }
         File file = new File(ServerMarket.getInstance().getDataFolder() + "/data/", uuid + ".yml");
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
-        PLAYER_DATA_MAP.put(uuid, new PlayerData(uuid, data));
+        PLAYER_DATA_MAP.put(uuid, new PlayerCache(uuid, data));
         return PLAYER_DATA_MAP.get(uuid);
     }
 
     @Override
-    public Optional<PlayerData> getPlayerDataByCache(UUID uuid) {
+    public Optional<PlayerCache> getPlayerDataByCache(UUID uuid) {
         if (PLAYER_DATA_MAP.containsKey(uuid)) {
             return Optional.of(PLAYER_DATA_MAP.get(uuid));
         }
@@ -226,15 +261,15 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public boolean addItemToStore(UUID uuid, ItemStack itemStack) {
-        Optional<PlayerData> optional = this.getPlayerDataByCache(uuid);
+    public boolean addItemToStore(UUID uuid, ItemStack itemStack, String reason) {
+        Optional<PlayerCache> optional = this.getPlayerDataByCache(uuid);
         try {
             if (optional.isPresent()) {
-                optional.get().addStoreItem(itemStack);
+                optional.get().addStoreItem(itemStack, reason);
             } else {
-                PlayerData playerData = this.getOrLoadPlayerCache(uuid);
-                playerData.addStoreItem(itemStack);
-                this.savePlayerData(playerData, true);
+                PlayerCache playerCache = this.getOrLoadPlayerCache(uuid);
+                playerCache.addStoreItem(itemStack, reason);
+                this.savePlayerData(playerCache, true);
             }
             return true;
         } catch (Exception e) {
@@ -244,15 +279,15 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public boolean addItemToStore(UUID uuid, SaleItem saleItem) {
-        Optional<PlayerData> optional = this.getPlayerDataByCache(uuid);
+    public boolean addItemToStore(UUID uuid, SaleCache saleItem, String reason) {
+        Optional<PlayerCache> optional = this.getPlayerDataByCache(uuid);
         try {
             if (optional.isPresent()) {
-                optional.get().addStoreItem(saleItem);
+                optional.get().addStoreItem(saleItem, reason);
             } else {
-                PlayerData playerData = this.getOrLoadPlayerCache(uuid);
-                playerData.addStoreItem(saleItem);
-                this.savePlayerData(playerData, true);
+                PlayerCache playerCache = this.getOrLoadPlayerCache(uuid);
+                playerCache.addStoreItem(saleItem, reason);
+                this.savePlayerData(playerCache, true);
             }
             return true;
         } catch (Exception e) {
@@ -263,14 +298,14 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
 
     @Override
     public ItemStack removeStoreItem(UUID uuid, String storeItemId) {
-        Optional<PlayerData> optional = this.getPlayerDataByCache(uuid);
+        Optional<PlayerCache> optional = this.getPlayerDataByCache(uuid);
         try {
             if (optional.isPresent()) {
                 return optional.get().removeStoreItem(storeItemId);
             } else {
-                PlayerData playerData = this.getOrLoadPlayerCache(uuid);
-                ItemStack itemStack = playerData.removeStoreItem(storeItemId);
-                this.savePlayerData(playerData, true);
+                PlayerCache playerCache = this.getOrLoadPlayerCache(uuid);
+                ItemStack itemStack = playerCache.removeStoreItem(storeItemId);
+                this.savePlayerData(playerCache, true);
                 return itemStack;
             }
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.blank038.servermarket.filter.impl;
 
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,7 +22,7 @@ public class KeyFilterImpl implements ISaleFilter {
     }
 
     @Override
-    public boolean check(SaleItem saleItem) {
+    public boolean check(SaleCache saleItem) {
         return this.check(saleItem.getSaleItem());
     }
 

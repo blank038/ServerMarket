@@ -3,7 +3,7 @@ package com.blank038.servermarket.gui.impl;
 import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.data.cache.player.PlayerData;
+import com.blank038.servermarket.data.cache.player.PlayerCache;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.gui.AbstractGui;
 import com.blank038.servermarket.i18n.I18n;
@@ -40,7 +40,7 @@ public class StoreContainerGui extends AbstractGui {
     }
 
     public void open(int currentPage) {
-        Optional<PlayerData> playerData = ServerMarket.getStorageHandler().getPlayerDataByCache(target.getUniqueId());
+        Optional<PlayerCache> playerData = ServerMarket.getStorageHandler().getPlayerDataByCache(target.getUniqueId());
         if (playerData.isPresent()) {
             // 指向文件
             File file = new File(ServerMarket.getInstance().getDataFolder(), "gui/store.yml");
@@ -118,7 +118,7 @@ public class StoreContainerGui extends AbstractGui {
         ServerMarket.getStorageHandler().getPlayerDataByCache(player.getUniqueId()).ifPresent((data) -> {
             if (data.hasStoretem(uuid)) {
                 if (player.getInventory().firstEmpty() == -1) {
-                    player.sendMessage(I18n.getString("inventory-full", true));
+                    player.sendMessage(I18n.getStrAndHeader("inventory-full"));
                     return;
                 }
                 // 给予玩家物品
@@ -127,16 +127,16 @@ public class StoreContainerGui extends AbstractGui {
                     String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
                             itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
                     player.getInventory().addItem(itemStack);
-                    player.sendMessage(I18n.getString("get-store-item", true)
+                    player.sendMessage(I18n.getStrAndHeader("get-store-item")
                             .replace("%item%", displayMmae)
                             .replace("%amount%", String.valueOf(itemStack.getAmount())));
                     // 刷新玩家界面
                     ServerMarket.getApi().openMarket(player, this.oldMarket, this.marketPage, null);
                 } else {
-                    player.sendMessage(I18n.getString("error-store", true));
+                    player.sendMessage(I18n.getStrAndHeader("error-store"));
                 }
             } else {
-                player.sendMessage(I18n.getString("error-store", true));
+                player.sendMessage(I18n.getStrAndHeader("error-store"));
             }
         });
     }

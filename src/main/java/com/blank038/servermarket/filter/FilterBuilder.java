@@ -1,6 +1,6 @@
 package com.blank038.servermarket.filter;
 
-import com.blank038.servermarket.data.cache.sale.SaleItem;
+import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.filter.interfaces.ISaleFilter;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class FilterBuilder {
         return this;
     }
 
-    public boolean check(SaleItem saleItem) {
+    public boolean check(SaleCache saleItem) {
         if (this.typeFilter != null && this.typeFilter.check(saleItem)) {
             return true;
         }

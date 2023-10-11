@@ -9,7 +9,8 @@ import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.cache.market.MarketData;
-import com.blank038.servermarket.listener.PlayerListener;
+import com.blank038.servermarket.listen.impl.CoreListener;
+import com.blank038.servermarket.listen.impl.PlayerListener;
 import com.blank038.servermarket.metrics.Metrics;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,10 +43,12 @@ public class ServerMarket extends AyPlugin {
         // 注册命令、事件及线程
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
         // 注册事件监听类
-        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
+        new CoreListener().register();
+        new PlayerListener().register();
+        // start tasks
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 200L, 200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::saveAll, 1200L, 1200L);
-        // start metrics
+        // inject metrics
         new Metrics(this, 20031);
     }
 
@@ -71,7 +74,7 @@ public class ServerMarket extends AyPlugin {
         // Initialize economy
         BaseEconomy.initEconomies();
         // Initialize I18n
-        I18n.check();
+        new I18n(this.getConfig().getString("language", "zh_CN"));
         // Save the default files
         for (String fileName : new String[]{"gui/store.yml"}) {
             this.saveResource(fileName, fileName);

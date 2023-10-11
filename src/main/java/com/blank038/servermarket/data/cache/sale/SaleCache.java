@@ -16,11 +16,11 @@ import java.util.List;
  * @author Blank038
  */
 @Getter
-public class SaleItem {
+public class SaleCache {
     /**
      * 存储物品的 UUID
      */
-    private final String saleUUID, ownerUUID, ownerName, ecoType;
+    private final String saleUUID, ownerUUID, ownerName;
     /**
      * 商品对应的物品
      */
@@ -39,20 +39,19 @@ public class SaleItem {
     private final long postTime;
     private final List<String> saleTypes = new ArrayList<>();
 
-    public SaleItem(ConfigurationSection section) {
+    public SaleCache(ConfigurationSection section) {
         this.saleUUID = section.getString("sale-uuid");
         this.ownerName = section.getString("owner-name");
         this.ownerUUID = section.getString("owner-uuid");
         this.saleItem = section.getItemStack("sale-item");
         this.payType = PayType.valueOf(section.getString("pay-type"));
-        this.ecoType = section.getString("eco-type", null);
         this.price = section.getInt("price");
         this.postTime = section.getLong("post-time");
         this.init();
     }
 
-    public SaleItem(String saleUUID, String ownerUUID, String ownerName, ItemStack itemStack,
-                    PayType payType, String ecoType, double price, long postTime) {
+    public SaleCache(String saleUUID, String ownerUUID, String ownerName, ItemStack itemStack,
+                     PayType payType, double price, long postTime) {
         this.saleUUID = saleUUID;
         this.ownerUUID = ownerUUID;
         this.ownerName = ownerName;
@@ -60,7 +59,6 @@ public class SaleItem {
         this.payType = payType;
         this.price = price;
         this.postTime = postTime;
-        this.ecoType = ecoType;
         this.init();
     }
 
@@ -82,7 +80,6 @@ public class SaleItem {
         section.set("pay-type", payType.name());
         section.set("price", price);
         section.set("post-time", postTime);
-        section.set("eco-type", ecoType);
         return section;
     }
 }

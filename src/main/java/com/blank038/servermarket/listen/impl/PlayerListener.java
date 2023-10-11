@@ -1,13 +1,13 @@
-package com.blank038.servermarket.listener;
+package com.blank038.servermarket.listen.impl;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.cache.market.MarketData;
+import com.blank038.servermarket.listen.AbstractListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -19,7 +19,7 @@ import java.util.Map;
  * @author Blank038
  * @date 2021/03/05
  */
-public class PlayerListener implements Listener {
+public class PlayerListener extends AbstractListener {
 
     /**
      * 玩家加入服务器事件
@@ -61,7 +61,7 @@ public class PlayerListener implements Listener {
                 if (BaseEconomy.PAY_TYPES.containsKey(v.getPayType())) {
                     DecimalFormat df = new DecimalFormat("#0.00");
                     BaseEconomy.getEconomyBridge(v.getPayType()).give(player, v.getEconomyType(), last);
-                    player.sendMessage(I18n.getString("sale-sell", true)
+                    player.sendMessage(I18n.getStrAndHeader("sale-sell")
                             .replace("%economy%", marketData == null ? "" : marketData.getDisplayName())
                             .replace("%money%", df.format(price)).replace("%last%", df.format(last)));
                 }
