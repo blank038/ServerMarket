@@ -3,6 +3,7 @@ package com.blank038.servermarket.data.cache.market;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.api.event.PlayerSaleEvent;
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.enums.MarketStatus;
@@ -11,9 +12,9 @@ import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.gui.impl.MarketGui;
 import com.blank038.servermarket.i18n.I18n;
+import com.blank038.servermarket.util.TextUtil;
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -32,7 +33,6 @@ import java.util.*;
 @SuppressWarnings(value = {"unused"})
 @Getter
 public class MarketData {
-    public static final HashMap<String, MarketData> MARKET_DATA = new HashMap<>();
 
     private final File sourceFile;
     /**
@@ -55,8 +55,8 @@ public class MarketData {
         this.sourceId = options.getString("source_id");
         this.permission = options.getString("permission");
         this.shortCommand = options.getString("short-command");
-        this.displayName = ChatColor.translateAlternateColorCodes('&', options.getString("display-name"));
-        this.economyName = ChatColor.translateAlternateColorCodes('&', options.getString("economy-name"));
+        this.displayName = TextUtil.formatHexColor(options.getString("display-name"));
+        this.economyName = TextUtil.formatHexColor(options.getString("economy-name"));
         this.min = options.getInt("price.min");
         this.max = options.getInt("price.max");
         if (options.contains("extra-price")) {
@@ -97,7 +97,7 @@ public class MarketData {
                 ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f物品异常");
             }
         }
-        MarketData.MARKET_DATA.put(this.getMarketKey(), this);
+        DataContainer.MARKET_DATA.put(this.getMarketKey(), this);
         // Call the event MarketLoadEvent
         MarketLoadEvent event = new MarketLoadEvent(this);
         Bukkit.getPluginManager().callEvent(event);
@@ -210,7 +210,7 @@ public class MarketData {
                     // 给予购买者物品
                     ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), saleItem, "buy");
                     // call PlayerSaleEvent.Buy
-                    PlayerSaleEvent.Buy event = new PlayerSaleEvent.Buy(buyer, saleItem);
+                    PlayerSaleEvent.Buy event = new PlayerSaleEvent.Buy(buyer, this, saleItem);
                     Bukkit.getPluginManager().callEvent(event);
                     // 发送购买消息至购买者
                     buyer.sendMessage(I18n.getStrAndHeader("buy-item"));
@@ -314,12 +314,12 @@ public class MarketData {
         // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);
         // 上架物品
-        SaleCache saleItem = new SaleCache(UUID.randomUUID().toString(), player.getUniqueId().toString(),
-                player.getName(), itemStack, PayType.VAULT, price, System.currentTimeMillis());
+        SaleCache saleItem = new SaleCache(UUID.randomUUID().toString(), this.marketKey, player.getUniqueId().toString(),
+                player.getName(), itemStack, PayType.VAULT, this.ecoType, price, System.currentTimeMillis());
         // add sale to storage handler
         ServerMarket.getStorageHandler().addSale(this.marketKey, saleItem);
         // call PlayerSaleEvent.Sell
-        PlayerSaleEvent.Sell event = new PlayerSaleEvent.Sell(player, saleItem);
+        PlayerSaleEvent.Sell event = new PlayerSaleEvent.Sell(player, this, saleItem);
         Bukkit.getPluginManager().callEvent(event);
 
         player.sendMessage(I18n.getStrAndHeader("sell"));

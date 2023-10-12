@@ -1,6 +1,7 @@
 package com.blank038.servermarket.api;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.data.cache.other.OfflineTransactionData;
 import com.blank038.servermarket.enums.PayType;
@@ -20,7 +21,7 @@ public class ServerMarketApi {
     private final ServerMarket plugin = ServerMarket.getInstance();
 
     public MarketData fuzzySearchMarketData(String key) {
-        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+        for (Map.Entry<String, MarketData> entry : DataContainer.MARKET_DATA.entrySet()) {
             if (entry.getKey().equals(key) || entry.getValue().getDisplayName().contains(key)) {
                 return entry.getValue();
             }
@@ -35,8 +36,8 @@ public class ServerMarketApi {
      * @param key    目标市场编号
      */
     public void openMarket(Player player, String key, int page, FilterBuilder filter) {
-        MarketData marketData = MarketData.MARKET_DATA.containsKey(key) ? MarketData.MARKET_DATA.get(key)
-                : MarketData.MARKET_DATA.get(plugin.getConfig().getString("default-market"));
+        MarketData marketData = DataContainer.MARKET_DATA.containsKey(key) ? DataContainer.MARKET_DATA.get(key)
+                : DataContainer.MARKET_DATA.get(plugin.getConfig().getString("default-market"));
         if (marketData == null) {
             return;
         }

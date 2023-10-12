@@ -1,14 +1,15 @@
 package com.blank038.servermarket.command;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.gui.impl.StoreContainerGui;
+import com.blank038.servermarket.util.TextUtil;
 import com.google.common.collect.Lists;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -106,7 +107,7 @@ public class MainCommand implements CommandExecutor {
     private void show(CommandSender sender) {
         for (String line : I18n.getArrayOption("show")) {
             String last = line;
-            for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+            for (Map.Entry<String, MarketData> entry : DataContainer.MARKET_DATA.entrySet()) {
                 String value = "%" + entry.getValue().getMarketKey() + "%";
                 if (last.contains(value)) {
                     // 开始设置变量
@@ -118,7 +119,7 @@ public class MainCommand implements CommandExecutor {
                     last = last.replace(value, I18n.getOption("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
                 }
             }
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', last));
+            sender.sendMessage(TextUtil.formatHexColor(last));
         }
     }
 
@@ -127,7 +128,7 @@ public class MainCommand implements CommandExecutor {
      */
     private void sendHelp(CommandSender sender, String label) {
         for (String text : I18n.getArrayOption("help." + (sender.hasPermission("servermarket.admin") ? "admin" : "default"))) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', text).replace("%c", label));
+            sender.sendMessage(TextUtil.formatHexColor(text).replace("%c", label));
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.blank038.servermarket.listen.impl;
 
 import com.blank038.servermarket.ServerMarket;
+import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.data.cache.market.MarketData;
@@ -14,6 +15,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.text.DecimalFormat;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author Blank038
@@ -27,7 +30,7 @@ public class PlayerListener extends AbstractListener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        ServerMarket.getStorageHandler().getOrLoadPlayerCache(player.getUniqueId());
+        ServerMarket.getStorageHandler().getOrLoadPlayerCache(player.getUniqueId(), false);
         // check player offline transactions
         Bukkit.getScheduler().runTaskAsynchronously(ServerMarket.getInstance(), () -> this.checkResult(player));
     }
@@ -37,12 +40,22 @@ public class PlayerListener extends AbstractListener {
      */
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        ServerMarket.getStorageHandler().savePlayerData(event.getPlayer().getUniqueId(), true);
+        UUID uuid = event.getPlayer().getUniqueId();
+        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            ServerMarket.getStorageHandler().savePlayerData(uuid, true);
+            return true;
+        });
+        future.exceptionally((e) -> false);
+        future.thenAccept((v) -> {
+            if (v) {
+                ServerMarket.getStorageHandler().setLock(uuid, false);
+            }
+        });
     }
 
     @EventHandler(ignoreCancelled = true)
     public void onCommand(PlayerCommandPreprocessEvent event) {
-        for (Map.Entry<String, MarketData> entry : MarketData.MARKET_DATA.entrySet()) {
+        for (Map.Entry<String, MarketData> entry : DataContainer.MARKET_DATA.entrySet()) {
             if (entry.getValue().performSellCommand(event.getPlayer(), event.getMessage())) {
                 event.setCancelled(true);
                 break;
@@ -54,7 +67,7 @@ public class PlayerListener extends AbstractListener {
         ServerMarket.getStorageHandler().getOfflineTransactionByPlayer(player.getUniqueId()).forEach((k, v) -> {
             if (ServerMarket.getStorageHandler().removeOfflineTransaction(k)) {
                 // 获取市场数据
-                MarketData marketData = MarketData.MARKET_DATA.getOrDefault(v.getSourceMarket(), null);
+                MarketData marketData = DataContainer.MARKET_DATA.getOrDefault(v.getSourceMarket(), null);
                 // 获取可获得货币
                 double price = v.getAmount(), last = marketData == null ? price : marketData.getLastMoney(marketData.getTaxSection(), player, price);
                 // 判断货币桥是否存在

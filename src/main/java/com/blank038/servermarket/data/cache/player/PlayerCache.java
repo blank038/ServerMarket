@@ -3,8 +3,10 @@ package com.blank038.servermarket.data.cache.player;
 import com.blank038.servermarket.api.event.PlayerStoreItemAddEvent;
 import com.blank038.servermarket.data.cache.sale.SaleCache;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -18,6 +20,8 @@ import java.util.UUID;
 public class PlayerCache {
     private final Map<String, ItemStack> storeItems = new HashMap<>();
     private final UUID ownerUniqueId;
+    @Setter
+    private boolean newData;
 
     public PlayerCache(UUID uuid, FileConfiguration data) {
         this.ownerUniqueId = uuid;
@@ -29,8 +33,13 @@ public class PlayerCache {
         }
     }
 
+    public PlayerCache(UUID uuid, FileConfiguration data, boolean newData) {
+        this(uuid, data);
+        this.newData = newData;
+    }
+
     /**
-     * 判断暂存库是否有物品
+     * 判断暂存库是否有物品, Only YAML
      *
      * @param uuid 物品编号
      * @return 是否拥有
@@ -40,7 +49,7 @@ public class PlayerCache {
     }
 
     /**
-     * 从暂存箱中移除某个物品
+     * 从暂存箱中移除某个物品, Only YAML
      *
      * @param uuid 物品编号
      * @return 移除的物品
@@ -50,7 +59,7 @@ public class PlayerCache {
     }
 
     /**
-     * 增加暂存物品至暂存箱
+     * 增加暂存物品至暂存箱, Only YAML
      *
      * @param itemStack 增加的物品
      */
@@ -64,7 +73,7 @@ public class PlayerCache {
     }
 
     /**
-     * 增加物品至暂存箱且增加购买记录
+     * 增加物品至暂存箱且增加购买记录, Only YAML
      *
      * @param saleItem 购买的商品
      */
@@ -75,5 +84,13 @@ public class PlayerCache {
         if (event.getItemStack() != null) {
             storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
         }
+    }
+
+    public FileConfiguration saveToConfiguration() {
+        FileConfiguration data = new YamlConfiguration();
+        for (Map.Entry<String, ItemStack> entry : this.getStoreItems().entrySet()) {
+            data.set("items." + entry.getKey(), entry.getValue());
+        }
+        return data;
     }
 }

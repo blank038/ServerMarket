@@ -3,6 +3,7 @@ package com.blank038.servermarket.data.handler;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.InitializeStorageHandlerEvent;
 import com.blank038.servermarket.data.cache.player.PlayerCache;
+import com.blank038.servermarket.data.handler.impl.MysqlStorageHandlerImpl;
 import com.blank038.servermarket.data.handler.impl.YamlStorageHandlerImpl;
 import org.bukkit.Bukkit;
 
@@ -26,6 +27,7 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
             IStorageHandler storageHandler = null;
             switch (ServerMarket.getInstance().getConfig().getString("data-option.type").toLowerCase()) {
                 case "mysql":
+                    storageHandler = new MysqlStorageHandlerImpl();
                     break;
                 case "yaml":
                 default:
@@ -38,5 +40,14 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
             ServerMarket.setStorageHandler(event.getStorageHandler());
             ServerMarket.getStorageHandler().initialize();
         }
+    }
+
+    @Override
+    public void setLock(UUID uuid, boolean locked) {
+    }
+
+    @Override
+    public boolean isLocked(UUID uuid) {
+        return false;
     }
 }

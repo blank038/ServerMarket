@@ -11,10 +11,11 @@ import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.gui.AbstractGui;
 import com.blank038.servermarket.i18n.I18n;
+import com.blank038.servermarket.util.ItemUtil;
+import com.blank038.servermarket.util.TextUtil;
 import com.google.common.collect.Lists;
 import de.tr7zw.nbtapi.NBTItem;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -55,7 +56,7 @@ public class MarketGui extends AbstractGui {
      * @param player 目标玩家
      */
     public void openGui(Player player) {
-        MarketData marketData = MarketData.MARKET_DATA.get(this.sourceMarketKey);
+        MarketData marketData = DataContainer.MARKET_DATA.get(this.sourceMarketKey);
         if (marketData == null || marketData.getMarketStatus() == MarketStatus.ERROR) {
             player.sendMessage(I18n.getStrAndHeader("market-error"));
             return;
@@ -120,7 +121,7 @@ public class MarketGui extends AbstractGui {
                 Player clicker = (Player) e.getWhoClicked();
                 if (key != null && !key.isEmpty()) {
                     // 购买商品
-                    MarketData.MARKET_DATA.get(this.sourceMarketKey).tryBuySale(clicker, key, e.isShiftClick(), lastPage, filter);
+                    DataContainer.MARKET_DATA.get(this.sourceMarketKey).tryBuySale(clicker, key, e.isShiftClick(), lastPage, filter);
                 } else if (action != null && !action.isEmpty()) {
                     // 判断交互方式
                     switch (action) {
@@ -183,15 +184,15 @@ public class MarketGui extends AbstractGui {
         if (data.contains("items")) {
             for (String key : data.getConfigurationSection("items").getKeys(false)) {
                 ConfigurationSection section = data.getConfigurationSection("items." + key);
-                ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()),
-                        section.getInt("amount"), (short) section.getInt("data"));
+                ItemStack itemStack = ItemUtil.generateItem(section.getString("type"),
+                        section.getInt("amount"),
+                        (short) section.getInt("data"),
+                        section.getInt("customModel", -1));
                 ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
+                itemMeta.setDisplayName(TextUtil.formatHexColor(section.getString("name")));
                 // 开始遍历设置Lore
-                List<String> list = new ArrayList<>();
-                for (String lore : section.getStringList("lore")) {
-                    list.add(ChatColor.translateAlternateColorCodes('&', lore).replace("%saleType%", this.getCurrentTypeDisplayName()));
-                }
+                List<String> list = new ArrayList<>(section.getStringList("lore"));
+                list.replaceAll((s) -> TextUtil.formatHexColor(s).replace("%saleType%", this.getCurrentTypeDisplayName()));
                 itemMeta.setLore(list);
                 itemStack.setItemMeta(itemMeta);
                 // 开始判断是否有交互操作
@@ -227,7 +228,7 @@ public class MarketGui extends AbstractGui {
             SimpleDateFormat sdf = new SimpleDateFormat(marketData.getDateFormat());
             // 设置额外信息
             for (String i : data.getStringList("sale-info")) {
-                lore.add(ChatColor.translateAlternateColorCodes('&', i).replace("%seller%", saleItem.getOwnerName())
+                lore.add(TextUtil.formatHexColor(i).replace("%seller%", saleItem.getOwnerName())
                         .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
             }
             itemMeta.setLore(lore);

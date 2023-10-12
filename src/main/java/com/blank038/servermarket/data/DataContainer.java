@@ -5,7 +5,7 @@ import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
-import org.bukkit.ChatColor;
+import com.blank038.servermarket.util.TextUtil;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -18,6 +18,7 @@ import java.util.*;
 public class DataContainer {
     public static final Map<String, List<String>> SALE_TYPES = new HashMap<>();
     public static final Map<String, String> SALE_TYPE_DISPLAY_NAME = new HashMap<>();
+    public static final HashMap<String, MarketData> MARKET_DATA = new HashMap<>();
 
     public static void loadData() {
         ServerMarket.getInstance().saveResource("types.yml", "types.yml", false, (file) -> {
@@ -30,12 +31,12 @@ public class DataContainer {
             }
             if (data.contains("default")) {
                 for (String key : data.getConfigurationSection("default").getKeys(false)) {
-                    DataContainer.SALE_TYPE_DISPLAY_NAME.put(key, ChatColor.translateAlternateColorCodes('&', data.getString("default." + key)));
+                    DataContainer.SALE_TYPE_DISPLAY_NAME.put(key, TextUtil.formatHexColor(data.getString("default." + key)));
                 }
             }
         });
         // Save all data
-        if (!MarketData.MARKET_DATA.isEmpty() && ServerMarket.getStorageHandler() != null) {
+        if (!MARKET_DATA.isEmpty() && ServerMarket.getStorageHandler() != null) {
             ServerMarket.getStorageHandler().saveAll();
         }
         // Load market data
@@ -45,7 +46,7 @@ public class DataContainer {
             // 输出
             ServerMarket.getInstance().saveResource("market/example.yml", "market/example.yml");
         }
-        MarketData.MARKET_DATA.clear();
+        MARKET_DATA.clear();
         Arrays.stream(file.listFiles()).iterator().forEachRemaining(MarketData::new);
     }
 

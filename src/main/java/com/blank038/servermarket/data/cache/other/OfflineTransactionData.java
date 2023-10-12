@@ -26,6 +26,14 @@ public class OfflineTransactionData {
         this.sourceMarket = section.getString("source-market");
     }
 
+    public OfflineTransactionData(String sourceMarket, UUID ownerUniqueId, PayType payType, String economyType, double amount) {
+        this.sourceMarket = sourceMarket;
+        this.ownerUniqueId = ownerUniqueId;
+        this.payType = payType;
+        this.economyType = economyType;
+        this.amount = amount;
+    }
+
     public ConfigurationSection toSection() {
         ConfigurationSection section = new YamlConfiguration();
         section.set("amount", this.amount);

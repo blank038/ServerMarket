@@ -1,6 +1,6 @@
 package com.blank038.servermarket.enums;
 
-public enum SaleType {
+public enum LogType {
     SELL,
     BUY,
     TIMEOUT,

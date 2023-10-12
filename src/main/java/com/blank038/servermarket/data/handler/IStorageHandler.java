@@ -116,13 +116,17 @@ public interface IStorageHandler {
      */
     void savePlayerData(PlayerCache playerCache, boolean removeCache);
 
+    void setLock(UUID uuid, boolean locked);
+
+    boolean isLocked(UUID uuid);
+
     /**
      * 获取玩家缓存数据，如果数据不存在则载入
      *
      * @param uuid 目标玩家
      * @return 玩家数据
      */
-    PlayerCache getOrLoadPlayerCache(UUID uuid);
+    PlayerCache getOrLoadPlayerCache(UUID uuid, boolean forceLoad);
 
     /**
      * 从缓存中获取玩家数据，如果数据不存在则返回 Optional.empty()

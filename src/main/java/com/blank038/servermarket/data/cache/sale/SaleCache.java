@@ -20,7 +20,7 @@ public class SaleCache {
     /**
      * 存储物品的 UUID
      */
-    private final String saleUUID, ownerUUID, ownerName;
+    private final String saleUUID, ownerUUID, ownerName, ecoType, sourceMarket;
     /**
      * 商品对应的物品
      */
@@ -39,7 +39,7 @@ public class SaleCache {
     private final long postTime;
     private final List<String> saleTypes = new ArrayList<>();
 
-    public SaleCache(ConfigurationSection section) {
+    public SaleCache(String market, ConfigurationSection section) {
         this.saleUUID = section.getString("sale-uuid");
         this.ownerName = section.getString("owner-name");
         this.ownerUUID = section.getString("owner-uuid");
@@ -47,18 +47,22 @@ public class SaleCache {
         this.payType = PayType.valueOf(section.getString("pay-type"));
         this.price = section.getInt("price");
         this.postTime = section.getLong("post-time");
+        this.ecoType = section.getString("eco-type");
+        this.sourceMarket = market;
         this.init();
     }
 
-    public SaleCache(String saleUUID, String ownerUUID, String ownerName, ItemStack itemStack,
-                     PayType payType, double price, long postTime) {
+    public SaleCache(String saleUUID, String market, String ownerUUID, String ownerName, ItemStack itemStack,
+                     PayType payType, String ecoType, double price, long postTime) {
         this.saleUUID = saleUUID;
         this.ownerUUID = ownerUUID;
         this.ownerName = ownerName;
         this.saleItem = itemStack.clone();
         this.payType = payType;
+        this.ecoType = ecoType;
         this.price = price;
         this.postTime = postTime;
+        this.sourceMarket = market;
         this.init();
     }
 
@@ -78,6 +82,7 @@ public class SaleCache {
         section.set("owner-name", ownerName);
         section.set("sale-item", saleItem);
         section.set("pay-type", payType.name());
+        section.set("eco-type", this.ecoType);
         section.set("price", price);
         section.set("post-time", postTime);
         return section;

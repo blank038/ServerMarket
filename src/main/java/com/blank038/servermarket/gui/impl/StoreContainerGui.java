@@ -7,9 +7,9 @@ import com.blank038.servermarket.data.cache.player.PlayerCache;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.gui.AbstractGui;
 import com.blank038.servermarket.i18n.I18n;
+import com.blank038.servermarket.util.ItemUtil;
+import com.blank038.servermarket.util.TextUtil;
 import de.tr7zw.nbtapi.NBTItem;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -54,15 +54,15 @@ public class StoreContainerGui extends AbstractGui {
             if (data.contains("items")) {
                 for (String key : data.getConfigurationSection("items").getKeys(false)) {
                     ConfigurationSection section = data.getConfigurationSection("items." + key);
-                    ItemStack itemStack = new ItemStack(Material.valueOf(section.getString("type").toUpperCase()),
-                            section.getInt("amount"), (short) section.getInt("data"));
+                    ItemStack itemStack = ItemUtil.generateItem(section.getString("type"),
+                            section.getInt("amount"),
+                            (short) section.getInt("data"),
+                            section.getInt("customModel", -1));
                     ItemMeta itemMeta = itemStack.getItemMeta();
-                    itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', section.getString("name")));
+                    itemMeta.setDisplayName(TextUtil.formatHexColor(section.getString("name")));
                     // 开始遍历设置Lore
-                    List<String> list = new ArrayList<>();
-                    for (String lore : section.getStringList("lore")) {
-                        list.add(ChatColor.translateAlternateColorCodes('&', lore));
-                    }
+                    List<String> list = new ArrayList<>(section.getStringList("lore"));
+                    list.replaceAll(TextUtil::formatHexColor);
                     itemMeta.setLore(list);
                     itemStack.setItemMeta(itemMeta);
                     // 开始判断是否有交互操作

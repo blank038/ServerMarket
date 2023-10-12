@@ -8,7 +8,6 @@ import com.blank038.servermarket.economy.BaseEconomy;
 import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.i18n.I18n;
-import com.blank038.servermarket.data.cache.market.MarketData;
 import com.blank038.servermarket.listen.impl.CoreListener;
 import com.blank038.servermarket.listen.impl.PlayerListener;
 import com.blank038.servermarket.metrics.Metrics;
@@ -81,7 +80,7 @@ public class ServerMarket extends AyPlugin {
         }
         // Initialize DataContainer
         DataContainer.loadData();
-        this.getConsoleLogger().log(false, "&6 * &f加载完成, 已读取 &a" + MarketData.MARKET_DATA.size() + "&f 个市场");
+        this.getConsoleLogger().log(false, "&6 * &f加载完成, 已读取 &a" + DataContainer.MARKET_DATA.size() + "&f 个市场");
         this.getConsoleLogger().log(false, " ");
     }
 }
