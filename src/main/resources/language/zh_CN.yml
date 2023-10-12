@@ -14,6 +14,10 @@ help:
     - "&f/%c box 查看市场暂存盒"
     - "&f/%c show 查看市场情况"
     - "&f/%c reload 重载插件配置文件"
+
+pulling-start: "正在加载你的数据."
+pulling-completed: "数据已经加载完成."
+
 error-sale: "商品已被购买或已被下架."
 no-previous-page: "已经是第一页了."
 no-next-page: "已经是最后一页了."
@@ -50,7 +54,6 @@ show:
   - "&c上架物品前请将物品手持在手上."
 reload: "插件配置重载完成."
 
-# 市场状态文本
 status-text:
   loaded: "&a已加载"
   error: "&c出现异常"

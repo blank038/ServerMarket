@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  * @author Blank038
  */
 public class I18n {
-    private static final String[] LANGUAGES = {"zh_CN.yml"};
+    private static final String[] LANGUAGES = {"zh_CN.yml", "en_US.yml"};
     private static I18n instance;
 
     private final Map<String, String> stringOptions = new HashMap<>();

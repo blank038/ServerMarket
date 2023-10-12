@@ -1,7 +1,7 @@
 language: "zh_CN"
 # 存储设定
 data-option:
-  # 存储类型, 支持: MySQL, SQLite, YAML
+  # 存储类型, 支持: MySQL, YAML
   type: YAML
   # MySQL url, 例如 jdbc:mysql://127.0.0.1/minecraft 格式: jdbc:mysql://MySQL地址/数据库名
   url: jdbc:mysql://localhost/minecraft?useSSL=false
@@ -9,6 +9,10 @@ data-option:
   user: "root"
   # 数据库密码
   password: "root"
+  # 数据库读取超时打开数据锁时长, 2 = 1秒
+  time-out: 120
+  # 同步提示
+  pull-notify: true
 # 如果未填写市场名的话, 默认操作市场
 default-market: "example"
 # 是否启用命令短写帮助
