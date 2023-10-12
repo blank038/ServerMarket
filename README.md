@@ -6,14 +6,15 @@
 
 ### ⚙ 依赖 | Dependencies
 
-|  插件名   | 依赖关系 |                                        下载地址                                        |
-|:------:|:----:|:----------------------------------------------------------------------------------:|
-| AyCore | 硬依赖  | https://github.com/Blank038/ServerMarket/blob/master/depends/AyCore-1.0.3-BETA.jar |
-| NBTAPI | 硬依赖  |                    https://modrinth.com/plugin/nbtapi/versions                     |
+|  插件名   | 依赖关系 |                             下载地址                              |
+|:------:|:----:|:-------------------------------------------------------------:|
+| AyCore | 硬依赖  | https://github.com/Blank038/ServerMarket/blob/master/depends/ |
+| NBTAPI | 硬依赖  |          https://modrinth.com/plugin/nbtapi/versions          |
 
 ### ✨ 功能 | Features
 
 * 高度自定义 Gui 界面
+* 支持 MySQL, YAML 格式存储
 * 自定义商品原信息是否显示
 * 自定义商品所在槽位
 * 个人仓库及仓库面板自定义
