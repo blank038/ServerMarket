@@ -106,7 +106,7 @@ public class StoreContainerGui extends AbstractGui {
                     if ("market".equalsIgnoreCase(action)) {
                         ServerMarket.getApi().openMarket(clicker, this.oldMarket, this.marketPage, this.filterBuilder);
                     } else if (storeId != null && !storeId.isEmpty()) {
-                        this.getItem(clicker, storeId);
+                        this.getItem(clicker, storeId, currentPage);
                     }
                 }
             });
@@ -114,7 +114,7 @@ public class StoreContainerGui extends AbstractGui {
         }
     }
 
-    public void getItem(Player player, String uuid) {
+    public void getItem(Player player, String uuid, int currentPage) {
         ServerMarket.getStorageHandler().getPlayerDataByCache(player.getUniqueId()).ifPresent((data) -> {
             if (data.hasStoretem(uuid)) {
                 if (player.getInventory().firstEmpty() == -1) {
@@ -131,7 +131,7 @@ public class StoreContainerGui extends AbstractGui {
                             .replace("%item%", displayMmae)
                             .replace("%amount%", String.valueOf(itemStack.getAmount())));
                     // 刷新玩家界面
-                    ServerMarket.getApi().openMarket(player, this.oldMarket, this.marketPage, null);
+                    this.open(currentPage);
                 } else {
                     player.sendMessage(I18n.getStrAndHeader("error-store"));
                 }
