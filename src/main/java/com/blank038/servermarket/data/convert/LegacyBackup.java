@@ -3,10 +3,11 @@ package com.blank038.servermarket.data.convert;
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.i18n.I18n;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.libs.org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 
 /**
@@ -25,7 +26,8 @@ public class LegacyBackup {
                 // backups data
                 try {
                     String fileName = "ServerMarket-" + System.currentTimeMillis();
-                    FileUtils.copyDirectory(ServerMarket.getInstance().getDataFolder(), new File(backupFolder, fileName));
+                    Files.createDirectories(Paths.get("./backups", fileName));
+                    LegacyBackup.copyFile(ServerMarket.getInstance().getDataFolder(), new File(backupFolder, fileName));
                     ServerMarket.getInstance().saveResource("history.yml", "history.yml");
                     ServerMarket.getInstance().getConsoleLogger().log(false,
                             I18n.getProperties().getProperty("backup-completed").replace("%s", fileName));
@@ -35,5 +37,29 @@ public class LegacyBackup {
                 }
             }
         }
+    }
+
+    private static boolean copyFile(File in, File out) throws IOException {
+        if (in.exists()) {
+            if (in.isDirectory()) {
+                out.mkdir();
+                for (File i : in.listFiles()) {
+                    LegacyBackup.copyFile(new File(in, i.getName()), new File(out, i.getName()));
+                }
+            } else if (in.isFile()) {
+                InputStreamReader isr = new InputStreamReader(Files.newInputStream(in.toPath()), StandardCharsets.UTF_8);
+                OutputStreamWriter osw = new OutputStreamWriter(Files.newOutputStream(out.toPath()),StandardCharsets.UTF_8);
+                char[] bytes = new char[1024];
+                int len;
+                while ((len = isr.read(bytes)) > 0) {
+                    osw.write(bytes, 0, len);
+                }
+                isr.close();
+                osw.flush();
+                osw.close();
+            }
+            return true;
+        }
+        return false;
     }
 }

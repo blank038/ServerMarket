@@ -10,6 +10,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -67,8 +70,8 @@ public class I18n {
         this.header = "prefix";
         // initialize properties
         properties = new Properties();
-        try {
-            properties.load(ServerMarket.getInstance().getResource("properties/" + language + ".properties"));
+        try (InputStream resourceInputStream = ServerMarket.getInstance().getResource("properties/" + language + ".properties")) {
+            properties.load(new InputStreamReader(resourceInputStream, StandardCharsets.UTF_8));
         } catch (IOException e) {
             ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to load properties file.");
         }

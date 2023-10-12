@@ -68,11 +68,11 @@ public class ServerMarket extends AyPlugin {
         this.getConsoleLogger().log(false, " ");
         this.saveDefaultConfig();
         this.reloadConfig();
+        // Initialize I18n
+        new I18n(this.getConfig().getString("language", "zh_CN"));
         // Run legacy converter
         LegacyBackup.check();
         if (this.isEnabled()) {
-            // Initialize I18n
-            new I18n(this.getConfig().getString("language", "zh_CN"));
             // Initialize IStorageHandler
             AbstractStorageHandler.check();
             storageHandler.reload();
