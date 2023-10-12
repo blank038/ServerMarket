@@ -39,7 +39,7 @@ public class PlayerCache {
     }
 
     /**
-     * 判断暂存库是否有物品, Only YAML
+     * 判断暂存库是否有物品
      *
      * @param uuid 物品编号
      * @return 是否拥有
@@ -59,7 +59,7 @@ public class PlayerCache {
     }
 
     /**
-     * 增加暂存物品至暂存箱, Only YAML
+     * 增加暂存物品至暂存箱
      *
      * @param itemStack 增加的物品
      */
@@ -73,7 +73,7 @@ public class PlayerCache {
     }
 
     /**
-     * 增加物品至暂存箱且增加购买记录, Only YAML
+     * 增加物品至暂存箱且增加购买记录
      *
      * @param saleItem 购买的商品
      */
