@@ -2,6 +2,7 @@ package com.blank038.servermarket;
 
 import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.servermarket.api.ServerMarketApi;
+import com.blank038.servermarket.data.convert.LegacyBackup;
 import com.blank038.servermarket.data.handler.AbstractStorageHandler;
 import com.blank038.servermarket.data.handler.IStorageHandler;
 import com.blank038.servermarket.economy.BaseEconomy;
@@ -67,20 +68,25 @@ public class ServerMarket extends AyPlugin {
         this.getConsoleLogger().log(false, " ");
         this.saveDefaultConfig();
         this.reloadConfig();
-        // Initialize IStorageHandler
-        AbstractStorageHandler.check();
-        storageHandler.reload();
-        // Initialize economy
-        BaseEconomy.initEconomies();
-        // Initialize I18n
-        new I18n(this.getConfig().getString("language", "zh_CN"));
-        // Save the default files
-        for (String fileName : new String[]{"gui/store.yml"}) {
-            this.saveResource(fileName, fileName);
+        // Run legacy converter
+        LegacyBackup.check();
+        if (this.isEnabled()) {
+            // Initialize I18n
+            new I18n(this.getConfig().getString("language", "zh_CN"));
+            // Initialize IStorageHandler
+            AbstractStorageHandler.check();
+            storageHandler.reload();
+            // Initialize economy
+            BaseEconomy.initEconomies();
+            // Save the default files
+            for (String fileName : new String[]{"gui/store.yml"}) {
+                this.saveResource(fileName, fileName);
+            }
+            // Initialize DataContainer
+            DataContainer.loadData();
+            this.getConsoleLogger().log(false, I18n.getProperties().getProperty("load-completed")
+                    .replace("%s", String.valueOf(DataContainer.MARKET_DATA.size())));
+            this.getConsoleLogger().log(false, " ");
         }
-        // Initialize DataContainer
-        DataContainer.loadData();
-        this.getConsoleLogger().log(false, "&6 * &f加载完成, 已读取 &a" + DataContainer.MARKET_DATA.size() + "&f 个市场");
-        this.getConsoleLogger().log(false, " ");
     }
 }

@@ -9,10 +9,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 /**
@@ -22,7 +21,10 @@ import java.util.stream.Collectors;
  */
 public class I18n {
     private static final String[] LANGUAGES = {"zh_CN.yml", "en_US.yml"};
+    @Getter
     private static I18n instance;
+    @Getter
+    private static Properties properties;
 
     private final Map<String, String> stringOptions = new HashMap<>();
     private final Map<String, List<String>> arrayOptions = new HashMap<>();
@@ -63,6 +65,13 @@ public class I18n {
             }
         }
         this.header = "prefix";
+        // initialize properties
+        properties = new Properties();
+        try {
+            properties.load(ServerMarket.getInstance().getResource("properties/" + language + ".properties"));
+        } catch (IOException e) {
+            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to load properties file.");
+        }
     }
 
     public static String getStrAndHeader(String key) {
@@ -88,9 +97,5 @@ public class I18n {
             return new ArrayList<>(instance.arrayOptions.get(key));
         }
         return Lists.newArrayList();
-    }
-
-    public static I18n inst() {
-        return instance;
     }
 }

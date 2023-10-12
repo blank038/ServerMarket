@@ -86,15 +86,18 @@ public class MarketData {
         }
         if (!BaseEconomy.PAY_TYPES.containsKey(this.paytype)) {
             this.marketStatus = MarketStatus.ERROR;
-            ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f异常, 货币不存在");
+            ServerMarket.getInstance().getConsoleLogger().log(false,
+                    I18n.getProperties().getProperty("load-market-eco-not-exists").replace("%s", this.displayName));
         } else {
             this.marketStatus = MarketStatus.LOADED;
             try {
                 ServerMarket.getStorageHandler().load(this.marketKey);
-                ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f市场 &e" + this.displayName + " &f加载成功");
+                ServerMarket.getInstance().getConsoleLogger().log(false,
+                        I18n.getProperties().getProperty("load-market-completed").replace("%s", this.displayName));
             } catch (Exception ignored) {
                 this.marketStatus = MarketStatus.ERROR;
-                ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f读取市场 &e" + this.displayName + " &f物品异常");
+                ServerMarket.getInstance().getConsoleLogger().log(false,
+                        I18n.getProperties().getProperty("load-market-wrong-sale-item").replace("%s", this.displayName));
             }
         }
         DataContainer.MARKET_DATA.put(this.getMarketKey(), this);

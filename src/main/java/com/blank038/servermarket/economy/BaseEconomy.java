@@ -2,21 +2,24 @@ package com.blank038.servermarket.economy;
 
 import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.enums.PayType;
+import com.blank038.servermarket.i18n.I18n;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 /**
  * @author Blank038
  */
 public abstract class BaseEconomy {
-    public static final HashMap<PayType, BaseEconomy> PAY_TYPES = new HashMap<>();
+    public static final Map<PayType, BaseEconomy> PAY_TYPES = new HashMap<>();
 
     public BaseEconomy(PayType payType) {
         PAY_TYPES.put(payType, this);
-        ServerMarket.getInstance().getConsoleLogger().log(false, "&6 * &f挂钩货币: &e" + payType.getPlugin());
+        ServerMarket.getInstance().getConsoleLogger().log(false,
+                I18n.getProperties().getProperty("hook-economy").replace("%s", payType.getPlugin()));
     }
 
     /**
