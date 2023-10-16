@@ -1,5 +1,6 @@
 package com.blank038.servermarket.data.cache.player;
 
+import com.blank038.servermarket.ServerMarket;
 import com.blank038.servermarket.api.event.PlayerStoreItemAddEvent;
 import com.blank038.servermarket.data.cache.sale.SaleCache;
 import lombok.Getter;
@@ -65,11 +66,13 @@ public class PlayerCache {
      */
     public void addStoreItem(ItemStack itemStack, String reason) {
         // call PlayerStoreItemAddEvent
-        PlayerStoreItemAddEvent event = new PlayerStoreItemAddEvent(this.getOwnerUniqueId(), itemStack, reason);
-        Bukkit.getPluginManager().callEvent(event);
-        if (event.getItemStack() != null) {
-            storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
-        }
+        Bukkit.getScheduler().runTask(ServerMarket.getInstance(), () -> {
+            PlayerStoreItemAddEvent event = new PlayerStoreItemAddEvent(this.getOwnerUniqueId(), itemStack, reason);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.getItemStack() != null) {
+                storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
+            }
+        });
     }
 
     /**
@@ -79,11 +82,13 @@ public class PlayerCache {
      */
     public void addStoreItem(SaleCache saleItem, String reason) {
         // call PlayerStoreItemAddEvent
-        PlayerStoreItemAddEvent event = new PlayerStoreItemAddEvent(this.getOwnerUniqueId(), saleItem.getSaleItem(), reason);
-        Bukkit.getPluginManager().callEvent(event);
-        if (event.getItemStack() != null) {
-            storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
-        }
+        Bukkit.getScheduler().runTask(ServerMarket.getInstance(), () -> {
+            PlayerStoreItemAddEvent event = new PlayerStoreItemAddEvent(this.getOwnerUniqueId(), saleItem.getSaleItem(), reason);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.getItemStack() != null) {
+                storeItems.put(UUID.randomUUID().toString(), event.getItemStack().clone());
+            }
+        });
     }
 
     public FileConfiguration saveToConfiguration() {
