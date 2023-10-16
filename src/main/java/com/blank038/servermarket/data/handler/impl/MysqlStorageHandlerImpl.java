@@ -226,9 +226,9 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
                 if (second >= v.getEffectiveTime()) {
                     iterator.remove();
                     UUID uuid = UUID.fromString(entry.getValue().getOwnerUUID());
-                    if (ServerMarket.getStorageHandler().removeStoreItem(uuid, entry.getKey()) != null) {
-                        ServerMarket.getStorageHandler().addItemToStore(uuid, entry.getValue().getSaleItem(), "timeout");
-                    }
+                    ServerMarket.getStorageHandler().removeSaleItem(k, entry.getKey()).ifPresent((sale) -> {
+                        ServerMarket.getStorageHandler().addItemToStore(uuid, sale.getSaleItem(), "timeout");
+                    });
                 }
             }
         });
@@ -327,23 +327,22 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
         if (PLAYER_DATA_MAP.containsKey(uuid)) {
             return PLAYER_DATA_MAP.get(uuid);
         }
-        Player player = Bukkit.getPlayer(uuid);
         if (forceLoad) {
             AtomicReference<PlayerCache> reference = new AtomicReference<>(null);
             storageHandler.connect((preparedStatement) -> {
                 try {
-                    preparedStatement.setString(1, player.getUniqueId().toString());
+                    preparedStatement.setString(1, uuid.toString());
                     ResultSet resultSet = preparedStatement.executeQuery();
                     if (resultSet.next()) {
                         byte[] bytes = Base64.getDecoder().decode(resultSet.getString(1).getBytes(StandardCharsets.UTF_8));
                         FileConfiguration data = new YamlConfiguration();
                         data.loadFromString(new String(bytes, StandardCharsets.UTF_8));
-                        PlayerCache playerCache = new PlayerCache(player.getUniqueId(), data);
-                        PLAYER_DATA_MAP.put(player.getUniqueId(), playerCache);
+                        PlayerCache playerCache = new PlayerCache(uuid, data);
+                        PLAYER_DATA_MAP.put(uuid, playerCache);
                         reference.set(playerCache);
                     } else {
-                        PlayerCache playerCache = new PlayerCache(player.getUniqueId(), new YamlConfiguration(), true);
-                        PLAYER_DATA_MAP.put(player.getUniqueId(), playerCache);
+                        PlayerCache playerCache = new PlayerCache(uuid, new YamlConfiguration(), true);
+                        PLAYER_DATA_MAP.put(uuid, playerCache);
                         reference.set(playerCache);
                     }
                 } catch (SQLException | InvalidConfigurationException e) {
@@ -352,6 +351,7 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
             }, "SELECT data FROM " + playersTable + " WHERE player_uuid = ?;");
             return reference.get();
         } else {
+            Player player = Bukkit.getPlayer(uuid);
             if (this.pluign.getConfig().getBoolean("data-option.pull-notify")
                     && player != null && player.isOnline()) {
                 player.sendMessage(I18n.getStrAndHeader("pulling-start"));
