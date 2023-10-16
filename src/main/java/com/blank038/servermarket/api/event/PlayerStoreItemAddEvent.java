@@ -25,6 +25,7 @@ public class PlayerStoreItemAddEvent extends Event {
     private ItemStack itemStack;
 
     public PlayerStoreItemAddEvent(UUID uuid, ItemStack itemStack, String reason) {
+        super(true);
         this.ownerUniqueId = uuid;
         this.itemStack = itemStack;
         this.reason = reason;
