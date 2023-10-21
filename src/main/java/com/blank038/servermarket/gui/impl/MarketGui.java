@@ -95,7 +95,7 @@ public class MarketGui extends AbstractGui {
                 break;
             }
             // 开始设置物品
-           Optional<SaleCache> saleItemOptional = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
+            Optional<SaleCache> saleItemOptional = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
             if (!saleItemOptional.isPresent()) {
                 --index;
                 continue;
@@ -220,8 +220,13 @@ public class MarketGui extends AbstractGui {
      */
     private ItemStack getShowItem(MarketData marketData, SaleCache saleItem, FileConfiguration data) {
         ItemStack itemStack = saleItem.getSaleItem().clone();
+        ItemMeta itemMeta = itemStack.getItemMeta();
+        if (data.contains("sale-name")) {
+            String displayName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : itemStack.getType().name(),
+                    finalName = data.getString("sale-name").replace("%name%", displayName);
+            itemMeta.setDisplayName(TextUtil.formatHexColor(finalName));
+        }
         if (marketData.isShowSaleInfo()) {
-            ItemMeta itemMeta = itemStack.getItemMeta();
             List<String> lore = itemMeta.hasLore() ? itemMeta.getLore() : Lists.newArrayList();
             // 设置物品格式
             Date date = new Date(saleItem.getPostTime());
@@ -232,8 +237,9 @@ public class MarketGui extends AbstractGui {
                         .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
             }
             itemMeta.setLore(lore);
-            itemStack.setItemMeta(itemMeta);
         }
+        itemStack.setItemMeta(itemMeta);
+        // Add uuid to the sale nbt.
         NBTItem nbtItem = new NBTItem(itemStack);
         nbtItem.setString("SaleUUID", saleItem.getSaleUUID());
         return nbtItem.getItem();

@@ -71,6 +71,7 @@ size: 54
 #   > 数字(小)-数字(大) 例子: 0-44
 #   > 数字 例子: 0
 sale-item-slots: "0-44"
+sale-name: "%name%"
 # 物品信息
 sale-info:
   - " "
