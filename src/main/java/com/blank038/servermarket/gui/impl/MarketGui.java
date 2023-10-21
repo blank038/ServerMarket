@@ -221,9 +221,9 @@ public class MarketGui extends AbstractGui {
     private ItemStack getShowItem(MarketData marketData, SaleCache saleItem, FileConfiguration data) {
         ItemStack itemStack = saleItem.getSaleItem().clone();
         ItemMeta itemMeta = itemStack.getItemMeta();
+        String displayName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : itemStack.getType().name();
         if (data.contains("sale-name")) {
-            String displayName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : itemStack.getType().name(),
-                    finalName = data.getString("sale-name").replace("%name%", displayName);
+            String finalName = data.getString("sale-name").replace("%name%", displayName);
             itemMeta.setDisplayName(TextUtil.formatHexColor(finalName));
         }
         if (marketData.isShowSaleInfo()) {
@@ -233,8 +233,11 @@ public class MarketGui extends AbstractGui {
             SimpleDateFormat sdf = new SimpleDateFormat(marketData.getDateFormat());
             // 设置额外信息
             for (String i : data.getStringList("sale-info")) {
-                lore.add(TextUtil.formatHexColor(i).replace("%seller%", saleItem.getOwnerName())
-                        .replace("%price%", String.valueOf(saleItem.getPrice())).replace("%time%", sdf.format(date)));
+                lore.add(TextUtil.formatHexColor(i)
+                        .replace("%seller%", saleItem.getOwnerName())
+                        .replace("%price%", String.valueOf(saleItem.getPrice()))
+                        .replace("%time%", sdf.format(date))
+                        .replace("%name%", displayName));
             }
             itemMeta.setLore(lore);
         }
