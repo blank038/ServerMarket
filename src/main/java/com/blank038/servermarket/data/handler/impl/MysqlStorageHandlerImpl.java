@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
@@ -78,6 +79,23 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
             }
         }, "SELECT sale_uuid FROM " + salesTable + " WHERE sale_uuid = ? AND market = ?;");
         return atomicBoolean.get();
+    }
+
+    @Override
+    public int getSaleCountByPlayer(UUID uuid, String market) {
+        AtomicInteger count = new AtomicInteger(0);
+        storageHandler.connect((preparedStatement) -> {
+            try (ResultSet resultSet = preparedStatement.executeQuery()){
+                preparedStatement.setString(1, uuid.toString());
+                preparedStatement.setString(2, market);
+                if (resultSet.next()) {
+                    count.set(resultSet.getInt(1));
+                }
+            } catch (SQLException e) {
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to get sale count.");
+            }
+        }, "SELECT count(*) FROM " + this.salesTable + " WHERE owner_uuid = ? AND market = ?;");
+        return count.get();
     }
 
     @Override

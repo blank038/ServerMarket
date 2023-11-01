@@ -104,6 +104,14 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
+    public int getSaleCountByPlayer(UUID uuid, String market) {
+        if (MARKET_STORAGE_DATA_MAP.containsKey(market)) {
+            return MARKET_STORAGE_DATA_MAP.get(market).getSaleByPlayer(uuid).size();
+        }
+        return 0;
+    }
+
+    @Override
     public Optional<SaleCache> getSaleItem(String market, String saleId) {
         if (MARKET_STORAGE_DATA_MAP.containsKey(market)) {
             return MARKET_STORAGE_DATA_MAP.get(market).getSale(saleId);

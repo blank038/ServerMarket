@@ -5,6 +5,8 @@ import com.blank038.servermarket.data.cache.sale.SaleCache;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * It's only used in YAML storage mode.
@@ -48,6 +50,12 @@ public class MarketStorageData {
 
     public Map<String, SaleCache> getSales() {
         return this.saleMap;
+    }
+
+    public Map<String, SaleCache> getSaleByPlayer(UUID uuid) {
+        return this.saleMap.entrySet().stream()
+                .filter((entry) -> entry.getValue().getOwnerUUID().equals(uuid.toString()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public String getMarketSourceId() {

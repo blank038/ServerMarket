@@ -46,6 +46,7 @@ lack-money: "你没有足够的%economy%来购买这个商品."
 shout-tax: "你没有足够的%economy%来上缴税费."
 changeSaleType: "已切换分类, 当前分类: &b%type%"
 cooldown: "你不能这么做, 正在冷却中."
+maximum-sale: "你已经达到上架数量上限."
 show:
   - "&6市场用法"
   - " "

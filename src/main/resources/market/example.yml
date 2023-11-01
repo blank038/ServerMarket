@@ -43,6 +43,14 @@ shout-tax:
   node:
     default: 0.1
     vip: 0.05
+# 玩家上架物品数量限制(当前市场)
+# 权限: header.node(例如: servermarket.limit.count.default)
+# 默认玩家拥有 default 节点权限
+limit-count:
+  header: "servermarket.limit.count"
+  node:
+    default: 3
+    vip: 10
 # 日期格式
 simple-date-format: "yyyy/MM/dd HH:mm:ss"
 # 商品超时时间, 单位: 秒

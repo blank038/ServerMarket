@@ -43,7 +43,7 @@ public class MarketData {
     private final List<String> loreBlackList, typeBlackList, saleTypes;
     private final int min, max, effectiveTime;
     private final PayType paytype;
-    private final ConfigurationSection taxSection, shoutTaxSection;
+    private final ConfigurationSection taxSection, shoutTaxSection, limitCountSection;
     private MarketStatus marketStatus;
     private boolean showSaleInfo, saleBroadcast;
     private String dateFormat;
@@ -70,6 +70,7 @@ public class MarketData {
         this.saleTypes = options.getStringList("types");
         this.taxSection = options.getConfigurationSection("tax");
         this.shoutTaxSection = options.getConfigurationSection("shout-tax");
+        this.limitCountSection = options.getConfigurationSection("limit-count");
         this.showSaleInfo = options.getBoolean("show-sale-info");
         this.saleBroadcast = options.getBoolean("sale-broadcast");
         this.dateFormat = options.getString("simple-date-format");
@@ -117,11 +118,14 @@ public class MarketData {
 
     /**
      * 获取扣税后的价格
+     * <p>
+     * TODO: 此方法将在未来版本移除, 将改用为 MarketData#getPermsValueForPlayer 方法
      *
      * @param player 目标玩家
      * @param money  初始金币
      * @return 扣税后金币
      */
+    @Deprecated
     public double getLastMoney(ConfigurationSection section, Player player, double money) {
         String header = section.getString("header");
         double tax = section.getDouble("node.default");
@@ -134,7 +138,13 @@ public class MarketData {
         return money - money * tax;
     }
 
-    public double getTax(ConfigurationSection section, Player player) {
+    /**
+     * 获取玩家在权限节点上的值
+     *
+     * @param player 目标玩家
+     * @return 最终值
+     */
+    private double getPermsValueForPlayer(ConfigurationSection section, Player player) {
         String header = section.getString("header");
         double tax = section.getDouble("node.default");
         for (String key : section.getConfigurationSection("node").getKeys(false)) {
@@ -304,15 +314,24 @@ public class MarketData {
                     .replace("%max%", extraPrice.split("-")[1]));
             return true;
         }
-        double tax = this.getTax(this.getShoutTaxSection(), player);
+        // 判断玩家上架物品是否上限
+        int currentCount = ServerMarket.getStorageHandler().getSaleCountByPlayer(player.getUniqueId(), this.marketKey);
+        if (currentCount >= this.getPermsValueForPlayer(this.limitCountSection, player)) {
+            player.sendMessage(I18n.getStrAndHeader("maximum-sale"));
+            return true;
+        }
+        // 判断余额是否足够交上架税
+        double tax = this.getPermsValueForPlayer(this.getShoutTaxSection(), player);
         if (BaseEconomy.getEconomyBridge(this.paytype).balance(player, this.ecoType) < tax) {
             player.sendMessage(I18n.getStrAndHeader("shout-tax")
                     .replace("%economy%", this.economyName));
             return true;
         }
         // 扣除费率
-        if (tax > 0) {
-            BaseEconomy.getEconomyBridge(this.paytype).take(player, this.ecoType, tax);
+        if (tax > 0 && !BaseEconomy.getEconomyBridge(this.paytype).take(player, this.ecoType, tax)) {
+            player.sendMessage(I18n.getStrAndHeader("shout-tax")
+                    .replace("%economy%", this.economyName));
+            return true;
         }
         // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);

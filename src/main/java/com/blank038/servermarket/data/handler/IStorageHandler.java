@@ -42,6 +42,15 @@ public interface IStorageHandler {
     boolean hasSale(String market, String saleId);
 
     /**
+     * 获取玩家在目标市场上架的商品数量
+     *
+     * @param uuid   目标玩家 UUID
+     * @param market 目标市场
+     * @return 已上架商品数量
+     */
+    int getSaleCountByPlayer(UUID uuid, String market);
+
+    /**
      * 获取商品数据
      *
      * @param market 市场编号
