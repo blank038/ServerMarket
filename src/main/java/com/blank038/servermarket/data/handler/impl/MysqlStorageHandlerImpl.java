@@ -85,9 +85,10 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
     public int getSaleCountByPlayer(UUID uuid, String market) {
         AtomicInteger count = new AtomicInteger(0);
         storageHandler.connect((preparedStatement) -> {
-            try (ResultSet resultSet = preparedStatement.executeQuery()){
+            try {
                 preparedStatement.setString(1, uuid.toString());
                 preparedStatement.setString(2, market);
+                ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     count.set(resultSet.getInt(1));
                 }
