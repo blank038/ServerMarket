@@ -15,7 +15,17 @@ public abstract class AbstractGui {
 
     static {
         Bukkit.getScheduler().runTaskTimerAsynchronously(ServerMarket.getInstance(), () -> {
-            COOLDOWN.entrySet().removeIf((entry) -> System.currentTimeMillis() > entry.getValue());
+            synchronized (COOLDOWN) {
+                COOLDOWN.entrySet().removeIf((entry) -> System.currentTimeMillis() > entry.getValue());
+            }
         }, 1200L, 1200L);
+    }
+
+    public boolean isCooldown(UUID uuid) {
+        if (System.currentTimeMillis() <= COOLDOWN.getOrDefault(uuid, 0L)) {
+            return true;
+        }
+        COOLDOWN.put(uuid, System.currentTimeMillis() + ServerMarket.getInstance().getConfig().getInt("cooldown.action"));
+        return false;
     }
 }

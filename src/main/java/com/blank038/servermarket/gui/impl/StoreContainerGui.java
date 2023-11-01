@@ -101,6 +101,10 @@ public class StoreContainerGui extends AbstractGui {
                     if (itemStack == null) {
                         return;
                     }
+                    if (this.isCooldown(clicker.getUniqueId())) {
+                        clicker.sendMessage(I18n.getStrAndHeader("cooldown"));
+                        return;
+                    }
                     NBTItem nbtItem = new NBTItem(itemStack);
                     String storeId = nbtItem.getString("StoreID"), action = nbtItem.getString("action");
                     if ("market".equalsIgnoreCase(action)) {

@@ -115,10 +115,13 @@ public class MarketGui extends AbstractGui {
                 if (itemStack == null || itemStack.getType() == Material.AIR) {
                     return;
                 }
+                Player clicker = (Player) e.getWhoClicked();
+                if (this.isCooldown(clicker.getUniqueId())) {
+                    clicker.sendMessage(I18n.getStrAndHeader("cooldown"));
+                    return;
+                }
                 NBTItem nbtItem = new NBTItem(itemStack);
                 String key = nbtItem.getString("SaleUUID"), action = nbtItem.getString("MarketAction");
-                // 强转玩家
-                Player clicker = (Player) e.getWhoClicked();
                 if (key != null && !key.isEmpty()) {
                     // 购买商品
                     DataContainer.MARKET_DATA.get(this.sourceMarketKey).tryBuySale(clicker, key, e.isShiftClick(), lastPage, filter);
