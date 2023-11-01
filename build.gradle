@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'java'
 }
-version = "2.0.4-BETA"
+version = "2.1.0-BETA"
 group = "com.blank038.servermarket"
 archivesBaseName = "ServerMarket"
 
@@ -46,14 +46,4 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
-}
-
-tasks.build.dependsOn {
-    def branch = 'git remote'.execute().text.trim(), repo = "git remote get-url ${branch}".execute().text.trim()
-    def token = 'git config --global user.token'.execute().text.trim()
-    if (repo.contains("$token@github.com")) {
-        return
-    }
-    def latest = repo.replaceFirst("([\\da-zA-Z_]+@)?github.com", "$token@github.com");
-    "git remote set-url ${branch} ${latest}".execute()
 }
