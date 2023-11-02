@@ -78,12 +78,12 @@ public class ServerMarket extends AyPlugin {
             storageHandler.reload();
             // Initialize economy
             BaseEconomy.initEconomies();
+            // Initialize DataContainer
+            DataContainer.loadData();
             // Save the default files
             for (String fileName : new String[]{"gui/store.yml"}) {
                 this.saveResource(fileName, fileName);
             }
-            // Initialize DataContainer
-            DataContainer.loadData();
             this.getConsoleLogger().log(false, I18n.getProperties().getProperty("load-completed")
                     .replace("%s", String.valueOf(DataContainer.MARKET_DATA.size())));
             this.getConsoleLogger().log(false, " ");

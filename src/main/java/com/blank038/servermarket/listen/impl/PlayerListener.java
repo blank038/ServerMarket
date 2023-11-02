@@ -9,12 +9,11 @@ import com.blank038.servermarket.listen.AbstractListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.text.DecimalFormat;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -53,14 +52,9 @@ public class PlayerListener extends AbstractListener {
         });
     }
 
-    @EventHandler(ignoreCancelled = true)
-    public void onCommand(PlayerCommandPreprocessEvent event) {
-        for (Map.Entry<String, MarketData> entry : DataContainer.MARKET_DATA.entrySet()) {
-            if (entry.getValue().performSellCommand(event.getPlayer(), event.getMessage())) {
-                event.setCancelled(true);
-                break;
-            }
-        }
+    @EventHandler
+    public void onPlayerCommandSend(PlayerCommandSendEvent event) {
+        event.getCommands().addAll(DataContainer.REGISTERED_COMMAND);
     }
 
     private synchronized void checkResult(Player player) {
