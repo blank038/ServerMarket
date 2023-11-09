@@ -1,0 +1,36 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 8
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: 7.5.1
+
+      - name: Gradle Build
+        run: |
+          chmod 755 ./gradlew
+          ./gradlew clean build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ServerMarket Package
+          path: build/libs/*.jar
