@@ -1,24 +1,26 @@
 package com.blank038.servermarket.filter.impl;
 
 import com.blank038.servermarket.data.cache.sale.SaleCache;
-import com.blank038.servermarket.filter.interfaces.ISaleFilter;
+import com.blank038.servermarket.filter.interfaces.IFilter;
+import org.bukkit.ChatColor;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Blank038
  */
-public class KeyFilterImpl implements ISaleFilter {
-    private final String[] keys;
+public class KeyFilterImpl implements IFilter {
+    private final List<String> keys = new ArrayList<>();
 
     public KeyFilterImpl(String... keys) {
-        this.keys = keys;
+        this.keys.addAll(Arrays.asList(keys));
     }
 
-    public KeyFilterImpl(List<String> keys) {
-        this.keys = keys.toArray(new String[0]);
+    public KeyFilterImpl(List<String> list) {
+        this.keys.addAll(list);
     }
 
     @Override
@@ -26,12 +28,24 @@ public class KeyFilterImpl implements ISaleFilter {
         return this.check(saleItem.getSaleItem());
     }
 
+    public KeyFilterImpl addKeys(String... keys) {
+        this.keys.addAll(Arrays.asList(keys));
+        this.keys.replaceAll((s) -> ChatColor.translateAlternateColorCodes('&', s));
+        return this;
+    }
+
+    public KeyFilterImpl addKeys(List<String> list) {
+        this.keys.addAll(list);
+        this.keys.replaceAll((s) -> ChatColor.translateAlternateColorCodes('&', s));
+        return this;
+    }
+
     @Override
     public boolean check(ItemStack itemStack) {
         if (itemStack == null) {
             return false;
         }
-        return Arrays.stream(keys).anyMatch((s) -> {
+        return this.keys.stream().anyMatch((s) -> {
             if (itemStack.getType().name().toLowerCase().contains(s.toLowerCase())) {
                 return true;
             }

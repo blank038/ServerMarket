@@ -2,7 +2,7 @@ package com.blank038.servermarket.filter;
 
 import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.filter.impl.TypeFilterImpl;
-import com.blank038.servermarket.filter.interfaces.ISaleFilter;
+import com.blank038.servermarket.filter.interfaces.IFilter;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,10 +14,10 @@ import java.util.List;
  */
 @Getter
 public class FilterBuilder {
-    private final List<ISaleFilter> saleFilters = new ArrayList<>();
+    private final List<IFilter> saleFilters = new ArrayList<>();
     private TypeFilterImpl typeFilter;
 
-    public FilterBuilder addKeyFilter(ISaleFilter saleFilter) {
+    public FilterBuilder addKeyFilter(IFilter saleFilter) {
         this.saleFilters.add(saleFilter);
         return this;
     }

@@ -9,6 +9,8 @@ import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.enums.MarketStatus;
 import com.blank038.servermarket.enums.PayType;
 import com.blank038.servermarket.filter.FilterBuilder;
+import com.blank038.servermarket.filter.impl.KeyFilterImpl;
+import com.blank038.servermarket.filter.interfaces.IFilter;
 import com.blank038.servermarket.gui.impl.MarketGui;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.util.TextUtil;
@@ -37,7 +39,8 @@ public class MarketData {
      */
     private final Map<String, String> extraMap = new HashMap<>();
     private final String sourceId, marketKey, permission, shortCommand, ecoType, displayName, economyName;
-    private final List<String> loreBlackList, typeBlackList, saleTypes;
+    private final IFilter deniedFilter;
+    private final List<String> saleTypes;
     private final int min, max, effectiveTime;
     private final PayType paytype;
     private final ConfigurationSection taxSection, shoutTaxSection, limitCountSection;
@@ -62,8 +65,9 @@ public class MarketData {
             }
         }
         this.effectiveTime = options.getInt("effective_time");
-        this.typeBlackList = options.getStringList("black-list.type");
-        this.loreBlackList = options.getStringList("black-list.lore");
+        this.deniedFilter = new KeyFilterImpl()
+                .addKeys(options.getStringList("black-list.type"))
+                .addKeys(options.getStringList("black-list.lore"));
         this.saleTypes = options.getStringList("types");
         this.taxSection = options.getConfigurationSection("tax");
         this.shoutTaxSection = options.getConfigurationSection("shout-tax");

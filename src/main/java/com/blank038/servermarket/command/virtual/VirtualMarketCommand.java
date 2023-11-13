@@ -59,12 +59,7 @@ public class VirtualMarketCommand extends Command {
             player.sendMessage(I18n.getStrAndHeader("hand-air"));
             return;
         }
-        boolean denied = false;
-        if (itemStack.hasItemMeta() && itemStack.getItemMeta().hasLore()) {
-            denied = itemStack.getItemMeta().getLore().stream()
-                    .anyMatch((s) -> this.marketData.getShortCommand().contains(s.replace("§", "&")));
-        }
-        if (this.marketData.getTypeBlackList().contains(itemStack.getType().name()) || denied) {
+        if (this.marketData.getDeniedFilter().check(itemStack)) {
             player.sendMessage(I18n.getStrAndHeader("deny-item"));
             return;
         }
