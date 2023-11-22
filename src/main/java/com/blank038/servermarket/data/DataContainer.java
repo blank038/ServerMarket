@@ -7,6 +7,7 @@ import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.filter.FilterBuilder;
 import com.blank038.servermarket.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.util.TextUtil;
+import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
@@ -92,7 +93,9 @@ public class DataContainer {
                     }
                 });
                 // update online player commands
-                Bukkit.getOnlinePlayers().forEach(Player::updateCommands);
+                if (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1)) {
+                    Bukkit.getOnlinePlayers().forEach(Player::updateCommands);
+                }
             }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to register virtual command.");
