@@ -2,6 +2,7 @@ package com.blank038.servermarket.api.event;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
@@ -25,7 +26,7 @@ public class PlayerStoreItemAddEvent extends Event {
     private ItemStack itemStack;
 
     public PlayerStoreItemAddEvent(UUID uuid, ItemStack itemStack, String reason) {
-        super(true);
+        super(!Bukkit.getServer().isPrimaryThread());
         this.ownerUniqueId = uuid;
         this.itemStack = itemStack;
         this.reason = reason;
