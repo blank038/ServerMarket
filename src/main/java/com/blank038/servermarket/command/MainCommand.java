@@ -50,7 +50,7 @@ public class MainCommand implements CommandExecutor {
                     this.searchItemsAndOpenMarket(sender, args);
                     break;
                 case "show":
-                    show(sender);
+                    this.show(sender);
                     break;
                 case "box":
                     if (sender instanceof Player) {
@@ -96,9 +96,10 @@ public class MainCommand implements CommandExecutor {
             sender.sendMessage(I18n.getStrAndHeader("wrong-key"));
             return;
         }
-        ServerMarket.getApi().openMarket((Player) sender, args[1], 1, new FilterBuilder()
+        FilterBuilder builder = new FilterBuilder()
                 .addKeyFilter(new KeyFilterImpl(args[2]))
-                .setTypeFilter(new TypeFilterImpl(Lists.newArrayList("none"))));
+                .setTypeFilter(new TypeFilterImpl(Lists.newArrayList("none")));
+        ServerMarket.getApi().openMarket((Player) sender, args[1], 1, builder);
     }
 
     /**
@@ -109,15 +110,16 @@ public class MainCommand implements CommandExecutor {
             String last = line;
             for (Map.Entry<String, MarketData> entry : DataContainer.MARKET_DATA.entrySet()) {
                 String value = "%" + entry.getValue().getMarketKey() + "%";
-                if (last.contains(value)) {
-                    // 开始设置变量
-                    String permission = entry.getValue().getPermission();
-                    if (permission != null && !permission.isEmpty() && !sender.hasPermission(permission)) {
-                        last = last.replace(value, I18n.getOption("status-text.no-permission"));
-                        continue;
-                    }
-                    last = last.replace(value, I18n.getOption("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
+                if (!last.contains(value)) {
+                    continue;
                 }
+                // 开始设置变量
+                String permission = entry.getValue().getPermission();
+                if (permission != null && !permission.isEmpty() && !sender.hasPermission(permission)) {
+                    last = last.replace(value, I18n.getOption("status-text.no-permission"));
+                    continue;
+                }
+                last = last.replace(value, I18n.getOption("status-text." + entry.getValue().getMarketStatus().name().toLowerCase()));
             }
             sender.sendMessage(TextUtil.formatHexColor(last));
         }
