@@ -24,7 +24,7 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
 
     public static void check() {
         if (ServerMarket.getStorageHandler() == null) {
-            IStorageHandler storageHandler = null;
+            IStorageHandler storageHandler;
             switch (ServerMarket.getInstance().getConfig().getString("data-option.type").toLowerCase()) {
                 case "mysql":
                     storageHandler = new MysqlStorageHandlerImpl();

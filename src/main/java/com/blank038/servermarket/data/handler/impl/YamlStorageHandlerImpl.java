@@ -9,6 +9,7 @@ import com.blank038.servermarket.data.cache.other.SaleLog;
 import com.blank038.servermarket.data.cache.player.PlayerCache;
 import com.blank038.servermarket.data.cache.sale.SaleCache;
 import com.blank038.servermarket.data.handler.AbstractStorageHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     private static final Map<String, OfflineTransactionData> RESULT_DATA = new HashMap<>();
     private static final Map<String, MarketStorageData> MARKET_STORAGE_DATA_MAP = new HashMap<>();
+    private static final Map<String, ConfigurationSection> LOG_SECTION_MAP = new HashMap<>();
 
     /*
      * self methods
@@ -51,16 +53,39 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     /*
      * AbstractStorageHandler methods
      */
+    private void saveLogs() {
+        synchronized (LOG_SECTION_MAP) {
+            File logFolder = new File(ServerMarket.getInstance().getDataFolder(), "logs");
+            logFolder.mkdir();
 
+            LocalDate localDate = LocalDate.now();
+            String format = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+            File logFile = new File(logFolder, format + ".yml");
+            FileConfiguration data = YamlConfiguration.loadConfiguration(logFile);
+            try {
+                LOG_SECTION_MAP.forEach(data::set);
+                LOG_SECTION_MAP.clear();
+                data.save(logFile);
+            } catch (IOException e) {
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save log data: " + format + ".yml");
+            }
+        }
+    }
 
     @Override
     public void initialize() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(ServerMarket.getInstance(), this::saveLogs, 60L, 60L);
     }
 
     @Override
     public void reload() {
         File dataFolder = new File(ServerMarket.getInstance().getDataFolder(), "data");
         dataFolder.mkdirs();
+        // check logs
+        if (!LOG_SECTION_MAP.isEmpty()) {
+            this.saveLogs();
+        }
         // Check results map
         if (!RESULT_DATA.isEmpty()) {
             this.saveResults();
@@ -147,35 +172,20 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
 
     @Override
     public void addLog(SaleLog log) {
-        // TODO: 待增加日志流写入以提升性能
-        File logFolder = new File(ServerMarket.getInstance().getDataFolder(), "logs");
-        logFolder.mkdir();
-
-        LocalDate localDate = LocalDate.now();
-        String format = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-        File logFile = new File(logFolder, format + ".yml");
-        FileConfiguration data = YamlConfiguration.loadConfiguration(logFile);
-
-        try {
-            SaleCache saleCache = log.getSaleCache();
-            ConfigurationSection section = new YamlConfiguration(), sale = new YamlConfiguration();
-            section.set("triggerPlayerUUID", log.getTriggerPlayerUUID().toString());
-            section.set("triggerTime", log.getTriggerTime());
-            section.set("market", log.getSourceMarket());
-            sale.set("saleUUID", saleCache.getSaleUUID());
-            sale.set("ownerUUID", saleCache.getOwnerUUID());
-            sale.set("ownerName", saleCache.getOwnerName());
-            sale.set("payType", saleCache.getPayType().name());
-            sale.set("price", saleCache.getPrice());
-            sale.set("postTime", saleCache.getPostTime());
-            sale.set("saleItem", saleCache.getSaleItem());
-            section.set("sale", sale);
-            data.set(String.valueOf(log.getTriggerTime()), section);
-            data.save(logFile);
-        } catch (IOException e) {
-            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save log data: " + format + ".yml");
-        }
+        SaleCache saleCache = log.getSaleCache();
+        ConfigurationSection section = new YamlConfiguration(), sale = new YamlConfiguration();
+        section.set("triggerPlayerUUID", log.getTriggerPlayerUUID().toString());
+        section.set("triggerTime", log.getTriggerTime());
+        section.set("market", log.getSourceMarket());
+        sale.set("saleUUID", saleCache.getSaleUUID());
+        sale.set("ownerUUID", saleCache.getOwnerUUID());
+        sale.set("ownerName", saleCache.getOwnerName());
+        sale.set("payType", saleCache.getPayType().name());
+        sale.set("price", saleCache.getPrice());
+        sale.set("postTime", saleCache.getPostTime());
+        sale.set("saleItem", saleCache.getSaleItem());
+        section.set("sale", sale);
+        LOG_SECTION_MAP.put(String.valueOf(log.getTriggerTime()), section);
     }
 
     @Override
