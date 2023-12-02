@@ -118,28 +118,6 @@ public class MarketData {
     }
 
     /**
-     * 获取扣税后的价格
-     * <p>
-     * TODO: 此方法将在未来版本移除, 将改用为 MarketData#getPermsValueForPlayer 方法
-     *
-     * @param player 目标玩家
-     * @param money  初始金币
-     * @return 扣税后金币
-     */
-    @Deprecated
-    public double getLastMoney(ConfigurationSection section, Player player, double money) {
-        String header = section.getString("header");
-        double tax = section.getDouble("node.default");
-        for (String key : section.getConfigurationSection("node").getKeys(false)) {
-            double tempTax = section.getDouble("node." + key);
-            if (player.hasPermission(header + "." + key) && tempTax < tax) {
-                tax = tempTax;
-            }
-        }
-        return money - money * tax;
-    }
-
-    /**
      * 获取玩家在权限节点上的值
      *
      * @param player 目标玩家
@@ -211,7 +189,7 @@ public class MarketData {
                     BaseEconomy.getEconomyBridge(this.paytype).take(buyer, this.ecoType, saleItem.getPrice());
                     Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
                     if (seller != null && seller.isOnline()) {
-                        double last = this.getLastMoney(this.getTaxSection(), seller, saleItem.getPrice());
+                        double last = saleItem.getPrice() - saleItem.getPrice() * this.getPermsValueForPlayer(this.getTaxSection(), seller);
                         DecimalFormat df = new DecimalFormat("#0.00");
                         BaseEconomy.getEconomyBridge(this.paytype).give(seller, this.ecoType, last);
                         seller.sendMessage(I18n.getStrAndHeader("sale-sell")
