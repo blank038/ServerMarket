@@ -9,7 +9,6 @@ import com.blank038.servermarket.listen.AbstractListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -21,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
  * @author Blank038
  * @date 2021/03/05
  */
-public class PlayerListener extends AbstractListener {
+public class PlayerCommonListener extends AbstractListener {
 
     /**
      * 玩家加入服务器事件
@@ -52,18 +51,13 @@ public class PlayerListener extends AbstractListener {
         });
     }
 
-    @EventHandler
-    public void onPlayerCommandSend(PlayerCommandSendEvent event) {
-        event.getCommands().addAll(DataContainer.REGISTERED_COMMAND);
-    }
-
     private synchronized void checkResult(Player player) {
         ServerMarket.getStorageHandler().getOfflineTransactionByPlayer(player.getUniqueId()).forEach((k, v) -> {
             if (ServerMarket.getStorageHandler().removeOfflineTransaction(k)) {
                 // 获取市场数据
                 MarketData marketData = DataContainer.MARKET_DATA.getOrDefault(v.getSourceMarket(), null);
                 // 获取可获得货币
-                double price = v.getAmount(), last = marketData == null ? price : marketData.getLastMoney(marketData.getTaxSection(), player, price);
+                double price = v.getAmount(), last = marketData == null ? price : (price - price * marketData.getPermsValueForPlayer(marketData.getTaxSection(), player));
                 // 判断货币桥是否存在
                 if (BaseEconomy.PAY_TYPES.containsKey(v.getPayType())) {
                     DecimalFormat df = new DecimalFormat("#0.00");

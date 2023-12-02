@@ -10,8 +10,10 @@ import com.blank038.servermarket.command.MainCommand;
 import com.blank038.servermarket.data.DataContainer;
 import com.blank038.servermarket.i18n.I18n;
 import com.blank038.servermarket.listen.impl.CoreListener;
-import com.blank038.servermarket.listen.impl.PlayerListener;
+import com.blank038.servermarket.listen.impl.PlayerCommonListener;
+import com.blank038.servermarket.listen.impl.PlayerLatestListener;
 import com.blank038.servermarket.metrics.Metrics;
+import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -44,7 +46,10 @@ public class ServerMarket extends AyPlugin {
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
         // 注册事件监听类
         new CoreListener().register();
-        new PlayerListener().register();
+        new PlayerCommonListener().register();
+        if (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1)) {
+            new PlayerLatestListener().register();
+        }
         // start tasks
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 200L, 200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::saveAll, 1200L, 1200L);
