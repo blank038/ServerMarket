@@ -1,6 +1,6 @@
 package com.blank038.servermarket.api.event;
 
-import com.blank038.servermarket.data.handler.IStorageHandler;
+import com.blank038.servermarket.dto.IStorageHandler;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.Event;

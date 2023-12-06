@@ -1,16 +1,18 @@
 package com.blank038.servermarket.api;
 
-import com.blank038.servermarket.ServerMarket;
-import com.blank038.servermarket.data.DataContainer;
-import com.blank038.servermarket.data.cache.market.MarketData;
-import com.blank038.servermarket.data.cache.other.OfflineTransactionData;
-import com.blank038.servermarket.enums.PayType;
-import com.blank038.servermarket.filter.FilterBuilder;
-import com.blank038.servermarket.gui.impl.MarketGui;
+import com.blank038.servermarket.internal.plugin.ServerMarket;
+import com.blank038.servermarket.internal.data.DataContainer;
+import com.blank038.servermarket.api.entity.MarketData;
+import com.blank038.servermarket.internal.cache.other.OfflineTransactionData;
+import com.blank038.servermarket.internal.enums.PayType;
+import com.blank038.servermarket.api.handler.filter.FilterHandler;
+import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -18,9 +20,16 @@ import java.util.Map;
  * @date 2021/03/05
  */
 public class ServerMarketApi {
-    private final ServerMarket plugin = ServerMarket.getInstance();
 
-    public MarketData fuzzySearchMarketData(String key) {
+    public static List<String> getMarketList() {
+        return new ArrayList<>(DataContainer.MARKET_DATA.keySet());
+    }
+
+    public static MarketData getMarketData(String marketKey) {
+        return DataContainer.MARKET_DATA.getOrDefault(marketKey, null);
+    }
+
+    public static MarketData fuzzySearchMarketData(String key) {
         for (Map.Entry<String, MarketData> entry : DataContainer.MARKET_DATA.entrySet()) {
             if (entry.getKey().equals(key) || entry.getValue().getDisplayName().contains(key)) {
                 return entry.getValue();
@@ -35,9 +44,9 @@ public class ServerMarketApi {
      * @param player 目标玩家
      * @param key    目标市场编号
      */
-    public void openMarket(Player player, String key, int page, FilterBuilder filter) {
+    public static void openMarket(Player player, String key, int page, FilterHandler filter) {
         MarketData marketData = DataContainer.MARKET_DATA.containsKey(key) ? DataContainer.MARKET_DATA.get(key)
-                : DataContainer.MARKET_DATA.get(plugin.getConfig().getString("default-market"));
+                : DataContainer.MARKET_DATA.get(ServerMarket.getInstance().getConfig().getString("default-market"));
         if (marketData == null) {
             return;
         }
@@ -46,7 +55,7 @@ public class ServerMarketApi {
         }
     }
 
-    public void addOfflineTransaction(String uuid, PayType payType, String ectType, double moeny, String sourceMarket) {
+    public static void addOfflineTransaction(String uuid, PayType payType, String ectType, double moeny, String sourceMarket) {
         ConfigurationSection section = new YamlConfiguration();
         section.set("amount", moeny);
         section.set("pay-type", payType.name());

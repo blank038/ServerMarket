@@ -1,6 +1,6 @@
 package com.blank038.servermarket.api.event;
 
-import com.blank038.servermarket.data.cache.market.MarketData;
+import com.blank038.servermarket.api.entity.MarketData;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

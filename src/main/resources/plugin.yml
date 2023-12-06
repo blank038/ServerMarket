@@ -1,5 +1,5 @@
 name: ServerMarket
-main: com.blank038.servermarket.ServerMarket
+main: com.blank038.servermarket.internal.plugin.ServerMarket
 authors:
   - Blank038
 depend:
