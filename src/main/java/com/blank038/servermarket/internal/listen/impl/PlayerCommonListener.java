@@ -57,7 +57,7 @@ public class PlayerCommonListener extends AbstractListener {
                 // 获取市场数据
                 MarketData marketData = DataContainer.MARKET_DATA.getOrDefault(v.getSourceMarket(), null);
                 // 获取可获得货币
-                double price = v.getAmount(), last = marketData == null ? price : (price - price * marketData.getPermsValueForPlayer(marketData.getTaxSection(), player));
+                double price = v.getAmount(), last = marketData == null ? price : (price - price * marketData.getPermsValueForPlayer(marketData.getTaxSection(), player, false));
                 // 判断货币桥是否存在
                 if (BaseEconomy.PAY_TYPES.containsKey(v.getPayType())) {
                     DecimalFormat df = new DecimalFormat("#0.00");

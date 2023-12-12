@@ -1,6 +1,7 @@
 package com.blank038.servermarket.internal.gui.impl;
 
 import com.aystudio.core.bukkit.util.common.CommonUtil;
+import com.aystudio.core.bukkit.util.inventory.ExecuteInterface;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
@@ -31,10 +32,13 @@ import java.util.*;
  * @author Blank038
  */
 public class MarketGui extends AbstractGui {
+    private static final ExecuteInterface CLICK_FUNC = (e) -> {
+
+    };
     private final String sourceMarketKey;
     private FilterHandler filter;
     private int currentPage;
-    private String currentType = "all";
+    private String currentType = "all", currentSort = "none";
 
     public MarketGui(String sourceMarketKey, int currentPage, FilterHandler filter) {
         this.sourceMarketKey = sourceMarketKey;
@@ -195,7 +199,9 @@ public class MarketGui extends AbstractGui {
                 itemMeta.setDisplayName(TextUtil.formatHexColor(section.getString("name")));
                 // 开始遍历设置Lore
                 List<String> list = new ArrayList<>(section.getStringList("lore"));
-                list.replaceAll((s) -> TextUtil.formatHexColor(s).replace("%saleType%", this.getCurrentTypeDisplayName()));
+                list.replaceAll((s) -> TextUtil.formatHexColor(s)
+                        .replace("%saleType%", this.getCurrentTypeDisplayName())
+                        .replace("%sortType%", this.getCurrentSortDisplayName()));
                 itemMeta.setLore(list);
                 itemStack.setItemMeta(itemMeta);
                 // 开始判断是否有交互操作
@@ -213,6 +219,10 @@ public class MarketGui extends AbstractGui {
 
     private String getCurrentTypeDisplayName() {
         return DataContainer.SALE_TYPE_DISPLAY_NAME.getOrDefault(this.currentType, this.currentType);
+    }
+
+    private String getCurrentSortDisplayName() {
+        return DataContainer.SALE_TYPE_DISPLAY_NAME.getOrDefault(this.currentSort, this.currentSort);
     }
 
     /**

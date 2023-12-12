@@ -97,12 +97,12 @@ public class VirtualMarketCommand extends Command {
         }
         // 判断玩家上架物品是否上限
         int currentCount = ServerMarket.getStorageHandler().getSaleCountByPlayer(player.getUniqueId(), this.marketData.getMarketKey());
-        if (currentCount >= this.marketData.getPermsValueForPlayer(this.marketData.getLimitCountSection(), player)) {
+        if (currentCount >= this.marketData.getPermsValueForPlayer(this.marketData.getLimitCountSection(), player, true)) {
             player.sendMessage(I18n.getStrAndHeader("maximum-sale"));
             return;
         }
         // 判断余额是否足够交上架税
-        double tax = this.marketData.getPermsValueForPlayer(this.marketData.getShoutTaxSection(), player);
+        double tax = this.marketData.getPermsValueForPlayer(this.marketData.getShoutTaxSection(), player, false);
         if (BaseEconomy.getEconomyBridge(this.marketData.getPayType()).balance(player, this.marketData.getEcoType()) < tax) {
             player.sendMessage(I18n.getStrAndHeader("shout-tax")
                     .replace("%economy%", this.marketData.getEconomyName()));

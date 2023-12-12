@@ -16,6 +16,7 @@ import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.util.TextUtil;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -46,7 +47,9 @@ public class MarketData {
     private final PayType paytype;
     private final ConfigurationSection taxSection, shoutTaxSection, limitCountSection;
     private MarketStatus marketStatus;
+    @Setter
     private boolean showSaleInfo, saleBroadcast;
+    @Setter
     private String dateFormat;
 
     public MarketData(File file) {
@@ -121,35 +124,24 @@ public class MarketData {
     /**
      * 获取玩家在权限节点上的值
      *
-     * @param player 目标玩家
+     * @param section target section
+     * @param player  target player
+     * @param compareBig is bigger than
      * @return 最终值
      */
-    public double getPermsValueForPlayer(ConfigurationSection section, Player player) {
+    public double getPermsValueForPlayer(ConfigurationSection section, Player player, boolean compareBig) {
         String header = section.getString("header");
         double tax = section.getDouble("node.default");
         for (String key : section.getConfigurationSection("node").getKeys(false)) {
             double tempTax = section.getDouble("node." + key);
-            if (player.hasPermission(header + "." + key) && tempTax < tax) {
+            if (!player.hasPermission(header + "." + key)) {
+                continue;
+            }
+            if ((!compareBig && tempTax < tax) || (compareBig && tempTax > tax)) {
                 tax = tempTax;
             }
         }
         return tax;
-    }
-
-    public void setShowSaleInfo(boolean show) {
-        this.showSaleInfo = show;
-    }
-
-    public boolean isSaleBroadcastStatus() {
-        return saleBroadcast;
-    }
-
-    public void setSaleBroadcastStatus(boolean status) {
-        this.saleBroadcast = status;
-    }
-
-    public void setDateFormat(String format) {
-        this.dateFormat = format;
     }
 
     public void tryBuySale(Player buyer, String uuid, boolean shift, int page, FilterHandler filter) {
@@ -190,7 +182,7 @@ public class MarketData {
                     BaseEconomy.getEconomyBridge(this.paytype).take(buyer, this.ecoType, saleItem.getPrice());
                     Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
                     if (seller != null && seller.isOnline()) {
-                        double last = saleItem.getPrice() - saleItem.getPrice() * this.getPermsValueForPlayer(this.getTaxSection(), seller);
+                        double last = saleItem.getPrice() - saleItem.getPrice() * this.getPermsValueForPlayer(this.getTaxSection(), seller, false);
                         DecimalFormat df = new DecimalFormat("#0.00");
                         BaseEconomy.getEconomyBridge(this.paytype).give(seller, this.ecoType, last);
                         seller.sendMessage(I18n.getStrAndHeader("sale-sell")
