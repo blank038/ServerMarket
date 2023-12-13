@@ -20,6 +20,12 @@
 * 支持商品分类、商品搜索、商品黑名单
 * 支持指定商品/分类价格范围
 
+## 🌱 贡献者 & Contributors
+
+<a href="https://github.com/blank038/ServerMarket/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=blank038/ServerMarket" alt="Contributors"/>
+</a>
+
 ## 📃 开源协议 & License
 
 [GPL v3.0](https://opensource.org/license/gpl-3-0/)
