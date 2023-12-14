@@ -7,4 +7,5 @@ stages:
 build-code-job:
   stage: build
   script:
+    - chmod 755 ./gradlew
     - ./gradlew clean build
