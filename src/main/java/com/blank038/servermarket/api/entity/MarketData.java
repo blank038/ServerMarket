@@ -50,7 +50,7 @@ public class MarketData {
     @Setter
     private boolean showSaleInfo, saleBroadcast;
     @Setter
-    private String dateFormat;
+    private String dateFormat, priceFormat;
 
     public MarketData(File file) {
         FileConfiguration options = YamlConfiguration.loadConfiguration(file);
@@ -79,6 +79,7 @@ public class MarketData {
         this.showSaleInfo = options.getBoolean("show-sale-info");
         this.saleBroadcast = options.getBoolean("sale-broadcast");
         this.dateFormat = options.getString("simple-date-format");
+        this.priceFormat = options.getString("price-format", "%.1f");
         switch ((this.ecoType = options.getString("vault-type").toLowerCase())) {
             case "vault":
                 this.paytype = PayType.VAULT;

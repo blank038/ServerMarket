@@ -1,7 +1,6 @@
 package com.blank038.servermarket.internal.gui.impl;
 
 import com.aystudio.core.bukkit.util.common.CommonUtil;
-import com.aystudio.core.bukkit.util.inventory.ExecuteInterface;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
@@ -260,7 +259,7 @@ public class MarketGui extends AbstractGui {
             for (String i : data.getStringList("sale-info")) {
                 lore.add(TextUtil.formatHexColor(i)
                         .replace("%seller%", saleItem.getOwnerName())
-                        .replace("%price%", String.valueOf(saleItem.getPrice()))
+                        .replace("%price%", String.format(marketData.getPriceFormat(), saleItem.getPrice()))
                         .replace("%time%", sdf.format(date))
                         .replace("%name%", displayName));
             }
