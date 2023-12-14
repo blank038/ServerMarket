@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'java'
 }
-version = "2.4.2-SNAPSHOT"
+version = "2.5.0-SNAPSHOT"
 group = "com.blank038.servermarket"
 archivesBaseName = "ServerMarket"
 
