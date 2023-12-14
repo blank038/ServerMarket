@@ -1,0 +1,10 @@
+workflow:
+  name: "Build Test"
+
+stages:
+  - build
+
+build-code-job:
+  stage: build
+  script:
+    - ./gradlew clean build
