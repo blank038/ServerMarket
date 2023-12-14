@@ -63,8 +63,9 @@ public class DataContainer {
         File file = new File(ServerMarket.getInstance().getDataFolder(), "market");
         if (!file.exists()) {
             file.mkdir();
-            // 输出
-            ServerMarket.getInstance().saveResource("market/example.yml", "market/example.yml");
+            // output default market files
+            String sourceFile = MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1) ? "market/example.yml" : "market/exampleLegacy.yml";
+            ServerMarket.getInstance().saveResource(sourceFile, "market/example.yml");
         }
         MARKET_DATA.clear();
         Arrays.stream(file.listFiles()).iterator().forEachRemaining(MarketData::new);

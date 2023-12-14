@@ -91,9 +91,9 @@ sale-info:
 # 界面物品设定
 items:
   panel:
-    type: BLACK_STAINED_GLASS_PANE
+    type: STAINED_GLASS_PANE
     amount: 1
-    data: 0
+    data: 15
     name: " "
     slot: 46,47,51,52
     lore: [ ]
