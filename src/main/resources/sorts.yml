@@ -1,0 +1,3 @@
+default: "默认"
+price_high: "价格高到低"
+price_low: "价格低到高"

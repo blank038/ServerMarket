@@ -1,7 +1,7 @@
 package com.blank038.servermarket.internal.plugin;
 
 import com.aystudio.core.bukkit.plugin.AyPlugin;
-import com.blank038.servermarket.api.ServerMarketApi;
+import com.blank038.servermarket.api.handler.sort.AbstractSortHandler;
 import com.blank038.servermarket.internal.data.convert.LegacyBackup;
 import com.blank038.servermarket.dto.AbstractStorageHandler;
 import com.blank038.servermarket.dto.IStorageHandler;
@@ -29,8 +29,6 @@ public class ServerMarket extends AyPlugin {
     @Getter
     private static ServerMarket instance;
     @Getter
-    private static ServerMarketApi api;
-    @Getter
     @Setter
     private static IStorageHandler storageHandler;
 
@@ -38,18 +36,19 @@ public class ServerMarket extends AyPlugin {
     @Override
     public void onEnable() {
         instance = this;
-        api = new ServerMarketApi();
-        // 开始载入
+        // begin loading
         this.getConsoleLogger().setPrefix("&f[&eServerMarket&f] &8");
         this.loadConfig(true);
-        // 注册命令、事件及线程
+        // register command executor
         super.getCommand("servermarket").setExecutor(new MainCommand(this));
-        // 注册事件监听类
+        // register listeners
         new CoreListener().register();
         new PlayerCommonListener().register();
         if (MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1)) {
             new PlayerLatestListener().register();
         }
+        // register sort handler
+        AbstractSortHandler.registerDefaults();
         // start tasks
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 200L, 200L);
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, storageHandler::saveAll, 1200L, 1200L);

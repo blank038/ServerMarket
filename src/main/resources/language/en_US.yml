@@ -45,6 +45,7 @@ no-permission: "You do not have permission to do that."
 lack-money: "You do not have enough %economy% to purchase this item."
 shout-tax: "You do not have enough %economy% to pay the tax fee."
 changeSaleType: "Switched category. Current category: &b%type%"
+changeSortType: "Switched sort, Current sort: &b%type%"
 cooldown: "You cannot do this, it is in cooldown."
 maximum-sale: "You have reached the maximum number of listings."
 show:

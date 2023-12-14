@@ -1,5 +1,6 @@
 package com.blank038.servermarket.internal.data;
 
+import com.blank038.servermarket.api.handler.sort.SortHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.command.virtual.VirtualMarketCommand;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -27,8 +28,10 @@ import java.util.logging.Level;
 public class DataContainer {
     public static final List<String> REGISTERED_COMMAND = new ArrayList<>();
     public static final Map<String, List<String>> SALE_TYPES = new HashMap<>();
-    public static final Map<String, String> SALE_TYPE_DISPLAY_NAME = new HashMap<>();
-    public static final HashMap<String, MarketData> MARKET_DATA = new HashMap<>();
+    public static final Map<String, String> SALE_TYPE_DISPLAY_NAME = new HashMap<>(),
+            SORT_TYPE_DISPLAY_NAME = new HashMap<>();
+    public static final Map<String, MarketData> MARKET_DATA = new HashMap<>();
+    public static final Map<String, SortHandler> SORT_HANDLER_MAP = new HashMap<>();
 
     public static void loadData() {
         ServerMarket.getInstance().saveResource("types.yml", "types.yml", false, (file) -> {
@@ -43,6 +46,13 @@ public class DataContainer {
                 for (String key : data.getConfigurationSection("default").getKeys(false)) {
                     DataContainer.SALE_TYPE_DISPLAY_NAME.put(key, TextUtil.formatHexColor(data.getString("default." + key)));
                 }
+            }
+        });
+        ServerMarket.getInstance().saveResource("sorts.yml", "sorts.yml", false, (file) -> {
+            DataContainer.SORT_TYPE_DISPLAY_NAME.clear();
+            FileConfiguration data = YamlConfiguration.loadConfiguration(file);
+            for (String key : data.getKeys(false)) {
+                SORT_TYPE_DISPLAY_NAME.put(key, data.getString(key));
             }
         });
         // Save all data

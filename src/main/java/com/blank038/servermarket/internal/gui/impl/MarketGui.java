@@ -27,18 +27,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Blank038
  */
 public class MarketGui extends AbstractGui {
-    private static final ExecuteInterface CLICK_FUNC = (e) -> {
-
-    };
     private final String sourceMarketKey;
     private FilterHandler filter;
     private int currentPage;
-    private String currentType = "all", currentSort = "none";
+    private String currentType = "all", currentSort = "default";
 
     public MarketGui(String sourceMarketKey, int currentPage, FilterHandler filter) {
         this.sourceMarketKey = sourceMarketKey;
@@ -79,15 +77,17 @@ public class MarketGui extends AbstractGui {
         model.setCloseRemove(true);
         // 设置界面物品
         this.initializeDisplayItem(model, data);
-        // 开始获取全球市场物品
+        // Get sale list
+        // TODO: Optimize logic, slice the data.
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
-        String[] keys = ServerMarket.getStorageHandler().getSaleItemsByMarket(this.sourceMarketKey)
-                .entrySet().stream()
-                .filter((entry) -> (filter == null || filter.check(entry.getValue())))
-                .map(Map.Entry::getKey).toArray(String[]::new);
+        List<SaleCache> saleList = ServerMarket.getStorageHandler().getSaleItemsByMarket(this.sourceMarketKey)
+                .values().stream()
+                .filter((entry) -> (filter == null || filter.check(entry)))
+                .sorted(DataContainer.SORT_HANDLER_MAP.get(this.currentSort))
+                .collect(Collectors.toList());
         // 计算下标
-        int maxPage = keys.length / slots.length;
-        maxPage += (keys.length % slots.length) == 0 ? 0 : 1;
+        int maxPage = saleList.size() / slots.length;
+        maxPage += (saleList.size() % slots.length) == 0 ? 0 : 1;
         // 判断页面是否超标, 如果是的话就设置为第一页
         if (currentPage > maxPage) {
             currentPage = 1;
@@ -95,16 +95,14 @@ public class MarketGui extends AbstractGui {
         // 获得额外增加的信息
         int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
         for (int i = start, index = 0; i < end; i++, index++) {
-            if (index >= slots.length || i >= keys.length) {
+            if (index >= slots.length || i >= saleList.size()) {
                 break;
             }
-            // 开始设置物品
-            Optional<SaleCache> saleItemOptional = ServerMarket.getStorageHandler().getSaleItem(sourceMarketKey, keys[i]);
-            if (!saleItemOptional.isPresent()) {
+            SaleCache saleItem = saleList.get(i);
+            if (saleItem == null) {
                 --index;
                 continue;
             }
-            SaleCache saleItem = saleItemOptional.get();
             if ((filter != null && !filter.check(saleItem))) {
                 --index;
                 continue;
@@ -149,19 +147,10 @@ public class MarketGui extends AbstractGui {
                             }
                             break;
                         case "type":
-                            List<String> types = marketData.getSaleTypes();
-                            if (types.size() <= 1) {
-                                return;
-                            }
-                            int index = types.indexOf(currentType);
-                            if (index == -1 || index == types.size() - 1) {
-                                this.currentType = types.get(0);
-                            } else {
-                                this.currentType = types.get(index + 1);
-                            }
-                            this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
-                            this.openGui(clicker);
-                            clicker.sendMessage(I18n.getStrAndHeader("changeSaleType").replace("%type%", this.getCurrentTypeDisplayName()));
+                            this.nextType(marketData, clicker);
+                            break;
+                        case "sort":
+                            this.nextSort(clicker);
                             break;
                         case "store":
                             new StoreContainerGui(clicker, lastPage, this.sourceMarketKey, this.filter).open(1);
@@ -222,7 +211,30 @@ public class MarketGui extends AbstractGui {
     }
 
     private String getCurrentSortDisplayName() {
-        return DataContainer.SALE_TYPE_DISPLAY_NAME.getOrDefault(this.currentSort, this.currentSort);
+        return DataContainer.SORT_TYPE_DISPLAY_NAME.getOrDefault(this.currentSort, this.currentSort);
+    }
+
+    private void nextType(MarketData marketData, Player clicker) {
+        List<String> types = marketData.getSaleTypes();
+        if (types.size() <= 1) {
+            return;
+        }
+        int index = types.indexOf(currentType);
+        this.currentType = (index == -1 || index == types.size() - 1) ? types.get(0) : types.get(index + 1);
+        this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
+        this.openGui(clicker);
+        clicker.sendMessage(I18n.getStrAndHeader("changeSaleType").replace("%type%", this.getCurrentTypeDisplayName()));
+    }
+
+    private void nextSort(Player clicker) {
+        List<String> sorts = new ArrayList<>(DataContainer.SORT_HANDLER_MAP.keySet());
+        if (sorts.size() <= 1) {
+            return;
+        }
+        int index = sorts.indexOf(currentSort);
+        this.currentSort = (index == -1 || index == sorts.size() - 1) ? sorts.get(0) : sorts.get(index + 1);
+        this.openGui(clicker);
+        clicker.sendMessage(I18n.getStrAndHeader("changeSortType").replace("%type%", this.getCurrentSortDisplayName()));
     }
 
     /**
