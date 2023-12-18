@@ -47,7 +47,7 @@ public class MarketGui extends AbstractGui {
         if (this.filter.getTypeFilter() == null) {
             this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
         } else {
-            this.currentType = this.filter.getTypeFilter().getTypes().get(0);
+            this.currentType = ((TypeFilterImpl) this.filter.getTypeFilter()).getTypes().get(0);
         }
     }
 

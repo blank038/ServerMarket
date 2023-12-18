@@ -1,7 +1,6 @@
 package com.blank038.servermarket.api.handler.filter;
 
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
-import com.blank038.servermarket.api.handler.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.api.handler.filter.interfaces.IFilter;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
@@ -15,14 +14,14 @@ import java.util.List;
 @Getter
 public class FilterHandler {
     private final List<IFilter> saleFilters = new ArrayList<>();
-    private TypeFilterImpl typeFilter;
+    private IFilter typeFilter;
 
     public FilterHandler addKeyFilter(IFilter saleFilter) {
         this.saleFilters.add(saleFilter);
         return this;
     }
 
-    public FilterHandler setTypeFilter(TypeFilterImpl typeFilter) {
+    public FilterHandler setTypeFilter(IFilter typeFilter) {
         this.typeFilter = typeFilter;
         return this;
     }
