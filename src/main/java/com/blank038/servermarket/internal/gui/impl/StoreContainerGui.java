@@ -11,6 +11,7 @@ import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.util.ItemUtil;
 import com.blank038.servermarket.internal.util.TextUtil;
 import de.tr7zw.nbtapi.NBTItem;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -99,7 +100,7 @@ public class StoreContainerGui extends AbstractGui {
                     Player clicker = (Player) e.getWhoClicked();
                     // 获取点击的物品和物品的Tag
                     ItemStack itemStack = e.getCurrentItem();
-                    if (itemStack == null) {
+                    if (itemStack == null || itemStack.getType() == Material.AIR) {
                         return;
                     }
                     if (this.isCooldown(clicker.getUniqueId())) {
