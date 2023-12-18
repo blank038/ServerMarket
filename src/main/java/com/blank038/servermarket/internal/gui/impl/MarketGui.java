@@ -154,6 +154,9 @@ public class MarketGui extends AbstractGui {
                         case "store":
                             new StoreContainerGui(clicker, lastPage, this.sourceMarketKey, this.filter).open(1);
                             break;
+                        case "refresh":
+                            new MarketGui(this.sourceMarketKey, this.currentPage, this.filter).openGui(clicker);
+                            break;
                         default:
                             if (action.contains(":")) {
                                 String[] split = action.split(":");
