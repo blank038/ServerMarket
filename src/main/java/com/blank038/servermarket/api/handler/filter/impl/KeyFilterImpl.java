@@ -8,6 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * @author Blank038
@@ -45,6 +46,12 @@ public class KeyFilterImpl implements IFilter {
         if (itemStack == null) {
             return false;
         }
+        BiFunction<String, String, Boolean> func = (text, require) -> {
+            if (require.startsWith("regex:")) {
+                return text.matches(require.substring(6));
+            }
+            return text.toLowerCase().contains(require.toLowerCase());
+        };
         return this.keys.stream().anyMatch((s) -> {
             if (itemStack.getType().name().toLowerCase().contains(s.toLowerCase())) {
                 return true;
@@ -52,10 +59,10 @@ public class KeyFilterImpl implements IFilter {
             if (!itemStack.hasItemMeta()) {
                 return false;
             }
-            if (itemStack.getItemMeta().hasDisplayName() && itemStack.getItemMeta().getDisplayName().toLowerCase().contains(s.toLowerCase())) {
+            if (itemStack.getItemMeta().hasDisplayName() && func.apply(itemStack.getItemMeta().getDisplayName(), s)) {
                 return true;
             }
-            return itemStack.getItemMeta().hasLore() && itemStack.getItemMeta().getLore().stream().anyMatch((i) -> i.toLowerCase().contains(s.toLowerCase()));
+            return itemStack.getItemMeta().hasLore() && itemStack.getItemMeta().getLore().stream().anyMatch((i) -> func.apply(i, s));
         });
     }
 }
