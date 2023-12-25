@@ -20,6 +20,10 @@
 * 支持商品分类、商品搜索、商品黑名单
 * 支持指定商品/分类价格范围
 
+## ⭐ 项目状态 & Analytics
+
+![Alt](https://repobeats.axiom.co/api/embed/b687c19b5d43169f91a2822e8673f7cbbdd73231.svg "Repobeats analytics image")
+
 ## 🌱 贡献者 & Contributors
 
 <a href="https://github.com/blank038/ServerMarket/graphs/contributors">
