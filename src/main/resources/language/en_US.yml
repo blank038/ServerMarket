@@ -3,17 +3,18 @@ unknown-command: "Unknown command, please enter /%c help to view command help."
 help:
   default:
     - "&bServerMarket:"
-    - "&f/%c open <Market ID> Open the global market."
-    - "&f/%c search <Market ID> <Keyword> Search for items in the market."
-    - "&f/%c box View the market storage box."
-    - "&f/%c show View market information."
+    - "&f/%c open <Market ID> &7Open the global market."
+    - "&f/%c search <Market ID> <Keyword> &7Search for items in the market."
+    - "&f/%c box &7View the market storage box."
+    - "&f/%c show &7View market information."
   admin:
     - "&bServerMarket:"
-    - "&f/%c open <Market ID> Open the global market."
-    - "&f/%c search <Market ID> <Keyword> Search for items in the market."
-    - "&f/%c box View the market storage box."
-    - "&f/%c show View market information."
-    - "&f/%c reload Reload plugin configuration files."
+    - "&f/%c open <Market ID> &7Open the global market."
+    - "&f/%c search <Market ID> <Keyword> &7Search for items in the market."
+    - "&f/%c box &7View the market storage box."
+    - "&f/%c show &7View market information."
+    - "&f/%c patch <Patch ID> &7Apply patch"
+    - "&f/%c reload &7Reload plugin configuration files."
 
 pulling-start: "Loading your data."
 pulling-completed: "Data loading completed."
@@ -25,6 +26,7 @@ error-store: "The item is not in the storage box, it may have already been claim
 get-store-item: "Successfully obtained &e%item% &fx &e%amount% from the storage box."
 wrong-market: "Please enter a market name."
 wrong-key: "Please enter a keyword."
+wrong-patch-id: "Please enter a patch id."
 price-null: "Please enter the price."
 wrong-number: "Please enter a number."
 min-price: "The price must be greater than %min%."
@@ -56,6 +58,10 @@ show:
   - " "
   - "&cPlease hold the item in your hand before putting it up for auction."
 reload: "Plugin configuration reloaded successfully."
+
+patch-result:
+  yes: "Successfully applied the patch."
+  no: "Patch failed to apply."
 
 status-text:
   loaded: "&aLoaded successfully."

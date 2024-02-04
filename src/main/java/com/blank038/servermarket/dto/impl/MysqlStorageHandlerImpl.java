@@ -12,6 +12,7 @@ import com.blank038.servermarket.internal.cache.player.PlayerCache;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.internal.enums.PayType;
 import com.blank038.servermarket.internal.i18n.I18n;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -33,6 +34,7 @@ import java.util.logging.Level;
  * @author Blank038
  */
 public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
+    @Getter
     private static MySqlStorageHandler storageHandler;
 
     private final String playersTable = "servermarket_players",
@@ -46,7 +48,7 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
                 "CREATE TABLE IF NOT EXISTS `servermarket_players`( `player_uuid` VARCHAR(36) NOT NULL, `data` TEXT, `locked` TINYINT, PRIMARY KEY (`player_uuid`)) ENGINE = InnoDB DEFAULT CHARSET = utf8;",
                 "CREATE TABLE IF NOT EXISTS `servermarket_sales` ( `sale_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(20) NOT NULL, `owner_name` VARCHAR(20) NOT NULL, `owner_uuid` VARCHAR(36) NOT NULL, `pay_type` VARCHAR(20) NOT NULL, `eco_type` VARCHAR(50), `price` int, `data` TEXT, `post_time` TIMESTAMP NOT NULL, PRIMARY KEY (`sale_uuid`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;",
                 "CREATE TABLE IF NOT EXISTS `servermarket_logs` ( `id` INT AUTO_INCREMENT, `trigger_time` TIMESTAMP, `trigger_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(50), `log_type` VARCHAR(10) NOT NULL, `data` TEXT, PRIMARY KEY (`id`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;",
-                "CREATE TABLE IF NOT EXISTS `servermarket_offline_transactions` ( `id` INT AUTO_INCREMENT, `owner_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(50) NOT NULL, `amount` TINYINT, `pay_type` VARCHAR(20) NOT NULL, `eco_type` VARCHAR(50), PRIMARY KEY (`id`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;"
+                "CREATE TABLE IF NOT EXISTS `servermarket_offline_transactions` ( `id` INT AUTO_INCREMENT, `owner_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(50) NOT NULL, `amount` INT, `pay_type` VARCHAR(20) NOT NULL, `eco_type` VARCHAR(50), PRIMARY KEY (`id`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;"
 
         };
         storageHandler = new MySqlStorageHandler(

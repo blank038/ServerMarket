@@ -3,17 +3,18 @@ unknown-command: "未知命令, 请输入 /%c help 查看命令帮助."
 help:
   default:
     - "&bServerMarket:"
-    - "&f/%c open <市场编号> 打开全球市场"
-    - "&f/%c search <市场编号> <关键字> 搜索市场物品"
-    - "&f/%c show 查看市场情况"
-    - "&f/%c box 查看市场暂存盒"
+    - "&f/%c open <市场编号> &7打开全球市场"
+    - "&f/%c search <市场编号> <关键字> &7搜索市场物品"
+    - "&f/%c show &7查看市场情况"
+    - "&f/%c box &7查看市场暂存盒"
   admin:
     - "&bServerMarket:"
-    - "&f/%c open <市场编号> 打开全球市场"
-    - "&f/%c search <市场编号> <关键字> 搜索市场物品"
-    - "&f/%c box 查看市场暂存盒"
-    - "&f/%c show 查看市场情况"
-    - "&f/%c reload 重载插件配置文件"
+    - "&f/%c open <市场编号> &7打开全球市场"
+    - "&f/%c search <市场编号> <关键字> &7搜索市场物品"
+    - "&f/%c box &7查看市场暂存盒"
+    - "&f/%c show &7查看市场情况"
+    - "&f/%c patch <补丁编号> &7使用补丁"
+    - "&f/%c reload &7重载插件配置文件"
 
 pulling-start: "正在加载你的数据."
 pulling-completed: "数据已经加载完成."
@@ -25,6 +26,7 @@ error-store: "该物品不在暂存库中, 可能已经领取过了."
 get-store-item: "成功从暂存库中获得 &e%item% &fx &e%amount%"
 wrong-market: "请输入一个市场名."
 wrong-key: "请输入一个关键字."
+wrong-patch-id: "请输入一个补丁编号."
 price-null: "请输入价格."
 wrong-number: "请输入一个数字."
 min-price: "价格必须大于%min%."
@@ -56,6 +58,10 @@ show:
   - " "
   - "&c上架物品前请将物品手持在手上."
 reload: "插件配置重载完成."
+
+patch-result:
+  yes: "成功使用补丁."
+  no: "使用失败."
 
 status-text:
   loaded: "&a已加载"

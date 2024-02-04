@@ -1,6 +1,7 @@
 package com.blank038.servermarket.internal.command;
 
 import com.blank038.servermarket.api.ServerMarketApi;
+import com.blank038.servermarket.internal.handler.PatchHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
@@ -14,18 +15,26 @@ import com.google.common.collect.Lists;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Blank038
  */
-public class MainCommand implements CommandExecutor {
+public class MainCommand implements CommandExecutor, TabCompleter {
     private final ServerMarket instance;
 
     public MainCommand(ServerMarket serverMarket) {
-        instance = serverMarket;
+        this.instance = serverMarket;
+    }
+
+    public void register() {
+        this.instance.getCommand("servermarket").setExecutor(this);
+        this.instance.getCommand("servermarket").setTabCompleter(this);
     }
 
     /**
@@ -63,6 +72,9 @@ public class MainCommand implements CommandExecutor {
                         this.instance.loadConfig(false);
                         sender.sendMessage(I18n.getStrAndHeader("reload"));
                     }
+                    break;
+                case "patch":
+                    this.usePatch(sender, args);
                     break;
                 default:
                     this.sendHelp(sender, label);
@@ -133,5 +145,29 @@ public class MainCommand implements CommandExecutor {
         for (String text : I18n.getArrayOption("help." + (sender.hasPermission("servermarket.admin") ? "admin" : "default"))) {
             sender.sendMessage(TextUtil.formatHexColor(text).replace("%c", label));
         }
+    }
+
+    /**
+     * To fix legacy issues from previous versions.
+     */
+    private void usePatch(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("servermarket.patch")) {
+            sender.sendMessage(I18n.getStrAndHeader("no-permission"));
+            return;
+        }
+        if (args.length == 1) {
+            sender.sendMessage(I18n.getStrAndHeader("wrong-patch-id"));
+            return;
+        }
+        boolean result = PatchHandler.executePatch(args[1]);
+        sender.sendMessage(I18n.getStrAndHeader("patch-result." + result));
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        if (strings.length == 2) {
+            return new ArrayList<>(PatchHandler.getPatchIds());
+        }
+        return null;
     }
 }

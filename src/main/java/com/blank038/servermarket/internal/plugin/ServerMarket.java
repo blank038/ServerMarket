@@ -40,7 +40,7 @@ public class ServerMarket extends AyPlugin {
         this.getConsoleLogger().setPrefix("&f[&eServerMarket&f] &8");
         this.loadConfig(true);
         // register command executor
-        super.getCommand("servermarket").setExecutor(new MainCommand(this));
+        new MainCommand(this).register();
         // register listeners
         new CoreListener().register();
         new PlayerCommonListener().register();
