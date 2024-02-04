@@ -20,6 +20,14 @@
 * 支持商品分类、商品搜索、商品黑名单
 * 支持指定商品/分类价格范围
 
+## 🛠 补丁 & Patch
+
+> [!CAUTION]  
+> 可能存在数据安全隐患，需要您手动备份数据后再执行
+
+当您在使用过程中遇到一些 BUG，需要进行修复时确定 ServerMarket 已经有修复的版本再执行下面的步骤，
+将插件更新至最新版，通过执行命令 `/market patch <补丁编号>` 来修复，补丁编号支持命令补全。
+
 ## ⭐ 项目状态 & Analytics
 
 ![Alt](https://repobeats.axiom.co/api/embed/b687c19b5d43169f91a2822e8673f7cbbdd73231.svg "Repobeats analytics image")
