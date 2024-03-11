@@ -75,6 +75,10 @@ public class SaleCache {
         this.saleTypes.addAll(types);
     }
 
+    public ItemStack getSaleItem() {
+        return saleItem.clone();
+    }
+
     public ConfigurationSection toSection() {
         ConfigurationSection section = new YamlConfiguration();
         section.set("owner-uuid", ownerUUID);

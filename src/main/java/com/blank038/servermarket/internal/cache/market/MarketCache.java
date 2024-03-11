@@ -49,7 +49,7 @@ public class MarketCache {
     }
 
     public Map<String, SaleCache> getSales() {
-        return this.saleMap;
+        return new HashMap<>(this.saleMap);
     }
 
     public Map<String, SaleCache> getSaleByPlayer(UUID uuid) {

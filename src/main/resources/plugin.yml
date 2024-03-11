@@ -17,3 +17,4 @@ commands:
       - market
       - sale
     description: Command for ServerMarket.
+folia-supported: true

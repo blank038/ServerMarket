@@ -58,6 +58,10 @@ public class PlayerCache {
         return storeItems.remove(uuid);
     }
 
+    public Map<String, ItemStack> getStoreItems() {
+        return new HashMap<>(storeItems);
+    }
+
     /**
      * 增加暂存物品至暂存箱
      *

@@ -14,10 +14,7 @@ repositories {
     }
 }
 
-sourceCompatibility = targetCompatibility = '1.8'
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 dependencies {
     implementation fileTree(dir: "libs", includes: ["*.jar"])

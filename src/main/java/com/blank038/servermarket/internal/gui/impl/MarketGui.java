@@ -246,7 +246,7 @@ public class MarketGui extends AbstractGui {
      * @return 展示物品
      */
     private ItemStack getShowItem(MarketData marketData, SaleCache saleItem, FileConfiguration data) {
-        ItemStack itemStack = saleItem.getSaleItem().clone();
+        ItemStack itemStack = saleItem.getSaleItem();
         ItemMeta itemMeta = itemStack.getItemMeta();
         String displayName = itemMeta.hasDisplayName() ? itemMeta.getDisplayName() : itemStack.getType().name();
         if (data.contains("sale-name")) {

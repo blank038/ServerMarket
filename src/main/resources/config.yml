@@ -20,3 +20,5 @@ command-help: true
 # 冷却设定, 单位: 秒
 cooldown:
   action: 3
+# 税收流向账户
+tax-account: "Blank038"
