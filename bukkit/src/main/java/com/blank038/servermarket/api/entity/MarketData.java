@@ -40,11 +40,11 @@ public class MarketData {
      * 商品列表
      */
     private final Map<String, String> extraMap = new HashMap<>();
-    private final String sourceId, marketKey, permission, shortCommand, ecoType, displayName, economyName;
+    private final String sourceId, marketKey, permission, shortCommand, economyType, displayName, economyName;
     private final IFilter deniedFilter;
     private final List<String> saleTypes;
     private final int min, max, effectiveTime;
-    private final PayType paytype;
+    private final PayType paymentType;
     private final ConfigurationSection taxSection, shoutTaxSection, limitCountSection;
     private MarketStatus marketStatus;
     @Setter
@@ -80,18 +80,18 @@ public class MarketData {
         this.saleBroadcast = options.getBoolean("sale-broadcast");
         this.dateFormat = options.getString("simple-date-format");
         this.priceFormat = options.getString("price-format", "%.1f");
-        switch ((this.ecoType = options.getString("vault-type").toLowerCase())) {
+        switch ((this.economyType = options.getString("vault-type").toLowerCase())) {
             case "vault":
-                this.paytype = PayType.VAULT;
+                this.paymentType = PayType.VAULT;
                 break;
             case "playerpoints":
-                this.paytype = PayType.PLAYER_POINTS;
+                this.paymentType = PayType.PLAYER_POINTS;
                 break;
             default:
-                this.paytype = PayType.NY_ECONOMY;
+                this.paymentType = PayType.NY_ECONOMY;
                 break;
         }
-        if (!BaseEconomy.PAY_TYPES.containsKey(this.paytype)) {
+        if (!BaseEconomy.PAY_TYPES.containsKey(this.paymentType)) {
             this.marketStatus = MarketStatus.ERROR;
             ServerMarket.getInstance().getConsoleLogger().log(false,
                     I18n.getProperties().getProperty("load-market-eco-not-exists").replace("%s", this.displayName));
@@ -111,15 +111,6 @@ public class MarketData {
         // Call the event MarketLoadEvent
         MarketLoadEvent event = new MarketLoadEvent(this);
         Bukkit.getPluginManager().callEvent(event);
-    }
-
-    /**
-     * 获取货币类型
-     *
-     * @return 货币类型枚举
-     */
-    public PayType getPayType() {
-        return this.paytype;
     }
 
     /**
@@ -172,7 +163,7 @@ public class MarketData {
                     buyer.sendMessage(I18n.getStrAndHeader("error-sale"));
                     return;
                 }
-                if (BaseEconomy.getEconomyBridge(this.paytype).balance(buyer, this.ecoType) < saleItem.getPrice()) {
+                if (BaseEconomy.getEconomyBridge(this.paymentType).balance(buyer, this.economyType) < saleItem.getPrice()) {
                     buyer.sendMessage(I18n.getStrAndHeader("lack-money")
                             .replace("%economy%", this.economyName));
                     return;
@@ -180,18 +171,21 @@ public class MarketData {
                 Optional<SaleCache> optional = ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid);
                 if (optional.isPresent()) {
                     saleItem = optional.get();
-                    BaseEconomy.getEconomyBridge(this.paytype).take(buyer, this.ecoType, saleItem.getPrice());
+                    BaseEconomy.getEconomyBridge(this.paymentType).take(buyer, this.economyType, saleItem.getPrice());
                     Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
                     if (seller != null && seller.isOnline()) {
-                        double last = saleItem.getPrice() - saleItem.getPrice() * this.getPermsValueForPlayer(this.getTaxSection(), seller, false);
+                        double tax = saleItem.getPrice() * this.getPermsValueForPlayer(this.getTaxSection(), seller, false);
+                        double last = saleItem.getPrice() - tax;
                         DecimalFormat df = new DecimalFormat("#0.00");
-                        BaseEconomy.getEconomyBridge(this.paytype).give(seller, this.ecoType, last);
+                        BaseEconomy.getEconomyBridge(this.paymentType).give(seller, this.economyType, last);
                         seller.sendMessage(I18n.getStrAndHeader("sale-sell")
                                 .replace("%economy%", this.economyName)
                                 .replace("%money%", df.format(saleItem.getPrice()))
                                 .replace("%last%", df.format(last)));
+                        // send taxes
+                        ServerMarketApi.sendTaxes(paymentType, this.economyType, tax);
                     } else {
-                        ServerMarketApi.addOfflineTransaction(saleItem.getOwnerUUID(), this.paytype, this.ecoType, saleItem.getPrice(), this.marketKey);
+                        ServerMarketApi.addOfflineTransaction(saleItem.getOwnerUUID(), this.paymentType, this.economyType, saleItem.getPrice(), this.marketKey);
                     }
                     // 给予购买者物品
                     ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), saleItem, "buy");
