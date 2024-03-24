@@ -5,7 +5,6 @@ plugins {
 }
 version = "2.5.2"
 group = "com.blank038.servermarket"
-archivesBaseName = "ServerMarket"
 
 repositories {
     maven {
@@ -16,17 +15,27 @@ repositories {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
-dependencies {
-    implementation fileTree(dir: "libs", includes: ["*.jar"])
+jar {
+    from project(':folia').sourceSets.main.output
+    from project(':bukkit').sourceSets.main.output
+}
 
-    implementation "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
+subprojects.each { subproject -> evaluationDependsOn(subproject.path) }
 
-    implementation "com.aystudio.core:AyCore:1.0.3-BETA"
-    implementation "de.tr7zw:item-nbt-api-plugin:2.11.1"
-    implementation "net.milkbowl.vault:VaultAPI:1.7"
+tasks.register('allJar', Jar) {
+    dependsOn subprojects.tasks.build
+    archiveBaseName = 'ServerMarket'
+    subprojects.each { subproject ->
+        from subproject.configurations.archives.allArtifacts.files.collect {
+            zipTree(it)
+        }
+    }
+}
 
-    compileOnly("org.projectlombok:lombok:1.18.24")
-    annotationProcessor("org.projectlombok:lombok:1.18.24")
+tasks.jar.enabled = false
+
+artifacts {
+    archives allJar
 }
 
 processResources {
