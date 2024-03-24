@@ -17,6 +17,10 @@ data-option:
 default-market: "example"
 # 是否启用命令短写帮助
 command-help: true
+# 通用参数设定
+settings:
+  # 玩家离线交易检测间隔, 单位: 秒
+  offline-transaction-interval: 60
 # 冷却设定, 单位: 秒
 cooldown:
   action: 3

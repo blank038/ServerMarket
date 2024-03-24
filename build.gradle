@@ -19,9 +19,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 dependencies {
     implementation fileTree(dir: "libs", includes: ["*.jar"])
 
-    implementation "org.spigotmc:spigot:1.16.5-R0.1-SNAPSHOT"
     implementation "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
-    implementation "org.bukkit:bukkit:1.16.5-R0.1-SNAPSHOT"
 
     implementation "com.aystudio.core:AyCore:1.0.3-BETA"
     implementation "de.tr7zw:item-nbt-api-plugin:2.11.1"
@@ -39,7 +37,6 @@ processResources {
         duplicatesStrategy DuplicatesStrategy.INCLUDE
     }
 }
-
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"

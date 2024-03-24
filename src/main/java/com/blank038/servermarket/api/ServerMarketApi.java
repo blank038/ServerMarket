@@ -1,5 +1,6 @@
 package com.blank038.servermarket.api;
 
+import com.blank038.servermarket.api.platform.IPlatformApi;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -7,6 +8,8 @@ import com.blank038.servermarket.internal.cache.other.OfflineTransactionData;
 import com.blank038.servermarket.internal.enums.PayType;
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -20,6 +23,9 @@ import java.util.Map;
  * @date 2021/03/05
  */
 public class ServerMarketApi {
+    @Getter
+    @Setter
+    private static IPlatformApi platformApi;
 
     public static List<String> getMarketList() {
         return new ArrayList<>(DataContainer.MARKET_DATA.keySet());

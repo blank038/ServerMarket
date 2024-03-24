@@ -1,5 +1,6 @@
 package com.blank038.servermarket.internal.gui;
 
+import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import org.bukkit.Bukkit;
 
@@ -14,7 +15,7 @@ public abstract class AbstractGui {
     protected static final Map<UUID, Long> COOLDOWN = new HashMap<>();
 
     static {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(ServerMarket.getInstance(), () -> {
+        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(ServerMarket.getInstance(), () -> {
             synchronized (COOLDOWN) {
                 COOLDOWN.entrySet().removeIf((entry) -> System.currentTimeMillis() > entry.getValue());
             }

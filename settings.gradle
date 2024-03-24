@@ -1,1 +1,3 @@
 rootProject.name = 'ServerMarket'
+
+include 'folia'

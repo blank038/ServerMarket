@@ -1,5 +1,6 @@
 package com.blank038.servermarket.dto.impl;
 
+import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.dto.AbstractStorageHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
@@ -75,7 +76,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
 
     @Override
     public void initialize() {
-        Bukkit.getScheduler().runTaskTimerAsynchronously(ServerMarket.getInstance(), this::saveLogs, 60L, 60L);
+        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(ServerMarket.getInstance(), this::saveLogs, 60L, 60L);
     }
 
     @Override
