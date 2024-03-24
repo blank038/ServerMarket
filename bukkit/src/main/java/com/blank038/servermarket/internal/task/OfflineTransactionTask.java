@@ -7,6 +7,7 @@ import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
@@ -25,7 +26,7 @@ public class OfflineTransactionTask implements Runnable {
 
     @Override
     public synchronized void run() {
-
+        Bukkit.getOnlinePlayers().forEach(this::checkResult);
     }
 
     private void checkResult(Player player) {
@@ -34,7 +35,13 @@ public class OfflineTransactionTask implements Runnable {
                 // 获取市场数据
                 MarketData marketData = DataContainer.MARKET_DATA.getOrDefault(v.getSourceMarket(), null);
                 // 获取可获得货币
-                double price = v.getAmount(), last = marketData == null ? price : (price - price * marketData.getPermsValueForPlayer(marketData.getTaxSection(), player, false));
+                double price = v.getAmount(), tax = 0;
+                if (marketData != null) {
+                    tax = price * marketData.getPermsValueForPlayer(marketData.getTaxSection(), player, false);
+                }
+                double last = price - tax;
+                // send taxes
+                ServerMarketApi.sendTaxes(v.getPayType(), v.getEconomyType(), tax);
                 // 判断货币桥是否存在
                 if (BaseEconomy.PAY_TYPES.containsKey(v.getPayType())) {
                     DecimalFormat df = new DecimalFormat("#0.00");

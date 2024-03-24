@@ -1,5 +1,6 @@
 package com.blank038.servermarket.internal.command.virtual;
 
+import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.api.event.PlayerSaleEvent;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -103,22 +104,23 @@ public class VirtualMarketCommand extends Command {
         }
         // 判断余额是否足够交上架税
         double tax = this.marketData.getPermsValueForPlayer(this.marketData.getShoutTaxSection(), player, false);
-        if (BaseEconomy.getEconomyBridge(this.marketData.getPayType()).balance(player, this.marketData.getEcoType()) < tax) {
+        if (BaseEconomy.getEconomyBridge(this.marketData.getPaymentType()).balance(player, this.marketData.getEconomyType()) < tax) {
             player.sendMessage(I18n.getStrAndHeader("shout-tax")
                     .replace("%economy%", this.marketData.getEconomyName()));
             return;
         }
-        // 扣除费率
-        if (tax > 0 && !BaseEconomy.getEconomyBridge(this.marketData.getPayType()).take(player, this.marketData.getEcoType(), tax)) {
+        if (tax > 0 && !BaseEconomy.getEconomyBridge(this.marketData.getPaymentType()).take(player, this.marketData.getEconomyType(), tax)) {
             player.sendMessage(I18n.getStrAndHeader("shout-tax")
                     .replace("%economy%", this.marketData.getEconomyName()));
             return;
         }
+        // send taxes
+        ServerMarketApi.sendTaxes(this.marketData.getPaymentType(), this.marketData.getEconomyType(), tax);
         // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);
         // 上架物品
         SaleCache saleItem = new SaleCache(UUID.randomUUID().toString(), this.marketData.getMarketKey(), player.getUniqueId().toString(),
-                player.getName(), itemStack, PayType.VAULT, this.marketData.getEcoType(), price, System.currentTimeMillis());
+                player.getName(), itemStack, PayType.VAULT, this.marketData.getEconomyType(), price, System.currentTimeMillis());
         // add sale to storage handler
         ServerMarket.getStorageHandler().addSale(this.marketData.getMarketKey(), saleItem);
         // call PlayerSaleEvent.Sell

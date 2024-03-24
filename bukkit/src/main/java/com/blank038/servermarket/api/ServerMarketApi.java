@@ -1,6 +1,7 @@
 package com.blank038.servermarket.api;
 
 import com.blank038.servermarket.api.platform.IPlatformApi;
+import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -10,6 +11,8 @@ import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -17,6 +20,8 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * @author Blank038
@@ -71,5 +76,24 @@ public class ServerMarketApi {
         // 存入数据
         OfflineTransactionData resultData = new OfflineTransactionData(section);
         ServerMarket.getStorageHandler().addOfflineTransaction(resultData);
+    }
+
+    public static void sendTaxes(PayType payType, String subData, double tax) {
+        if (tax <= 0) {
+            return;
+        }
+        String taxAccount = ServerMarket.getInstance().getConfig().getString("tax-account", "");
+        if (taxAccount.isEmpty() || taxAccount.equalsIgnoreCase("UUID")) {
+            return;
+        }
+        try {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(taxAccount));
+            if (offlinePlayer == null) {
+                return;
+            }
+            BaseEconomy.getEconomyBridge(payType).give(offlinePlayer, subData, tax);
+        } catch (Exception e) {
+            ServerMarket.getInstance().getLogger().log(Level.WARNING, "Fail to send the tax payment to " + taxAccount);
+        }
     }
 }
