@@ -1,8 +1,5 @@
 # ServerMarket
 
-> [!WARNING]  
-> 此仓库并未单独创建开发分支，提交的代码含有未经调试的代码，请前往 releases 或发布贴下载稳定版。
-
 ## 🛠 插件依赖 & Dependencies
 
 + AyCore [Download](https://cdn.mc9y.com/files/AyCore/AyCore-1.0.6-BETA.jar)
@@ -31,10 +28,6 @@
 |  补丁编号   |                                   补丁功能                                   |
 |:-------:|:------------------------------------------------------------------------:|
 | 251-U-1 | 修复离线记录金额超过数值范围，例：[#2](https://github.com/blank038/ServerMarket/issues/2) |
-
-## ⭐ 项目状态 & Analytics
-
-![Alt](https://repobeats.axiom.co/api/embed/b687c19b5d43169f91a2822e8673f7cbbdd73231.svg "Repobeats analytics image")
 
 ## 🌱 贡献者 & Contributors
 
