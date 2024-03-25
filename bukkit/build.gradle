@@ -30,7 +30,7 @@ processResources {
     setFilteringCharset("UTF-8")
     from(sourceSets.main.resources.srcDirs) {
         include '**/plugin.yml', '**/history.yml'
-        filter ReplaceTokens, tokens: ["version": project.property("version")]
+        filter ReplaceTokens, tokens: ["version": project(":").property("version")]
         duplicatesStrategy DuplicatesStrategy.INCLUDE
     }
 }
