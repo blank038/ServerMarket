@@ -18,7 +18,7 @@ dependencies {
 
     implementation "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
 
-    implementation "com.aystudio.core:AyCore:1.0.3-BETA"
+    implementation "com.aystudio.core:AyCore:1.1.0-BETA"
     implementation "de.tr7zw:item-nbt-api-plugin:2.11.1"
     implementation "net.milkbowl.vault:VaultAPI:1.7"
 
