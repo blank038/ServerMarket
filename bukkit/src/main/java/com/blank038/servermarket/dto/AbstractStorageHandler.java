@@ -43,6 +43,11 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
     }
 
     @Override
+    public void saveAllPlayerData() {
+        PLAYER_DATA_MAP.entrySet().stream().forEach((entry) -> this.savePlayerData(entry.getValue(), false));
+    }
+
+    @Override
     public void setLock(UUID uuid, boolean locked) {
     }
 

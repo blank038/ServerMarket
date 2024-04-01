@@ -234,13 +234,6 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public void saveAllPlayerData() {
-        for (Map.Entry<UUID, PlayerCache> entry : PLAYER_DATA_MAP.entrySet()) {
-            this.savePlayerData(entry.getValue(), false);
-        }
-    }
-
-    @Override
     public void savePlayerData(UUID uuid, boolean removeCache) {
         this.getPlayerDataByCache(uuid).ifPresent((playerCache) -> this.savePlayerData(playerCache, removeCache));
     }

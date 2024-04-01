@@ -261,13 +261,6 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
-    public void saveAllPlayerData() {
-        for (Map.Entry<UUID, PlayerCache> entry : PLAYER_DATA_MAP.entrySet()) {
-            this.savePlayerData(entry.getKey(), false);
-        }
-    }
-
-    @Override
     public void savePlayerData(UUID uuid, boolean removeCache) {
         Optional<PlayerCache> optional = this.getPlayerDataByCache(uuid);
         optional.ifPresent(playerCache -> this.savePlayerData(playerCache, removeCache));
