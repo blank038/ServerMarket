@@ -10,7 +10,6 @@ import com.blank038.servermarket.internal.cache.other.OfflineTransactionData;
 import com.blank038.servermarket.internal.cache.other.SaleLog;
 import com.blank038.servermarket.internal.cache.player.PlayerCache;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -32,10 +31,6 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     private static final Map<String, MarketCache> MARKET_STORAGE_DATA_MAP = new HashMap<>();
     private static final Map<String, ConfigurationSection> LOG_SECTION_MAP = new HashMap<>();
 
-    /*
-     * self methods
-     */
-
 
     private void saveResults() {
         File resultFile = new File(this.pluign.getDataFolder(), "results.yml");
@@ -50,8 +45,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
         }
     }
 
-
-    /*
+    /**
      * AbstractStorageHandler methods
      */
     private void saveLogs() {
@@ -210,13 +204,9 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
             if (marketConfigData == null) {
                 return;
             }
-            // 开始计算
-            Iterator<Map.Entry<String, SaleCache>> iterator = v.getSales().entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, SaleCache> entry = iterator.next();
+            for (Map.Entry<String, SaleCache> entry : v.getSales().entrySet()) {
                 int second = (int) ((System.currentTimeMillis() - entry.getValue().getPostTime()) / 1000L);
-                if (second >= marketConfigData.getEffectiveTime()) {
-                    iterator.remove();
+                if (second >= marketConfigData.getEffectiveTime() && this.removeSaleItem(k, entry.getValue().getSaleUUID()).isPresent()) {
                     UUID uuid = UUID.fromString(entry.getValue().getOwnerUUID());
                     ServerMarket.getStorageHandler().addItemToStore(uuid, entry.getValue().getSaleItem(), "timeout");
                 }
@@ -227,9 +217,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     @Override
     public void saveAll() {
         this.saveAllPlayerData();
-        for (Map.Entry<String, MarketCache> entry : MARKET_STORAGE_DATA_MAP.entrySet()) {
-            this.save(entry.getKey(), entry.getValue().getSales());
-        }
+        MARKET_STORAGE_DATA_MAP.forEach((k, v) -> this.save(k, v.getSales()));
         this.saveResults();
     }
 
@@ -248,7 +236,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
             ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save player data: " + playerCache.getOwnerUniqueId().toString());
         }
         if (removeCache) {
-            PLAYER_DATA_MAP.remove(playerCache.getOwnerUniqueId());
+            this.removePlyerData(playerCache.getOwnerUniqueId());
         }
     }
 

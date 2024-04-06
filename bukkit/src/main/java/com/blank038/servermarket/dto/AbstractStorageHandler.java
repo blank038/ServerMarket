@@ -8,13 +8,14 @@ import com.blank038.servermarket.dto.impl.YamlStorageHandlerImpl;
 import org.bukkit.Bukkit;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * @author Blank038
  */
 public abstract class AbstractStorageHandler implements IStorageHandler {
-    protected static final HashMap<UUID, PlayerCache> PLAYER_DATA_MAP = new HashMap<>();
+    protected static final Map<UUID, PlayerCache> PLAYER_DATA_MAP = new HashMap<>();
 
     protected final ServerMarket pluign = ServerMarket.getInstance();
 
@@ -54,5 +55,9 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
     @Override
     public boolean isLocked(UUID uuid) {
         return false;
+    }
+
+    public void removePlyerData(UUID uuid) {
+        PLAYER_DATA_MAP.entrySet().removeIf(entry -> entry.getKey().equals(uuid));
     }
 }

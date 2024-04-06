@@ -240,12 +240,9 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
     @Override
     public void removeTimeOutItem() {
         DataContainer.MARKET_DATA.forEach((k, v) -> {
-            Iterator<Map.Entry<String, SaleCache>> iterator = this.getSaleItemsByMarket(k).entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, SaleCache> entry = iterator.next();
+            for (Map.Entry<String, SaleCache> entry : this.getSaleItemsByMarket(k).entrySet()) {
                 int second = (int) ((System.currentTimeMillis() - entry.getValue().getPostTime()) / 1000L);
                 if (second >= v.getEffectiveTime()) {
-                    iterator.remove();
                     UUID uuid = UUID.fromString(entry.getValue().getOwnerUUID());
                     ServerMarket.getStorageHandler().removeSaleItem(k, entry.getKey()).ifPresent((sale) -> {
                         ServerMarket.getStorageHandler().addItemToStore(uuid, sale.getSaleItem(), "timeout");
@@ -302,7 +299,7 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
             }, "UPDATE " + playersTable + " SET data = ? WHERE player_uuid = ?;");
         }
         if (removeCache) {
-            PLAYER_DATA_MAP.remove(playerCache.getOwnerUniqueId());
+            this.removePlyerData(playerCache.getOwnerUniqueId());
         }
     }
 
