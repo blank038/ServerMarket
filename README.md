@@ -2,7 +2,7 @@
 
 ## 🛠 插件依赖 & Dependencies
 
-+ AyCore [Download](https://cdn.mc9y.com/files/AyCore/AyCore-1.0.6-BETA.jar)
++ AyCore [Download](https://cdn.mc9y.com/files/AyCore/AyCore-1.2.1-BETA.jar)
 + NBTAPI [Download](https://www.spigotmc.org/resources/nbt-api.7939/)
 
 ## ✨ 插件功能 & Features
