@@ -20,6 +20,8 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 
 /**
  * @author Blank038
@@ -117,27 +119,39 @@ public class VirtualMarketCommand extends Command {
         }
         // send taxes
         ServerMarketApi.sendTaxes(this.marketData.getPaymentType(), this.marketData.getEconomyType(), tax);
-        // 设置玩家手中物品为空
         player.getInventory().setItemInMainHand(null);
-        // 上架物品
+        // initial SaleCache
         SaleCache saleItem = new SaleCache(UUID.randomUUID().toString(), this.marketData.getMarketKey(), player.getUniqueId().toString(),
                 player.getName(), cloneItem, PayType.VAULT, this.marketData.getEconomyType(), price, System.currentTimeMillis());
-        // add sale to storage handler
-        ServerMarket.getStorageHandler().addSale(this.marketData.getMarketKey(), saleItem);
-        // call PlayerSaleEvent.Sell
-        PlayerSaleEvent.Sell event = new PlayerSaleEvent.Sell(player, this.marketData, saleItem);
-        Bukkit.getPluginManager().callEvent(event);
+        CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            // add sale to storage handler
+            return ServerMarket.getStorageHandler().addSale(this.marketData.getMarketKey(), saleItem);
+        });
+        future.thenAccept((result) -> {
+            if (result) {
+                // call PlayerSaleEvent.Sell
+                PlayerSaleEvent.Sell event = new PlayerSaleEvent.Sell(player, this.marketData, saleItem);
+                Bukkit.getPluginManager().callEvent(event);
 
-        player.sendMessage(I18n.getStrAndHeader("sell"));
-        // 判断是否公告
-        if (this.marketData.isSaleBroadcast()) {
-            String displayName = cloneItem.hasItemMeta() && cloneItem.getItemMeta().hasDisplayName() ?
-                    cloneItem.getItemMeta().getDisplayName() : cloneItem.getType().name();
-            Bukkit.getServer().broadcastMessage(I18n.getStrAndHeader("broadcast")
-                    .replace("%item%", displayName)
-                    .replace("%market_name%", this.marketData.getDisplayName())
-                    .replace("%amount%", String.valueOf(cloneItem.getAmount()))
-                    .replace("%player%", player.getName()));
-        }
+                player.sendMessage(I18n.getStrAndHeader("sell"));
+                // 判断是否公告
+                if (this.marketData.isSaleBroadcast()) {
+                    String displayName = cloneItem.hasItemMeta() && cloneItem.getItemMeta().hasDisplayName() ?
+                            cloneItem.getItemMeta().getDisplayName() : cloneItem.getType().name();
+                    Bukkit.getServer().broadcastMessage(I18n.getStrAndHeader("broadcast")
+                            .replace("%item%", displayName)
+                            .replace("%market_name%", this.marketData.getDisplayName())
+                            .replace("%amount%", String.valueOf(cloneItem.getAmount()))
+                            .replace("%player%", player.getName()));
+                }
+            } else {
+                player.sendMessage(I18n.getStrAndHeader("sale-denied"));
+            }
+        });
+        future.exceptionally((e) -> {
+            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Please contact the author at https://github.com/blank038/ServerMarket/issues");
+            player.sendMessage(I18n.getStrAndHeader("sale-failed"));
+            return false;
+        });
     }
 }
