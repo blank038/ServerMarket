@@ -149,7 +149,7 @@ public class MarketData {
                 if (shift) {
                     ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid)
                             .ifPresent((sale) -> {
-                                ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), sale.getSaleItem(), "buy");
+                                ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), sale.getSaleItem(), "unsale");
                                 buyer.sendMessage(I18n.getStrAndHeader("unsale"));
                                 new MarketGui(this.marketKey, page, filter).openGui(buyer);
                             });
