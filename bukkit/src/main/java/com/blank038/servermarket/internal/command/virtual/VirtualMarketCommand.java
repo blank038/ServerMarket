@@ -55,12 +55,13 @@ public class VirtualMarketCommand extends Command {
             player.sendMessage(I18n.getStrAndHeader("price-null"));
             return;
         }
-        ItemStack itemStack = player.getInventory().getItemInMainHand().clone();
+        ItemStack itemStack = player.getInventory().getItemInMainHand();
         if (itemStack == null || itemStack.getType() == Material.AIR) {
             player.sendMessage(I18n.getStrAndHeader("hand-air"));
             return;
         }
-        if (this.marketData.getDeniedFilter().check(itemStack)) {
+        ItemStack cloneItem = itemStack.clone();
+        if (this.marketData.getDeniedFilter().check(cloneItem)) {
             player.sendMessage(I18n.getStrAndHeader("deny-item"));
             return;
         }
@@ -82,7 +83,7 @@ public class VirtualMarketCommand extends Command {
             return;
         }
         String extraPrice = this.marketData.getExtraMap().entrySet().stream()
-                .filter((s) -> new FilterHandler().addKeyFilter(new KeyFilterImpl(s.getKey())).check(itemStack))
+                .filter((s) -> new FilterHandler().addKeyFilter(new KeyFilterImpl(s.getKey())).check(cloneItem))
                 .findFirst()
                 .map(Map.Entry::getValue)
                 .orElse(null);
@@ -120,7 +121,7 @@ public class VirtualMarketCommand extends Command {
         player.getInventory().setItemInMainHand(null);
         // 上架物品
         SaleCache saleItem = new SaleCache(UUID.randomUUID().toString(), this.marketData.getMarketKey(), player.getUniqueId().toString(),
-                player.getName(), itemStack, PayType.VAULT, this.marketData.getEconomyType(), price, System.currentTimeMillis());
+                player.getName(), cloneItem, PayType.VAULT, this.marketData.getEconomyType(), price, System.currentTimeMillis());
         // add sale to storage handler
         ServerMarket.getStorageHandler().addSale(this.marketData.getMarketKey(), saleItem);
         // call PlayerSaleEvent.Sell
@@ -130,12 +131,12 @@ public class VirtualMarketCommand extends Command {
         player.sendMessage(I18n.getStrAndHeader("sell"));
         // 判断是否公告
         if (this.marketData.isSaleBroadcast()) {
-            String displayName = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
-                    itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
+            String displayName = cloneItem.hasItemMeta() && cloneItem.getItemMeta().hasDisplayName() ?
+                    cloneItem.getItemMeta().getDisplayName() : cloneItem.getType().name();
             Bukkit.getServer().broadcastMessage(I18n.getStrAndHeader("broadcast")
                     .replace("%item%", displayName)
                     .replace("%market_name%", this.marketData.getDisplayName())
-                    .replace("%amount%", String.valueOf(itemStack.getAmount()))
+                    .replace("%amount%", String.valueOf(cloneItem.getAmount()))
                     .replace("%player%", player.getName()));
         }
     }
