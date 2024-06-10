@@ -1,5 +1,9 @@
 # ServerMarket
 
+## README
+
+[中文](README_CN.md)
+
 ## ⭐ Dependencies
 
 + AyCore [Download](https://cdn.mc9y.com/files/AyCore/AyCore-1.2.1-BETA.jar)
@@ -34,6 +38,10 @@ When you encounter bugs during use that need to be fixed, make sure that ServerM
 <a href="https://github.com/blank038/ServerMarket/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=blank038/ServerMarket" alt="Contributors"/>
 </a>
+
+### Translations
+
+[Locales Directory](https://github.com/blank038/ServerMarket/tree/master/bukkit/src/main/resources/language)
 
 ## 📃 License
 
