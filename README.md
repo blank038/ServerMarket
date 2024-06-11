@@ -1,11 +1,16 @@
 # ServerMarket
 
-## 🛠 插件依赖 & Dependencies
+## 自述文件 & README
+
+* zh_CN [简体中文](README.md)
+* en [English](README_EN.md)
+
+## ⭐ 插件依赖
 
 + AyCore [Download](https://cdn.mc9y.com/files/AyCore/AyCore-1.2.1-BETA.jar)
 + NBTAPI [Download](https://www.spigotmc.org/resources/nbt-api.7939/)
 
-## ✨ 插件功能 & Features
+## ✨ 插件功能
 
 * 高度自定义 Gui 界面
 * 支持 MySQL, YAML 格式存储
@@ -17,7 +22,7 @@
 * 支持商品分类、商品搜索、商品黑名单
 * 支持指定商品/分类价格范围
 
-## 🛠 补丁 & Patch
+## 🔨 补丁
 
 > [!CAUTION]  
 > 可能存在数据安全隐患，需要您手动备份数据后再执行
@@ -34,6 +39,10 @@
 <a href="https://github.com/blank038/ServerMarket/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=blank038/ServerMarket" alt="Contributors"/>
 </a>
+
+### 翻译
+
+[语言文件位置](https://github.com/blank038/ServerMarket/tree/master/bukkit/src/main/resources/language)
 
 ## 📃 开源协议 & License
 
