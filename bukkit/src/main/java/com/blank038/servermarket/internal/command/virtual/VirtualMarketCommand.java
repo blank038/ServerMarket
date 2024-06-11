@@ -145,11 +145,13 @@ public class VirtualMarketCommand extends Command {
                             .replace("%player%", player.getName()));
                 }
             } else {
+                player.getInventory().addItem(cloneItem);
                 player.sendMessage(I18n.getStrAndHeader("sale-denied"));
             }
         });
         future.exceptionally((e) -> {
             ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Please contact the author at https://github.com/blank038/ServerMarket/issues");
+            player.getInventory().addItem(cloneItem);
             player.sendMessage(I18n.getStrAndHeader("sale-failed"));
             return false;
         });
