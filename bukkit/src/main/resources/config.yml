@@ -1,3 +1,4 @@
+# 支持: zh_CN, en_US, es_ES, fr_FR, ko_KR, ru_RU, tr_TR
 language: "zh_CN"
 # 存储设定
 data-option:
@@ -26,3 +27,19 @@ cooldown:
   action: 3
 # 税收流向账户, 参数类型: UUID
 tax-account: "UUID"
+# 跨服通知设定
+notify-option:
+  # 使用模式, 目前支持: self/MySQL, 未来会提供对 PostgreSQL/Redis 的支持
+  use: self
+  # 使用不同模式请配置对应参数
+  type:
+    self:
+      host: localhost
+      listen: 54211
+    mysql:
+      url: jdbc:mysql://localhost/minecraft?useSSL=false
+      user: root
+      password: root
+      prefix: "servermarket_"
+    postgresql: { }
+    redis: { }
