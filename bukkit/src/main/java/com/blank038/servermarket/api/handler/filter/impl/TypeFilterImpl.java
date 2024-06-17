@@ -3,6 +3,7 @@ package com.blank038.servermarket.api.handler.filter.impl;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.api.handler.filter.interfaces.IFilter;
 import lombok.Getter;
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -27,7 +28,28 @@ public class TypeFilterImpl implements IFilter {
         if (this.types.contains("all")) {
             return true;
         }
-        return this.types.stream().anyMatch((s) -> saleItem.getSaleTypes().contains(s));
+        return this.types.stream().anyMatch((s) -> {
+            if (s.startsWith("is:") && this.isType(saleItem, s.substring(3))) {
+                return true;
+            }
+            return saleItem.getSaleTypes().contains(s);
+        });
+    }
+
+    private boolean isType(SaleCache saleCache, String type) {
+        Material material = saleCache.getSaleItem().getType();
+        switch (type.toLowerCase()) {
+            case "block":
+                return material.isBlock();
+            case "edible":
+                return material.isEdible();
+            case "item":
+                return material.isItem();
+            case "burnable":
+                return material.isBurnable();
+            default:
+                return false;
+        }
     }
 
     @Override
