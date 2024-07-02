@@ -1,4 +1,4 @@
-prefix: "&eServerMarket &f"
+prefix: "&e全球市场 &f"
 unknown-command: "未知命令, 请输入 /%c help 查看命令帮助."
 help:
   default:
