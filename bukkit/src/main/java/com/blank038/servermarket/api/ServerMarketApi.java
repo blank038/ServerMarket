@@ -9,6 +9,8 @@ import com.blank038.servermarket.internal.cache.other.OfflineTransactionData;
 import com.blank038.servermarket.internal.enums.PayType;
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
+import com.blank038.servermarket.internal.service.notify.INotifyService;
+import com.blank038.servermarket.internal.service.notify.NotifyCenter;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -94,6 +96,22 @@ public class ServerMarketApi {
             BaseEconomy.getEconomyBridge(payType).give(offlinePlayer, subData, tax);
         } catch (Exception e) {
             ServerMarket.getInstance().getLogger().log(Level.WARNING, "Fail to send the tax payment to " + taxAccount);
+        }
+    }
+
+    public static void registerService(String source, Class<? extends INotifyService> classZ) {
+        NotifyCenter.register(source, classZ);
+    }
+
+    public static INotifyService createService(String source, ConfigurationSection config) {
+        if (!NotifyCenter.isRegister(source)) {
+            return null;
+        }
+        try {
+            INotifyService service = NotifyCenter.findNotifyClass(source).newInstance();
+            return NotifyCenter.create(source, service, config);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

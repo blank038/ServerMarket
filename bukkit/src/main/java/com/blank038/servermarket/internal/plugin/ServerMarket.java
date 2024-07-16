@@ -16,9 +16,11 @@ import com.blank038.servermarket.internal.listen.impl.PlayerLatestListener;
 import com.blank038.servermarket.internal.metrics.Metrics;
 import com.blank038.servermarket.internal.platform.PlatformHandler;
 import com.blank038.servermarket.internal.task.OfflineTransactionTask;
+import com.google.common.collect.Lists;
 import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.configuration.ConfigurationSection;
 
 /**
  * Global market plugin for Bukkit.
@@ -54,8 +56,8 @@ public class ServerMarket extends AyPlugin {
         // register sort handler
         AbstractSortHandler.registerDefaults();
         // start tasks
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 200L, 200L);
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::saveAll, 1200L, 1200L);
+        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 60, 60);
+        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::saveAll, 60, 60);
         // inject metrics
         new Metrics(this, 20031);
     }
@@ -78,11 +80,11 @@ public class ServerMarket extends AyPlugin {
         this.reloadConfig();
         // Initialize I18n
         new I18n(this.getConfig().getString("language", "zh_CN"));
-        // restart the task for offline transaction
-        OfflineTransactionTask.restart();
         // Run legacy converter
         LegacyBackup.check();
-        if (this.isEnabled()) {
+        // Save the default files
+        Lists.newArrayList("gui/store.yml").forEach((v) -> this.saveResource(v, v));
+        if (start && this.isEnabled()) {
             // Initialize IStorageHandler
             AbstractStorageHandler.check();
             storageHandler.reload();
@@ -90,13 +92,16 @@ public class ServerMarket extends AyPlugin {
             BaseEconomy.initEconomies();
             // Initialize DataContainer
             DataContainer.loadData();
-            // Save the default files
-            for (String fileName : new String[]{"gui/store.yml"}) {
-                this.saveResource(fileName, fileName);
-            }
-            this.getConsoleLogger().log(false, I18n.getProperties().getProperty("load-completed")
-                    .replace("%s", String.valueOf(DataContainer.MARKET_DATA.size())));
-            this.getConsoleLogger().log(false, " ");
+            // register service
+            ConfigurationSection section = this.getConfig().getConfigurationSection("notify-option");
+            String serviceType = section.getString("use", "self");
+            ServerMarketApi.createService(serviceType, section.getConfigurationSection("type." + serviceType));
         }
+        // restart the task for offline transaction
+        OfflineTransactionTask.restart();
+
+        this.getConsoleLogger().log(false, I18n.getProperties().getProperty("load-completed")
+                .replace("%s", String.valueOf(DataContainer.MARKET_DATA.size())));
+        this.getConsoleLogger().log(false, " ");
     }
 }

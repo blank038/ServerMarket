@@ -19,7 +19,7 @@ public abstract class AbstractGui {
             synchronized (COOLDOWN) {
                 COOLDOWN.entrySet().removeIf((entry) -> System.currentTimeMillis() > entry.getValue());
             }
-        }, 1200L, 1200L);
+        }, 60, 60);
     }
 
     public boolean isCooldown(UUID uuid) {

@@ -70,7 +70,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
 
     @Override
     public void initialize() {
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(ServerMarket.getInstance(), this::saveLogs, 60L, 60L);
+        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(ServerMarket.getInstance(), this::saveLogs, 3, 3);
     }
 
     @Override

@@ -5,7 +5,7 @@ data-option:
   # 存储类型, 支持: MySQL, YAML
   type: YAML
   # MySQL url, 例如 jdbc:mysql://127.0.0.1/minecraft 格式: jdbc:mysql://MySQL地址/数据库名
-  url: jdbc:mysql://localhost/minecraft?useSSL=false
+  url: jdbc:mysql://localhost/minecraft?useSSL=false&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf-8
   # 数据库用户名
   user: "root"
   # 数据库密码
@@ -27,19 +27,18 @@ cooldown:
   action: 3
 # 税收流向账户, 参数类型: UUID
 tax-account: "UUID"
-# 跨服通知设定
+# 跨服通知设定, 修改后需要重启服务器生效
 notify-option:
   # 使用模式, 目前支持: self/MySQL, 未来会提供对 PostgreSQL/Redis 的支持
   use: self
   # 使用不同模式请配置对应参数
   type:
-    self:
-      host: localhost
-      listen: 54211
+    self: { }
     mysql:
-      url: jdbc:mysql://localhost/minecraft?useSSL=false
+      url: jdbc:mysql://localhost/minecraft?useSSL=false&autoReconnect=true&autoReconnectForPools=true&useUnicode=true&characterEncoding=utf-8
       user: root
       password: root
-      prefix: "servermarket_"
-    postgresql: { }
-    redis: { }
+      # 每隔多少秒获取一次数据
+      fetch-interval: 10
+      # 每次获取多少秒内的数据
+      update-window: 30

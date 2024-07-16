@@ -19,8 +19,14 @@ public class BukkitPlatformApi implements IPlatformApi {
     }
 
     @Override
-    public ITaskWrapper runTaskTimerAsynchronously(JavaPlugin plugin, Runnable runnable, long delay, long period) {
-        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, delay, period);
+    public ITaskWrapper runTaskAsynchronously(JavaPlugin plugin, Runnable runnable) {
+        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskAsynchronously(plugin, runnable);
+        return new BukkitTaskWrapper(bukkitTask);
+    }
+
+    @Override
+    public ITaskWrapper runTaskTimerAsynchronously(JavaPlugin plugin, Runnable runnable, long delaySecond, long periodSecond) {
+        BukkitTask bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, runnable, delaySecond * 20, periodSecond * 20);
         return new BukkitTaskWrapper(bukkitTask);
     }
 }

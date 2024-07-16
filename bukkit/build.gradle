@@ -21,6 +21,7 @@ dependencies {
     implementation "com.aystudio.core:AyCore:1.1.0-BETA"
     implementation "de.tr7zw:item-nbt-api-plugin:2.11.1"
     implementation "net.milkbowl.vault:VaultAPI:1.7"
+    implementation group: 'io.netty', name: 'netty-all', version: '4.1.111.Final'
 
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")

@@ -7,5 +7,7 @@ public interface IPlatformApi {
 
     ITaskWrapper runTask(JavaPlugin plugin, Runnable runnable);
 
-    ITaskWrapper runTaskTimerAsynchronously(JavaPlugin plugin, Runnable runnable, long delay, long period);
+    ITaskWrapper runTaskAsynchronously(JavaPlugin plugin, Runnable runnable);
+
+    ITaskWrapper runTaskTimerAsynchronously(JavaPlugin plugin, Runnable runnable, long delaySecond, long periodSecond);
 }

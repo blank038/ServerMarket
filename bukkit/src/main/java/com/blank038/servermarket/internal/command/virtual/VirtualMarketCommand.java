@@ -1,6 +1,7 @@
 package com.blank038.servermarket.internal.command.virtual;
 
 import com.blank038.servermarket.api.ServerMarketApi;
+import com.blank038.servermarket.internal.cache.other.NotifyCache;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.api.event.PlayerSaleEvent;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -11,6 +12,7 @@ import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.api.handler.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import com.blank038.servermarket.internal.i18n.I18n;
+import com.blank038.servermarket.internal.service.notify.NotifyCenter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -106,7 +108,7 @@ public class VirtualMarketCommand extends Command {
             return;
         }
         // 判断余额是否足够交上架税
-        double tax = this.marketData.getPermsValueForPlayer(this.marketData.getShoutTaxSection(), player, false);
+        double tax = price * this.marketData.getPermsValueForPlayer(this.marketData.getShoutTaxSection(), player, false);
         if (BaseEconomy.getEconomyBridge(this.marketData.getPaymentType()).balance(player, this.marketData.getEconomyType()) < tax) {
             player.sendMessage(I18n.getStrAndHeader("shout-tax")
                     .replace("%economy%", this.marketData.getEconomyName()));
@@ -138,11 +140,14 @@ public class VirtualMarketCommand extends Command {
                 if (this.marketData.isSaleBroadcast()) {
                     String displayName = cloneItem.hasItemMeta() && cloneItem.getItemMeta().hasDisplayName() ?
                             cloneItem.getItemMeta().getDisplayName() : cloneItem.getType().name();
-                    Bukkit.getServer().broadcastMessage(I18n.getStrAndHeader("broadcast")
+                    NotifyCache notify = new NotifyCache();
+                    notify.message = I18n.getStrAndHeader("broadcast")
                             .replace("%item%", displayName)
                             .replace("%market_name%", this.marketData.getDisplayName())
                             .replace("%amount%", String.valueOf(cloneItem.getAmount()))
-                            .replace("%player%", player.getName()));
+                            .replace("%player%", player.getName());
+                    notify.time = System.currentTimeMillis();
+                    NotifyCenter.pushNotify(notify);
                 }
             } else {
                 player.getInventory().addItem(cloneItem);

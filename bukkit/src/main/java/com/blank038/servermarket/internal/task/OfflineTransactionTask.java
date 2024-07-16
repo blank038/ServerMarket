@@ -18,12 +18,6 @@ import java.text.DecimalFormat;
 public class OfflineTransactionTask implements Runnable {
     private static ITaskWrapper taskWrapper;
 
-    public OfflineTransactionTask() {
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(ServerMarket.getInstance(), () -> {
-
-        }, 1200L, 1200L);
-    }
-
     @Override
     public synchronized void run() {
         Bukkit.getOnlinePlayers().forEach(this::checkResult);
