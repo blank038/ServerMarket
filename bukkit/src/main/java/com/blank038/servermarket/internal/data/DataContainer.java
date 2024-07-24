@@ -1,6 +1,7 @@
 package com.blank038.servermarket.internal.data;
 
 import com.blank038.servermarket.api.handler.sort.SortHandler;
+import com.blank038.servermarket.internal.enums.ActionType;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.command.virtual.VirtualMarketCommand;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -15,6 +16,7 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.SimplePluginManager;
 
 import java.io.File;
@@ -32,6 +34,7 @@ public class DataContainer {
             SORT_TYPE_DISPLAY_NAME = new HashMap<>();
     public static final Map<String, MarketData> MARKET_DATA = new HashMap<>();
     public static final Map<String, SortHandler> SORT_HANDLER_MAP = new HashMap<>();
+    public static final Map<ClickType, ActionType> ACTION_TYPE_MAP = new HashMap<>();
 
     public static void loadData() {
         ServerMarket.getInstance().saveResource("types.yml", "types.yml", false, (file) -> {
@@ -71,6 +74,27 @@ public class DataContainer {
         Arrays.stream(file.listFiles()).iterator().forEachRemaining(MarketData::new);
         // Register virtual command
         DataContainer.registerVirtualMarketCommands();
+        // load actions
+        DataContainer.loadActions();
+    }
+
+    /**
+     * Load the market actions.
+     */
+    private static void loadActions() {
+        ServerMarket.getInstance().saveResource("action/market.yml", "action/market.yml", false, (file) -> {
+            ACTION_TYPE_MAP.clear();
+            FileConfiguration data = YamlConfiguration.loadConfiguration(file);
+            data.getKeys(false).forEach((key) -> {
+                try {
+                    ClickType type = ClickType.valueOf(key.toUpperCase());
+                    ActionType action = ActionType.valueOf(data.getString(key).toUpperCase());
+                    ACTION_TYPE_MAP.put(type, action);
+                } catch (Exception e) {
+                    ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to load market action: " + key);
+                }
+            });
+        });
     }
 
     private static void registerVirtualMarketCommands() {
@@ -124,5 +148,9 @@ public class DataContainer {
         if (!types.isEmpty()) {
             saleItem.setSaleTypes(types);
         }
+    }
+
+    public static boolean isLegacy() {
+        return !MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1);
     }
 }

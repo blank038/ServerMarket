@@ -1,0 +1,20 @@
+title: "&8商品购买确认"
+size: 27
+item-slot: 13
+items:
+  confirm:
+    type: STAINED_GLASS_PANE
+    amount: 1
+    data: 5
+    action: confirm
+    name: "&a确认"
+    slot: 10
+    lore: [ ]
+  cancel:
+    type: STAINED_GLASS_PANE
+    amount: 1
+    data: 14
+    action: cancel
+    name: "&c取消"
+    slot: 16
+    lore: [ ]

@@ -14,6 +14,7 @@ import com.blank038.servermarket.api.handler.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.api.handler.filter.interfaces.IFilter;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import com.blank038.servermarket.internal.i18n.I18n;
+import com.blank038.servermarket.internal.provider.ActionProvider;
 import com.blank038.servermarket.internal.util.TextUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -116,8 +118,8 @@ public class MarketData {
     /**
      * 获取玩家在权限节点上的值
      *
-     * @param section target section
-     * @param player  target player
+     * @param section    target section
+     * @param player     target player
      * @param compareBig is bigger than
      * @return 最终值
      */
@@ -136,6 +138,19 @@ public class MarketData {
         return tax;
     }
 
+    public void action(Player player, String uuid, ClickType clickType, int page, FilterHandler filter) {
+        if (!ServerMarket.getStorageHandler().hasSale(this.sourceId, uuid)) {
+            player.sendMessage(I18n.getStrAndHeader("error-sale"));
+            return;
+        }
+        Optional<SaleCache> optionalSaleItem = ServerMarket.getStorageHandler().getSaleItem(this.sourceId, uuid);
+        if (optionalSaleItem.isPresent()) {
+            ActionProvider.runAction(this, player, uuid, optionalSaleItem.get(), clickType, page, filter);
+        } else {
+            player.sendMessage(I18n.getStrAndHeader("error-sale"));
+        }
+    }
+
     public void tryBuySale(Player buyer, String uuid, boolean shift, int page, FilterHandler filter) {
         // 判断商品是否存在
         if (!ServerMarket.getStorageHandler().hasSale(this.sourceId, uuid)) {
@@ -145,59 +160,8 @@ public class MarketData {
         Optional<SaleCache> optionalSaleItem = ServerMarket.getStorageHandler().getSaleItem(this.sourceId, uuid);
         if (optionalSaleItem.isPresent()) {
             SaleCache saleItem = optionalSaleItem.get();
-            if (saleItem.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
-                if (shift) {
-                    ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid)
-                            .ifPresent((sale) -> {
-                                ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), sale.getSaleItem(), "unsale");
-                                buyer.sendMessage(I18n.getStrAndHeader("unsale"));
-                                new MarketGui(this.marketKey, page, filter).openGui(buyer);
-                            });
-                } else {
-                    buyer.sendMessage(I18n.getStrAndHeader("shift-unsale"));
-                }
-                return;
-            }
             if (shift) {
-                if (saleItem.getPrice() == 0) {
-                    buyer.sendMessage(I18n.getStrAndHeader("error-sale"));
-                    return;
-                }
-                if (BaseEconomy.getEconomyBridge(this.paymentType).balance(buyer, this.economyType) < saleItem.getPrice()) {
-                    buyer.sendMessage(I18n.getStrAndHeader("lack-money")
-                            .replace("%economy%", this.economyName));
-                    return;
-                }
-                Optional<SaleCache> optional = ServerMarket.getStorageHandler().removeSaleItem(this.sourceId, uuid);
-                if (optional.isPresent()) {
-                    saleItem = optional.get();
-                    BaseEconomy.getEconomyBridge(this.paymentType).take(buyer, this.economyType, saleItem.getPrice());
-                    Player seller = Bukkit.getPlayer(UUID.fromString(saleItem.getOwnerUUID()));
-                    if (seller != null && seller.isOnline()) {
-                        double tax = saleItem.getPrice() * this.getPermsValueForPlayer(this.getTaxSection(), seller, false);
-                        double last = saleItem.getPrice() - tax;
-                        DecimalFormat df = new DecimalFormat("#0.00");
-                        BaseEconomy.getEconomyBridge(this.paymentType).give(seller, this.economyType, last);
-                        seller.sendMessage(I18n.getStrAndHeader("sale-sell")
-                                .replace("%economy%", this.economyName)
-                                .replace("%money%", df.format(saleItem.getPrice()))
-                                .replace("%last%", df.format(last)));
-                        // send taxes
-                        ServerMarketApi.sendTaxes(paymentType, this.economyType, tax);
-                    } else {
-                        ServerMarketApi.addOfflineTransaction(saleItem.getOwnerUUID(), this.paymentType, this.economyType, saleItem.getPrice(), this.marketKey);
-                    }
-                    // 给予购买者物品
-                    ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), saleItem, "buy");
-                    // call PlayerSaleEvent.Buy
-                    PlayerSaleEvent.Buy event = new PlayerSaleEvent.Buy(buyer, this, saleItem);
-                    Bukkit.getPluginManager().callEvent(event);
-                    // 发送购买消息至购买者
-                    buyer.sendMessage(I18n.getStrAndHeader("buy-item"));
-                    new MarketGui(this.marketKey, page, filter).openGui(buyer);
-                } else {
-                    buyer.sendMessage(I18n.getStrAndHeader("error-sale"));
-                }
+
             } else {
                 buyer.sendMessage(I18n.getStrAndHeader("shift-buy"));
             }

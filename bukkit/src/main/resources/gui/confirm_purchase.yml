@@ -1,0 +1,19 @@
+title: "&8商品购买确认"
+size: 27
+item-slot: 13
+items:
+  confirm:
+    type: GREEN_STAINED_GLASS_PANE
+    amount: 1
+    #custom-data: 0
+    action: confirm
+    name: "&a确认"
+    slot: 10
+    lore: [ ]
+  cancel:
+    type: RED_STAINED_GLASS_PANE
+    amount: 1
+    action: cancel
+    name: "&c取消"
+    slot: 16
+    lore: [ ]

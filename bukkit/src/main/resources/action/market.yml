@@ -1,0 +1,4 @@
+#right: purchase
+left: purchase
+shift_right: unsale
+shift_left: confirm_purchase

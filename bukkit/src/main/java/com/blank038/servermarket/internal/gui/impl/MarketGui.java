@@ -98,11 +98,7 @@ public class MarketGui extends AbstractGui {
                 break;
             }
             SaleCache saleItem = saleList.get(i);
-            if (saleItem == null) {
-                --index;
-                continue;
-            }
-            if ((filter != null && !filter.check(saleItem))) {
+            if (saleItem == null || (filter != null && !filter.check(saleItem))) {
                 --index;
                 continue;
             }
@@ -124,10 +120,8 @@ public class MarketGui extends AbstractGui {
                 NBTItem nbtItem = new NBTItem(itemStack);
                 String key = nbtItem.getString("SaleUUID"), action = nbtItem.getString("MarketAction");
                 if (key != null && !key.isEmpty()) {
-                    // 购买商品
-                    DataContainer.MARKET_DATA.get(this.sourceMarketKey).tryBuySale(clicker, key, e.isShiftClick(), lastPage, filter);
+                    DataContainer.MARKET_DATA.get(this.sourceMarketKey).action(clicker, key, e.getClick(), lastPage, filter);
                 } else if (action != null && !action.isEmpty()) {
-                    // 判断交互方式
                     switch (action) {
                         case "up":
                             if (lastPage == 1) {
