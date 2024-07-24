@@ -42,13 +42,15 @@ public enum ActionType {
                 DecimalFormat df = new DecimalFormat("#0.00");
                 BaseEconomy.getEconomyBridge(marketData.getPaymentType()).give(seller, marketData.getEconomyType(), last);
                 seller.sendMessage(I18n.getStrAndHeader("sale-sell")
+                        .replace("%market%", marketData == null ? "" : marketData.getDisplayName())
                         .replace("%economy%", marketData.getEconomyName())
                         .replace("%money%", df.format(saleItem.getPrice()))
-                        .replace("%last%", df.format(last)));
+                        .replace("%last%", df.format(last))
+                        .replaceAll("%buyer%", buyer.getName()));
                 // send taxes
                 ServerMarketApi.sendTaxes(marketData.getPaymentType(), marketData.getEconomyName(), tax);
             } else {
-                ServerMarketApi.addOfflineTransaction(saleItem.getOwnerUUID(), marketData.getPaymentType(),
+                ServerMarketApi.addOfflineTransaction(saleItem.getOwnerUUID(), buyer.getName(), marketData.getPaymentType(),
                         marketData.getEconomyType(), saleItem.getPrice(), marketData.getMarketKey());
             }
             // give sale item to buyer

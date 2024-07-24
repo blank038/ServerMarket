@@ -41,8 +41,11 @@ public class OfflineTransactionTask implements Runnable {
                     DecimalFormat df = new DecimalFormat("#0.00");
                     BaseEconomy.getEconomyBridge(v.getPayType()).give(player, v.getEconomyType(), last);
                     player.sendMessage(I18n.getStrAndHeader("sale-sell")
-                            .replace("%economy%", marketData == null ? "" : marketData.getDisplayName())
-                            .replace("%money%", df.format(price)).replace("%last%", df.format(last)));
+                            .replace("%market%", marketData == null ? "" : marketData.getDisplayName())
+                            .replace("%economy%", marketData == null ? "" : marketData.getEconomyName())
+                            .replace("%money%", df.format(price))
+                            .replace("%last%", df.format(last))
+                            .replace("%buyer%", v.getBuyer()));
                 }
             }
         });

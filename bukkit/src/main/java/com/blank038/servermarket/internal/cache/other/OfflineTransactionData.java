@@ -16,7 +16,7 @@ public class OfflineTransactionData {
     private final double amount;
     private final PayType payType;
     private final UUID ownerUniqueId;
-    private final String economyType, sourceMarket;
+    private final String economyType, sourceMarket, buyer;
 
     public OfflineTransactionData(ConfigurationSection section) {
         this.amount = section.getDouble("amount");
@@ -24,11 +24,13 @@ public class OfflineTransactionData {
         this.ownerUniqueId = UUID.fromString(section.getString("owner-uuid"));
         this.economyType = section.getString("eco-type", null);
         this.sourceMarket = section.getString("source-market");
+        this.buyer = section.getString("buyer");
     }
 
-    public OfflineTransactionData(String sourceMarket, UUID ownerUniqueId, PayType payType, String economyType, double amount) {
+    public OfflineTransactionData(String sourceMarket, String buyer, UUID ownerUniqueId, PayType payType, String economyType, double amount) {
         this.sourceMarket = sourceMarket;
         this.ownerUniqueId = ownerUniqueId;
+        this.buyer = buyer;
         this.payType = payType;
         this.economyType = economyType;
         this.amount = amount;
@@ -41,6 +43,7 @@ public class OfflineTransactionData {
         section.set("owner-uuid", this.ownerUniqueId.toString());
         section.set("eco-type", this.economyType);
         section.set("source-market", this.sourceMarket);
+        section.set("buyer", this.buyer);
         return section;
     }
 }

@@ -68,13 +68,14 @@ public class ServerMarketApi {
         }
     }
 
-    public static void addOfflineTransaction(String uuid, PayType payType, String ectType, double moeny, String sourceMarket) {
+    public static void addOfflineTransaction(String uuid, String buyer, PayType payType, String ectType, double moeny, String sourceMarket) {
         ConfigurationSection section = new YamlConfiguration();
         section.set("amount", moeny);
         section.set("pay-type", payType.name());
         section.set("owner-uuid", uuid);
         section.set("eco-type", ectType);
         section.set("source-market", sourceMarket);
+        section.set("buyer", buyer);
         // 存入数据
         OfflineTransactionData resultData = new OfflineTransactionData(section);
         ServerMarket.getStorageHandler().addOfflineTransaction(resultData);

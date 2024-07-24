@@ -48,7 +48,7 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
                 "CREATE TABLE IF NOT EXISTS `servermarket_players`( `player_uuid` VARCHAR(36) NOT NULL, `data` TEXT, `locked` TINYINT, PRIMARY KEY (`player_uuid`)) ENGINE = InnoDB DEFAULT CHARSET = utf8;",
                 "CREATE TABLE IF NOT EXISTS `servermarket_sales` ( `sale_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(20) NOT NULL, `owner_name` VARCHAR(20) NOT NULL, `owner_uuid` VARCHAR(36) NOT NULL, `pay_type` VARCHAR(20) NOT NULL, `eco_type` VARCHAR(50), `price` int, `data` TEXT, `post_time` TIMESTAMP NOT NULL, PRIMARY KEY (`sale_uuid`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;",
                 "CREATE TABLE IF NOT EXISTS `servermarket_logs` ( `id` INT AUTO_INCREMENT, `trigger_time` TIMESTAMP, `trigger_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(50), `log_type` VARCHAR(10) NOT NULL, `data` TEXT, PRIMARY KEY (`id`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;",
-                "CREATE TABLE IF NOT EXISTS `servermarket_offline_transactions` ( `id` INT AUTO_INCREMENT, `owner_uuid` VARCHAR(36) NOT NULL, `market` VARCHAR(50) NOT NULL, `amount` INT, `pay_type` VARCHAR(20) NOT NULL, `eco_type` VARCHAR(50), PRIMARY KEY (`id`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;"
+                "CREATE TABLE IF NOT EXISTS `servermarket_offline_transactions` ( `id` INT AUTO_INCREMENT, `owner_uuid` VARCHAR(36) NOT NULL, `buyer` VARCHAR(20) NOT NULL, `market` VARCHAR(50) NOT NULL, `amount` INT, `pay_type` VARCHAR(20) NOT NULL, `eco_type` VARCHAR(50), PRIMARY KEY (`id`) ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4;"
         };
         storageHandler = new MySqlStorageHandler(
                 ServerMarket.getInstance(),
@@ -485,15 +485,20 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
         storageHandler.connect((preparedStatement) -> {
             try {
                 preparedStatement.setString(1, data.getOwnerUniqueId().toString());
-                preparedStatement.setString(2, data.getSourceMarket());
-                preparedStatement.setInt(3, (int) (data.getAmount() * 100));
-                preparedStatement.setString(4, data.getPayType().name());
-                preparedStatement.setString(5, data.getEconomyType());
+                preparedStatement.setString(2, data.getBuyer());
+                preparedStatement.setString(3, data.getSourceMarket());
+                preparedStatement.setInt(4, (int) (data.getAmount() * 100));
+                preparedStatement.setString(5, data.getPayType().name());
+                preparedStatement.setString(6, data.getEconomyType());
                 preparedStatement.executeUpdate();
             } catch (SQLException e) {
-                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to add offline transaction.");
+                StringBuilder builder = new StringBuilder();
+                if (e.getSQLState().startsWith("42")) {
+                    builder.append("(Maybe you need to use the '/market patch 270-F-1' command, see https://github.com/blank038/ServerMarket/PATCHES.md)");
+                }
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to add offline transaction." + builder);
             }
-        }, "INSERT INTO " + offlineTransactionsTable + " (owner_uuid,market,amount,pay_type,eco_type) VALUES (?,?,?,?,?);");
+        }, "INSERT INTO " + offlineTransactionsTable + " (owner_uuid,buyer,market,amount,pay_type,eco_type) VALUES (?,?,?,?,?,?);");
     }
 
     @Override
@@ -522,17 +527,22 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
                 while (resultSet.next()) {
                     OfflineTransactionData data = new OfflineTransactionData(
                             resultSet.getString(2),
+                            resultSet.getString(3),
                             ownerUniqueId,
-                            PayType.valueOf(resultSet.getString(3)),
-                            resultSet.getString(4),
-                            resultSet.getInt(5) * 0.01
+                            PayType.valueOf(resultSet.getString(4)),
+                            resultSet.getString(5),
+                            resultSet.getInt(6) * 0.01
                     );
                     map.put(String.valueOf(resultSet.getInt(1)), data);
                 }
             } catch (SQLException e) {
-                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to get offline transactions.");
+                StringBuilder builder = new StringBuilder();
+                if (e.getSQLState().startsWith("42")) {
+                    builder.append("(Maybe you need to use the '/market patch 270-F-1' command, see https://github.com/blank038/ServerMarket/PATCHES.md)");
+                }
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to get offline transactions." + builder);
             }
-        }, "SELECT id,market,pay_type,eco_type,amount FROM " + offlineTransactionsTable + " WHERE owner_uuid = ?;");
+        }, "SELECT id,market,buyer,pay_type,eco_type,amount FROM " + offlineTransactionsTable + " WHERE owner_uuid = ?;");
         return map;
     }
 }
