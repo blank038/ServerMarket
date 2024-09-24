@@ -29,7 +29,7 @@
 ## 🌱 Contributors
 
 <a href="https://github.com/blank038/ServerMarket/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=blank038/ServerMarket" alt="Contributors"/>
+  <img src="https://contrib.rocks/image?repo=blank038/ServerMarket&anon=1" alt="Contributors"/>
 </a>
 
 ### Translations
