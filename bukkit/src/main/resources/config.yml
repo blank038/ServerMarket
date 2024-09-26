@@ -1,4 +1,4 @@
-# 支持: zh_CN, en_US, es_ES, fr_FR, ko_KR, ru_RU, tr_TR
+# 支持: zh_CN, en_US, es_ES, fr_FR, ko_KR, ru_RU, tr_TR, th_TH
 language: "zh_CN"
 # 存储设定
 data-option:
