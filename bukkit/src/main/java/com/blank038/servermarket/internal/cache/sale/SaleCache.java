@@ -3,6 +3,7 @@ package com.blank038.servermarket.internal.cache.sale;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.enums.PayType;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
@@ -17,27 +18,13 @@ import java.util.List;
  */
 @Getter
 public class SaleCache {
-    /**
-     * 存储物品的 UUID
-     */
     private final String saleUUID, ownerUUID, ownerName, ecoType, sourceMarket;
-    /**
-     * 商品对应的物品
-     */
-    private final ItemStack saleItem;
-    /**
-     * 商品对应的货币
-     */
     private final PayType payType;
-    /**
-     * 价格
-     */
     private final double price;
-    /**
-     * 发布时间
-     */
     private final long postTime;
     private final List<String> saleTypes = new ArrayList<>();
+    @Setter
+    private ItemStack saleItem;
 
     public SaleCache(String market, ConfigurationSection section) {
         this.saleUUID = section.getString("sale-uuid");

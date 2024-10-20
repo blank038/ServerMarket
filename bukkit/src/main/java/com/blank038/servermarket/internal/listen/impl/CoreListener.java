@@ -13,7 +13,7 @@ import org.bukkit.event.EventHandler;
 public class CoreListener extends AbstractListener {
 
     @EventHandler
-    public void onSaleSell(PlayerSaleEvent.Sell event) {
+    public void onSaleSell(PlayerSaleEvent.Sell.Post event) {
         SaleLog saleLog = SaleLog.builder()
                 .logType(LogType.SELL)
                 .sourceMarket(event.getMarketData().getSourceId())

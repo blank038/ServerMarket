@@ -119,12 +119,17 @@ public class VirtualMarketCommand extends Command {
                     .replace("%economy%", this.marketData.getEconomyName()));
             return;
         }
-        // send taxes
-        ServerMarketApi.sendTaxes(this.marketData.getPaymentType(), this.marketData.getEconomyType(), tax);
-        player.getInventory().setItemInMainHand(null);
         // initial SaleCache
         SaleCache saleItem = new SaleCache(UUID.randomUUID().toString(), this.marketData.getMarketKey(), player.getUniqueId().toString(),
                 player.getName(), cloneItem, PayType.VAULT, this.marketData.getEconomyType(), price, System.currentTimeMillis());
+        PlayerSaleEvent.Sell.Pre sellPreEvent = new PlayerSaleEvent.Sell.Pre(player, this.marketData, saleItem);
+        Bukkit.getPluginManager().callEvent(sellPreEvent);
+        if (sellPreEvent.isCancelled()) {
+            return;
+        }
+        // send taxes
+        ServerMarketApi.sendTaxes(this.marketData.getPaymentType(), this.marketData.getEconomyType(), tax);
+        player.getInventory().setItemInMainHand(null);
         CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
             // add sale to storage handler
             return ServerMarket.getStorageHandler().addSale(this.marketData.getMarketKey(), saleItem);
@@ -132,8 +137,8 @@ public class VirtualMarketCommand extends Command {
         future.thenAccept((result) -> {
             if (result) {
                 // call PlayerSaleEvent.Sell
-                PlayerSaleEvent.Sell event = new PlayerSaleEvent.Sell(player, this.marketData, saleItem);
-                Bukkit.getPluginManager().callEvent(event);
+                PlayerSaleEvent.Sell.Post sellPostEvent = new PlayerSaleEvent.Sell.Post(player, this.marketData, saleItem);
+                Bukkit.getPluginManager().callEvent(sellPostEvent);
 
                 player.sendMessage(I18n.getStrAndHeader("sell"));
                 // 判断是否公告
