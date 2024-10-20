@@ -90,13 +90,13 @@ public class ServerMarket extends AyPlugin {
             storageHandler.reload();
             // Initialize economy
             BaseEconomy.initEconomies();
-            // Initialize DataContainer
-            DataContainer.loadData();
-            // register service
-            ConfigurationSection section = this.getConfig().getConfigurationSection("notify-option");
-            String serviceType = section.getString("use", "self");
-            ServerMarketApi.createService(serviceType, section.getConfigurationSection("type." + serviceType));
         }
+        // Initialize DataContainer
+        DataContainer.loadData();
+        // register service
+        ConfigurationSection section = this.getConfig().getConfigurationSection("notify-option");
+        String serviceType = section.getString("use", "self");
+        ServerMarketApi.createService(serviceType, section.getConfigurationSection("type." + serviceType));
         // restart the task for offline transaction
         OfflineTransactionTask.restart();
 
