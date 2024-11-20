@@ -2,6 +2,7 @@ package com.blank038.servermarket.internal.gui;
 
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
+import org.bukkit.inventory.InventoryHolder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.UUID;
 /**
  * @author Blank038
  */
-public abstract class AbstractGui {
+public abstract class AbstractGui implements InventoryHolder {
     protected static final Map<UUID, Long> COOLDOWN = new HashMap<>();
 
     static {

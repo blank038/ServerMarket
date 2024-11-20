@@ -16,6 +16,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -145,5 +146,10 @@ public class StoreContainerGui extends AbstractGui {
                 player.sendMessage(I18n.getStrAndHeader("error-store"));
             }
         });
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return null;
     }
 }

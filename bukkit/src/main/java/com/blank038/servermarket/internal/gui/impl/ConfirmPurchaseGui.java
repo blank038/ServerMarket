@@ -18,6 +18,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -96,5 +97,10 @@ public class ConfirmPurchaseGui extends AbstractGui {
                 }
             }
         }
+    }
+
+    @Override
+    public Inventory getInventory() {
+        return null;
     }
 }
