@@ -3,6 +3,7 @@ package com.blank038.servermarket.internal.plugin;
 import com.aystudio.core.bukkit.plugin.AyPlugin;
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.api.handler.sort.AbstractSortHandler;
+import com.blank038.servermarket.internal.config.GeneralOption;
 import com.blank038.servermarket.internal.data.convert.LegacyBackup;
 import com.blank038.servermarket.dto.AbstractStorageHandler;
 import com.blank038.servermarket.dto.IStorageHandler;
@@ -78,6 +79,7 @@ public class ServerMarket extends AyPlugin {
         this.getConsoleLogger().log(false, " ");
         this.saveDefaultConfig();
         this.reloadConfig();
+        GeneralOption.init();
         // Initialize I18n
         new I18n(this.getConfig().getString("language", "zh_CN"));
         // Run legacy converter

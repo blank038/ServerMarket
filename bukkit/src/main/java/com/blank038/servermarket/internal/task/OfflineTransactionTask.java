@@ -3,6 +3,7 @@ package com.blank038.servermarket.internal.task;
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.api.entity.MarketData;
 import com.blank038.servermarket.api.platform.wrapper.ITaskWrapper;
+import com.blank038.servermarket.internal.config.GeneralOption;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.i18n.I18n;
@@ -55,12 +56,11 @@ public class OfflineTransactionTask implements Runnable {
         if (taskWrapper != null) {
             taskWrapper.cancel();
         }
-        int interval = ServerMarket.getInstance().getConfig().getInt("settings.offline-transaction-interval");
         taskWrapper = ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(
                 ServerMarket.getInstance(),
                 new OfflineTransactionTask(),
-                interval,
-                interval
+                GeneralOption.offlineTransactionInterval,
+                GeneralOption.offlineTransactionInterval
         );
     }
 }
