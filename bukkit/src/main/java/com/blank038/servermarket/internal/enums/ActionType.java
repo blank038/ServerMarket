@@ -5,6 +5,7 @@ import com.blank038.servermarket.api.entity.MarketData;
 import com.blank038.servermarket.api.event.PlayerSaleEvent;
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
+import com.blank038.servermarket.internal.config.GeneralOption;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.gui.impl.ConfirmPurchaseGui;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
@@ -74,6 +75,13 @@ public enum ActionType {
                         new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
                     });
         } else if (buyer.isOp() || buyer.hasPermission("servermarket.force-unsale")) {
+            // Check restitution
+            if (!GeneralOption.restitution) {
+                buyer.getInventory().addItem(saleCache.getSaleItem());
+                buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
+                new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
+                return;
+            }
             ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
                     .ifPresent((sale) -> {
                         UUID ownerUUID = UUID.fromString(sale.getOwnerUUID());
