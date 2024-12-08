@@ -18,8 +18,8 @@ dependencies {
 
     implementation "org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT"
 
-    implementation "com.aystudio.core:AyCore:1.1.0-BETA"
-    implementation "de.tr7zw:item-nbt-api-plugin:2.11.1"
+    implementation "com.aystudio.core:AyCore:1.3.1-BETA"
+    implementation "de.tr7zw:item-nbt-api-plugin:2.12.2"
     implementation "net.milkbowl.vault:VaultAPI:1.7"
     implementation group: 'io.netty', name: 'netty-all', version: '4.1.111.Final'
 
