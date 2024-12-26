@@ -78,7 +78,8 @@ public class MarketData {
         this.saleBroadcast = options.getBoolean("sale-broadcast");
         this.dateFormat = options.getString("simple-date-format");
         this.priceFormat = options.getString("price-format", "%.1f");
-        switch ((this.economyType = options.getString("vault-type").toLowerCase())) {
+        this.economyType = options.getString("vault-type");
+        switch (economyType.toLowerCase()) {
             case "vault":
                 this.paymentType = PayType.VAULT;
                 break;
