@@ -30,7 +30,7 @@ jobs:
           ./gradlew clean build
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ServerMarket Package
           path: build/libs/*.jar
