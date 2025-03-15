@@ -155,7 +155,9 @@ public class VirtualMarketCommand extends Command {
                                 .replace("%item%", displayName)
                                 .replace("%market_name%", this.marketData.getDisplayName())
                                 .replace("%amount%", String.valueOf(cloneItem.getAmount()))
-                                .replace("%player%", player.getName());
+                                .replace("%player%", player.getName())
+                                .replace("%price%", String.valueOf(price))
+                                .replace("%economy%", this.marketData.getEconomyName());
                         notify.time = System.currentTimeMillis();
                         NotifyCenter.pushNotify(notify);
                     }

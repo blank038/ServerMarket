@@ -31,7 +31,7 @@ public abstract class IncreaseNotifyService extends AbstractNotifyService {
         }
         wrapper = ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(
                 ServerMarket.getInstance(),
-                () -> this.update(),
+                this::update,
                 seconds,
                 seconds
         );
