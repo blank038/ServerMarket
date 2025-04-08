@@ -153,14 +153,17 @@ public class MarketGui extends AbstractGui {
                             break;
                         default:
                             if (action.contains(":")) {
-                                String[] split = action.split(":");
-                                if (split.length < 2) {
-                                    return;
-                                }
-                                if ("player".equalsIgnoreCase(split[0])) {
-                                    Bukkit.getServer().dispatchCommand(clicker, split[1].replace("%player%", clicker.getName()));
-                                } else if ("console".equalsIgnoreCase(split[0])) {
-                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), split[1].replace("%player%", clicker.getName()));
+                                String[] commands = action.split("\n");
+                                for (String command : commands) {
+                                    String[] split = command.split(":");
+                                    if (split.length < 2) {
+                                        continue;
+                                    }
+                                    if ("player".equalsIgnoreCase(split[0])) {
+                                        Bukkit.getServer().dispatchCommand(clicker, split[1].replace("%player%", clicker.getName()));
+                                    } else if ("console".equalsIgnoreCase(split[0])) {
+                                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), split[1].replace("%player%", clicker.getName()));
+                                    }
                                 }
                             }
                             break;
