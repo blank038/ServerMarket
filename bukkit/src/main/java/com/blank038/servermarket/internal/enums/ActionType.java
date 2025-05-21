@@ -75,23 +75,22 @@ public enum ActionType {
                         new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
                     });
         } else if (buyer.isOp() || buyer.hasPermission("servermarket.force-unsale")) {
-            // Check restitution
-            if (!GeneralOption.restitution) {
-                buyer.getInventory().addItem(saleCache.getSaleItem());
-                buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
-                new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
-                return;
-            }
             ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
                     .ifPresent((sale) -> {
-                        UUID ownerUUID = UUID.fromString(sale.getOwnerUUID());
-                        Player target = Bukkit.getPlayer(ownerUUID);
-                        ServerMarket.getStorageHandler().addItemToStore(ownerUUID, sale.getSaleItem(), "force-unsale");
-                        if (target != null && target.isOnline()) {
-                            target.sendMessage(I18n.getStrAndHeader("force-unsale-target"));
+                        if (!GeneralOption.restitution) {
+                            buyer.getInventory().addItem(saleCache.getSaleItem());
+                            buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
+                            new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
+                        } else {
+                            UUID ownerUUID = UUID.fromString(sale.getOwnerUUID());
+                            Player target = Bukkit.getPlayer(ownerUUID);
+                            ServerMarket.getStorageHandler().addItemToStore(ownerUUID, sale.getSaleItem(), "force-unsale");
+                            if (target != null && target.isOnline()) {
+                                target.sendMessage(I18n.getStrAndHeader("force-unsale-target"));
+                            }
+                            buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
+                            new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
                         }
-                        buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
-                        new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
                     });
         } else {
             buyer.sendMessage(I18n.getStrAndHeader("not-owner"));
