@@ -2,6 +2,7 @@ package com.blank038.servermarket.internal.gui.impl;
 
 import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
+import com.blank038.servermarket.internal.handler.CacheHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
@@ -79,7 +80,7 @@ public class MarketGui extends AbstractGui {
         // Get sale list
         // TODO: Optimize logic, slice the data.
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
-        List<SaleCache> saleList = ServerMarket.getStorageHandler().getSaleItemsByMarket(this.sourceMarketKey)
+        List<SaleCache> saleList = CacheHandler.querySales(this.sourceMarketKey)
                 .values().stream()
                 .filter((entry) -> (filter == null || filter.check(entry)))
                 .sorted(DataContainer.SORT_HANDLER_MAP.get(this.currentSort))

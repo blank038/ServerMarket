@@ -16,6 +16,7 @@ import com.blank038.servermarket.internal.listen.impl.PlayerCommonListener;
 import com.blank038.servermarket.internal.listen.impl.PlayerLatestListener;
 import com.blank038.servermarket.internal.metrics.Metrics;
 import com.blank038.servermarket.internal.platform.PlatformHandler;
+import com.blank038.servermarket.internal.task.CacheUpdateTask;
 import com.blank038.servermarket.internal.task.OfflineTransactionTask;
 import com.google.common.collect.Lists;
 import de.tr7zw.nbtapi.utils.MinecraftVersion;
@@ -59,6 +60,7 @@ public class ServerMarket extends AyPlugin {
         // start tasks
         ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 60, 60);
         ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::saveAll, 60, 60);
+        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, new CacheUpdateTask(), 200L, 200L);
         // inject metrics
         new Metrics(this, 20031);
     }
