@@ -1,13 +1,13 @@
-package com.blank038.servermarket.internal.task;
+package com.blank038.servermarket.internal.task.impl;
 
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.api.entity.MarketData;
-import com.blank038.servermarket.api.platform.wrapper.ITaskWrapper;
 import com.blank038.servermarket.internal.config.GeneralOption;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
+import com.blank038.servermarket.internal.task.AbstractTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -16,8 +16,7 @@ import java.text.DecimalFormat;
 /**
  * @author Blank038
  */
-public class OfflineTransactionTask implements Runnable {
-    private static ITaskWrapper taskWrapper;
+public class OfflineTransactionTask extends AbstractTask {
 
     @Override
     public synchronized void run() {
@@ -52,15 +51,13 @@ public class OfflineTransactionTask implements Runnable {
         });
     }
 
-    public static void restart() {
-        if (taskWrapper != null) {
-            taskWrapper.cancel();
-        }
-        taskWrapper = ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(
-                ServerMarket.getInstance(),
-                new OfflineTransactionTask(),
-                GeneralOption.offlineTransactionInterval,
-                GeneralOption.offlineTransactionInterval
-        );
+    @Override
+    public long getDelay() {
+        return GeneralOption.offlineTransactionInterval;
+    }
+
+    @Override
+    public long getPeroid() {
+        return GeneralOption.offlineTransactionInterval;
     }
 }

@@ -24,6 +24,8 @@ settings:
   offline-transaction-interval: 60
   # 下架商品是否返回玩家仓库(如果为 false 则直接给予下架的管理员)
   restitution: true
+  # 商品刷新间隔, 单位: 秒
+  cache-update-interval: 10
 # 冷却设定, 单位: 秒
 cooldown:
   action: 3

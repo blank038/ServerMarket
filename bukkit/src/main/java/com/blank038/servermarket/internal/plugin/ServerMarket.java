@@ -10,14 +10,13 @@ import com.blank038.servermarket.dto.IStorageHandler;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.command.MainCommand;
 import com.blank038.servermarket.internal.data.DataContainer;
+import com.blank038.servermarket.internal.handler.TaskHandler;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.listen.impl.CoreListener;
 import com.blank038.servermarket.internal.listen.impl.PlayerCommonListener;
 import com.blank038.servermarket.internal.listen.impl.PlayerLatestListener;
 import com.blank038.servermarket.internal.metrics.Metrics;
 import com.blank038.servermarket.internal.platform.PlatformHandler;
-import com.blank038.servermarket.internal.task.CacheUpdateTask;
-import com.blank038.servermarket.internal.task.OfflineTransactionTask;
 import com.google.common.collect.Lists;
 import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import lombok.Getter;
@@ -57,10 +56,6 @@ public class ServerMarket extends AyPlugin {
         }
         // register sort handler
         AbstractSortHandler.registerDefaults();
-        // start tasks
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::removeTimeOutItem, 60, 60);
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, storageHandler::saveAll, 60, 60);
-        ServerMarketApi.getPlatformApi().runTaskTimerAsynchronously(this, new CacheUpdateTask(), 200L, 200L);
         // inject metrics
         new Metrics(this, 20031);
     }
@@ -101,8 +96,8 @@ public class ServerMarket extends AyPlugin {
         ConfigurationSection section = this.getConfig().getConfigurationSection("notify-option");
         String serviceType = section.getString("use", "self");
         ServerMarketApi.createService(serviceType, section.getConfigurationSection("type." + serviceType));
-        // restart the task for offline transaction
-        OfflineTransactionTask.restart();
+        // Restart internal tasks
+        TaskHandler.restartInternalTasks();
 
         this.getConsoleLogger().log(false, I18n.getProperties().getProperty("load-completed")
                 .replace("%s", String.valueOf(DataContainer.MARKET_DATA.size())));
