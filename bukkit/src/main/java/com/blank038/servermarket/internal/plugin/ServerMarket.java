@@ -25,7 +25,6 @@ import org.bukkit.configuration.ConfigurationSection;
 
 /**
  * Global market plugin for Bukkit.
- * (version: 1.8 ~ 1.16)
  *
  * @author Blank038
  */
@@ -67,9 +66,6 @@ public class ServerMarket extends AyPlugin {
         }
     }
 
-    /**
-     * 检测配置文件是否存在, 并且重载配置文件
-     */
     public void loadConfig(boolean start) {
         this.getConsoleLogger().log(false, " ");
         this.getConsoleLogger().log(false, "   &3ServerMarket &bv" + this.getDescription().getVersion());

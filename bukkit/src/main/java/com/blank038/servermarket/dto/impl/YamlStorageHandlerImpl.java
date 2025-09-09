@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author Blank038
@@ -149,6 +150,13 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
+    public List<SaleCache> getAllSale() {
+        return MARKET_STORAGE_DATA_MAP.values().stream()
+                .flatMap((v) -> v.getSales().values().stream())
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<SaleCache> removeSaleItem(String market, String saleId) {
         if (MARKET_STORAGE_DATA_MAP.containsKey(market)) {
             return MARKET_STORAGE_DATA_MAP.get(market).removeSale(saleId);
@@ -219,6 +227,11 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
         this.saveAllPlayerData();
         MARKET_STORAGE_DATA_MAP.forEach((k, v) -> this.save(k, v.getSales()));
         this.saveResults();
+    }
+
+    @Override
+    public void importData(List<SaleCache> saleCaches) {
+        saleCaches.forEach((k) -> addSale(k.getSourceMarket(), k));
     }
 
     @Override

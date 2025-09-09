@@ -1,6 +1,8 @@
 package com.blank038.servermarket.internal.command;
 
 import com.blank038.servermarket.api.ServerMarketApi;
+import com.blank038.servermarket.dto.AbstractStorageHandler;
+import com.blank038.servermarket.dto.IStorageHandler;
 import com.blank038.servermarket.internal.handler.PatchHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
@@ -76,6 +78,9 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 case "patch":
                     this.usePatch(sender, args);
                     break;
+                case "import":
+                    this.importData(sender, args);
+                    break;
                 default:
                     this.sendHelp(sender, label);
                     break;
@@ -84,9 +89,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    /**
-     * 打开全球市场
-     */
     private void openServerMarket(CommandSender sender, String key) {
         if (!(sender instanceof Player)) {
             return;
@@ -94,9 +96,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         ServerMarketApi.openMarket((Player) sender, key, 1, null);
     }
 
-    /**
-     * 搜索全球市场并打开市场
-     */
     private void searchItemsAndOpenMarket(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             return;
@@ -115,9 +114,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         ServerMarketApi.openMarket((Player) sender, args[1], 1, builder);
     }
 
-    /**
-     * 发送市场状态
-     */
     private void show(CommandSender sender) {
         for (String line : I18n.getArrayOption("show")) {
             String last = line;
@@ -138,9 +134,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
     }
 
-    /**
-     * 发送命令帮助
-     */
     private void sendHelp(CommandSender sender, String label) {
         for (String text : I18n.getArrayOption("help." + (sender.hasPermission("servermarket.admin") ? "admin" : "default"))) {
             sender.sendMessage(TextUtil.formatHexColor(text).replace("%c", label));
@@ -161,6 +154,29 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         }
         boolean result = PatchHandler.executePatch(args[1]);
         sender.sendMessage(I18n.getStrAndHeader("patch-result." + result));
+    }
+
+    private void importData(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("servermarket.admin")) {
+            return;
+        }
+        if (args.length == 1) {
+            sender.sendMessage(I18n.getStrAndHeader("wrong-source-key"));
+            return;
+        }
+        if (args.length == 2) {
+            sender.sendMessage(I18n.getStrAndHeader("wrong-target-key"));
+            return;
+        }
+        IStorageHandler source = AbstractStorageHandler.createStorageHandler(args[1]),
+                target = AbstractStorageHandler.createStorageHandler(args[2]);
+        if (source == null || target == null) {
+            sender.sendMessage(I18n.getStrAndHeader("storage-handler-not-found"));
+            return;
+        }
+        target.initialize();
+        target.importData(source.getAllSale());
+        sender.sendMessage(I18n.getStrAndHeader("import-data"));
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.blank038.servermarket.internal.cache.player.PlayerCache;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,6 +68,8 @@ public interface IStorageHandler {
      */
     Map<String, SaleCache> getSaleItemsByMarket(String market);
 
+    List<SaleCache> getAllSale();
+
     /**
      * 从市场中移除商品并返回商品数据, 如果不存在则返回 null
      *
@@ -110,6 +113,8 @@ public interface IStorageHandler {
     void saveAll();
 
     void saveAllPlayerData();
+
+    void importData(List<SaleCache> saleCaches);
 
     /**
      * 存储玩家数据
