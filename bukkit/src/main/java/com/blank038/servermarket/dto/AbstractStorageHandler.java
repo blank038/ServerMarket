@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -21,26 +22,6 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
 
     @Override
     public void load(String market) {
-    }
-
-    public static void check() {
-        if (ServerMarket.getStorageHandler() == null) {
-            IStorageHandler storageHandler;
-            switch (ServerMarket.getInstance().getConfig().getString("data-option.type").toLowerCase()) {
-                case "mysql":
-                    storageHandler = new MysqlStorageHandlerImpl();
-                    break;
-                case "yaml":
-                default:
-                    storageHandler = new YamlStorageHandlerImpl();
-                    break;
-            }
-            InitializeStorageHandlerEvent event = new InitializeStorageHandlerEvent(storageHandler);
-            Bukkit.getPluginManager().callEvent(event);
-            // Set storage hadnler
-            ServerMarket.setStorageHandler(event.getStorageHandler());
-            ServerMarket.getStorageHandler().initialize();
-        }
     }
 
     @Override
@@ -59,5 +40,33 @@ public abstract class AbstractStorageHandler implements IStorageHandler {
 
     public void removePlyerData(UUID uuid) {
         PLAYER_DATA_MAP.entrySet().removeIf(entry -> entry.getKey().equals(uuid));
+    }
+
+    public static void check() {
+        if (ServerMarket.getStorageHandler() == null) {
+            String storageType = ServerMarket.getInstance().getConfig().getString("data-option.type").toLowerCase();
+            IStorageHandler storageHandler = createStorageHandler(storageType);
+            setStorageHandler(storageHandler);
+        }
+    }
+
+    public static void setStorageHandler(IStorageHandler storageHandler) {
+        Objects.requireNonNull(storageHandler, "The storageHandler must be not null");
+        InitializeStorageHandlerEvent event = new InitializeStorageHandlerEvent(storageHandler);
+        Bukkit.getPluginManager().callEvent(event);
+        // Set storage handler
+        ServerMarket.setStorageHandler(event.getStorageHandler());
+        ServerMarket.getStorageHandler().initialize();
+    }
+
+    public static IStorageHandler createStorageHandler(String type) {
+        switch (type.toLowerCase()) {
+            case "mysql":
+                return new MysqlStorageHandlerImpl();
+            case "yaml":
+                return new YamlStorageHandlerImpl();
+            default:
+                return null;
+        }
     }
 }

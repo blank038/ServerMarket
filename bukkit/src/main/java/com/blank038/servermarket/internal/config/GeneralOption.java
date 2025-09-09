@@ -15,6 +15,6 @@ public class GeneralOption {
         FileConfiguration config = ServerMarket.getInstance().getConfig();
         restitution = config.getBoolean("settings.restitution");
         offlineTransactionInterval = config.getInt("settings.offline-transaction-interval");
-        cacheUpdateInterval = config.getInt("settings.cache-update-interval") * 20;
+        cacheUpdateInterval = config.getInt("settings.cache-update-interval");
     }
 }

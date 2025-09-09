@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -164,6 +165,36 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
     }
 
     @Override
+    public List<SaleCache> getAllSale() {
+        List<SaleCache> saleCaches = new ArrayList<>();
+        storageHandler.connect((preparedStatement) -> {
+            try {
+                ResultSet resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()) {
+                    byte[] bytes = Base64.getDecoder().decode(resultSet.getString(8).getBytes(StandardCharsets.UTF_8));
+                    FileConfiguration data = new YamlConfiguration();
+                    data.loadFromString(new String(bytes, StandardCharsets.UTF_8));
+                    ItemStack itemStack = new ItemStack(data.getItemStack("item"));
+                    SaleCache saleCache = new SaleCache(
+                            resultSet.getString(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3),
+                            resultSet.getString(4),
+                            itemStack,
+                            PayType.valueOf(resultSet.getString(5)),
+                            resultSet.getString(6),
+                            resultSet.getInt(7) * 0.01,
+                            resultSet.getTimestamp(9).getTime());
+                    saleCaches.add(saleCache);
+                }
+            } catch (SQLException | InvalidConfigurationException e) {
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to check sale item.");
+            }
+        }, "SELECT sale_uuid,market,owner_uuid,owner_name,pay_type,eco_type,price,data,post_time FROM " + salesTable + ";");
+        return saleCaches;
+    }
+
+    @Override
     public Optional<SaleCache> removeSaleItem(String market, String saleId) {
         AtomicReference<SaleCache> reference = new AtomicReference<>(null);
         storageHandler.connect((preparedStatement) -> {
@@ -254,6 +285,45 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
     @Override
     public void saveAll() {
         this.saveAllPlayerData();
+    }
+
+    @Override
+    public void importData(List<SaleCache> saleCaches) {
+        storageHandler.connect((preparedStatement) -> {
+            Connection connection = null;
+            try {
+                connection = preparedStatement.getConnection();
+                connection.setAutoCommit(false);
+                for (SaleCache saleItem : saleCaches) {
+                    FileConfiguration data = new YamlConfiguration();
+                    data.set("item", saleItem.getSaleItem());
+                    String dataString = new String(Base64.getEncoder().encode(data.saveToString().getBytes(StandardCharsets.UTF_8)));
+
+                    preparedStatement.setString(1, saleItem.getSaleUUID());
+                    preparedStatement.setString(2, saleItem.getSourceMarket());
+                    preparedStatement.setString(3, saleItem.getOwnerName());
+                    preparedStatement.setString(4, saleItem.getOwnerUUID());
+                    preparedStatement.setString(5, saleItem.getPayType().name());
+                    preparedStatement.setString(6, saleItem.getEcoType());
+                    preparedStatement.setInt(7, (int) (saleItem.getPrice() * 100));
+                    preparedStatement.setString(8, dataString);
+                    preparedStatement.setTimestamp(9, new java.sql.Timestamp(saleItem.getPostTime()));
+
+                    preparedStatement.addBatch();
+                }
+                preparedStatement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                if (connection != null) {
+                    try {
+                        connection.rollback();
+                    } catch (SQLException ex) {
+                        ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to rollback data");
+                    }
+                }
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to import data");
+            }
+        }, "INSERT INTO " + salesTable + " (sale_uuid,market,owner_name,owner_uuid,pay_type,eco_type,price,data,post_time) VALUES (?,?,?,?,?,?,?,?,?);");
     }
 
     @Override

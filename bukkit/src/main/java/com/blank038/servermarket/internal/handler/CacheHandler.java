@@ -21,6 +21,12 @@ public class CacheHandler {
         return new HashMap<>();
     }
 
+    public static void removeSaleCache(String market, String saleId) {
+        if (CONTAINER_MAP.containsKey(market)) {
+            CONTAINER_MAP.get(market).removeSale(saleId);
+        }
+    }
+
     @Getter
     public static class MarketContainer {
         private final Map<String, SaleCache> saleCacheMap = new HashMap<>();
@@ -28,6 +34,10 @@ public class CacheHandler {
         public void uploadSales(Map<String, SaleCache> map) {
             this.saleCacheMap.clear();
             this.saleCacheMap.putAll(map);
+        }
+
+        public void removeSale(String uuid) {
+            this.saleCacheMap.remove(uuid);
         }
     }
 }
