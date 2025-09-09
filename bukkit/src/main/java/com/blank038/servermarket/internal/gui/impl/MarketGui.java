@@ -78,7 +78,6 @@ public class MarketGui extends AbstractGui {
         // 设置界面物品
         this.initializeDisplayItem(model, data);
         // Get sale list
-        // TODO: Optimize logic, slice the data.
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
         List<SaleCache> saleList = CacheHandler.querySales(this.sourceMarketKey)
                 .values().stream()

@@ -9,6 +9,7 @@ import com.blank038.servermarket.internal.config.GeneralOption;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.gui.impl.ConfirmPurchaseGui;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
+import com.blank038.servermarket.internal.handler.CacheHandler;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import org.bukkit.Bukkit;
@@ -54,6 +55,8 @@ public enum ActionType {
                 ServerMarketApi.addOfflineTransaction(saleItem.getOwnerUUID(), buyer.getName(), marketData.getPaymentType(),
                         marketData.getEconomyType(), saleItem.getPrice(), marketData.getMarketKey());
             }
+            // remove cache
+            CacheHandler.removeSaleCache(marketData.getSourceId(), saleItem.getSaleUUID());
             // give sale item to buyer
             ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), saleItem, "buy");
             // call PlayerSaleEvent.Buy
@@ -70,6 +73,9 @@ public enum ActionType {
         if (saleCache.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
             ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
                     .ifPresent((sale) -> {
+                        // remove cache
+                        CacheHandler.removeSaleCache(marketData.getSourceId(), uuid);
+                        // execute logic
                         ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), sale.getSaleItem(), "unsale");
                         buyer.sendMessage(I18n.getStrAndHeader("unsale"));
                         new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
@@ -77,6 +83,9 @@ public enum ActionType {
         } else if (buyer.isOp() || buyer.hasPermission("servermarket.force-unsale")) {
             ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
                     .ifPresent((sale) -> {
+                        // remove cache
+                        CacheHandler.removeSaleCache(marketData.getSourceId(), uuid);
+                        // execute logic
                         if (!GeneralOption.restitution) {
                             buyer.getInventory().addItem(saleCache.getSaleItem());
                             buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
