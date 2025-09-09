@@ -181,7 +181,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
-        if (strings.length == 2) {
+        if (strings.length == 2 && strings[0].equalsIgnoreCase("patch")) {
             return new ArrayList<>(PatchHandler.getPatchIds());
         }
         return null;
