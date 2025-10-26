@@ -8,6 +8,7 @@ import com.blank038.servermarket.internal.cache.player.PlayerCache;
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.gui.AbstractGui;
 import com.blank038.servermarket.internal.i18n.I18n;
+import com.blank038.servermarket.internal.provider.CustomNameProvider;
 import com.blank038.servermarket.internal.util.ItemUtil;
 import com.blank038.servermarket.internal.util.TextUtil;
 import de.tr7zw.nbtapi.NBTItem;
@@ -93,7 +94,7 @@ public class StoreContainerGui extends AbstractGui {
                 nbtItem.setString("StoreID", keys[i]);
                 guiModel.setItem(slots[index], nbtItem.getItem());
             }
-            guiModel.execute((e) -> {
+            guiModel.onClick((e) -> {
                 e.setCancelled(true);
                 if (e.getClickedInventory() == e.getInventory()) {
                     // 获取点击的玩家
@@ -130,8 +131,7 @@ public class StoreContainerGui extends AbstractGui {
                 // 给予玩家物品
                 ItemStack itemStack = ServerMarket.getStorageHandler().removeStoreItem(player.getUniqueId(), uuid);
                 if (itemStack != null) {
-                    String displayMmae = itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName() ?
-                            itemStack.getItemMeta().getDisplayName() : itemStack.getType().name();
+                    String displayMmae = CustomNameProvider.getCustomName(itemStack);
                     player.getInventory().addItem(itemStack);
                     player.sendMessage(I18n.getStrAndHeader("get-store-item")
                             .replace("%item%", displayMmae)

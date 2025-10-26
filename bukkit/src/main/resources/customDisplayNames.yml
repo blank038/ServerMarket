@@ -1,0 +1,7 @@
+# 是否优先显示自定义名(materials)
+customName: true
+# 材质名
+materials:
+  STONE: "石头"
+  DIRT: "泥土"
+  DIAMOND: "钻石"

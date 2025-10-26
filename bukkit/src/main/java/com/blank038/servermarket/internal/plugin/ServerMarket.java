@@ -10,6 +10,7 @@ import com.blank038.servermarket.dto.IStorageHandler;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
 import com.blank038.servermarket.internal.command.MainCommand;
 import com.blank038.servermarket.internal.data.DataContainer;
+import com.blank038.servermarket.internal.handler.ProviderHandler;
 import com.blank038.servermarket.internal.handler.TaskHandler;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.listen.impl.CoreListener;
@@ -94,6 +95,8 @@ public class ServerMarket extends AyPlugin {
         ServerMarketApi.createService(serviceType, section.getConfigurationSection("type." + serviceType));
         // Restart internal tasks
         TaskHandler.restartInternalTasks();
+        // Pretreatment provider data
+        ProviderHandler.pretreatment();
 
         this.getConsoleLogger().log(false, I18n.getProperties().getProperty("load-completed")
                 .replace("%s", String.valueOf(DataContainer.MARKET_DATA.size())));

@@ -105,7 +105,7 @@ public class MarketGui extends AbstractGui {
             model.setItem(slots[index], this.getShowItem(marketData, saleItem, data));
         }
         final int lastPage = currentPage, finalMaxPage = maxPage;
-        model.execute((e) -> {
+        model.onClick((e) -> {
             e.setCancelled(true);
             if (e.getClickedInventory() == e.getInventory()) {
                 ItemStack itemStack = e.getCurrentItem();

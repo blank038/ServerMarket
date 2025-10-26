@@ -12,6 +12,7 @@ import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.api.handler.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import com.blank038.servermarket.internal.i18n.I18n;
+import com.blank038.servermarket.internal.provider.CustomNameProvider;
 import com.blank038.servermarket.internal.service.notify.NotifyCenter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -148,8 +149,7 @@ public class VirtualMarketCommand extends Command {
                     player.sendMessage(I18n.getStrAndHeader("sell"));
                     // 判断是否公告
                     if (this.marketData.isSaleBroadcast()) {
-                        String displayName = cloneItem.hasItemMeta() && cloneItem.getItemMeta().hasDisplayName() ?
-                                cloneItem.getItemMeta().getDisplayName() : cloneItem.getType().name();
+                        String displayName = CustomNameProvider.getCustomName(cloneItem);
                         NotifyCache notify = new NotifyCache();
                         notify.message = I18n.getStrAndHeader("broadcast")
                                 .replace("%item%", displayName)
