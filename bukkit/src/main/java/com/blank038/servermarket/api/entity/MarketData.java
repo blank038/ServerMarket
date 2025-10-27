@@ -36,7 +36,7 @@ public class MarketData {
     private final Map<String, String> extraMap = new HashMap<>();
     private final String sourceId, marketKey, permission, shortCommand, economyType, displayName, economyName;
     private final IFilter deniedFilter;
-    private final List<String> saleTypes;
+    private final List<String> saleTypes, sorts = new ArrayList<>();
     private final int min, max, effectiveTime;
     private final PayType paymentType;
     private final ConfigurationSection taxSection, shoutTaxSection, limitCountSection;
@@ -75,6 +75,7 @@ public class MarketData {
         this.dateFormat = options.getString("simple-date-format");
         this.priceFormat = options.getString("price-format", "%.1f");
         this.economyType = options.getString("vault-type");
+        this.sorts.addAll(options.getStringList("sorts"));
         switch (economyType.toLowerCase()) {
             case "vault":
                 this.paymentType = PayType.VAULT;

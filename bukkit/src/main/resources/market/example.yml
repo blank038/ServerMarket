@@ -67,6 +67,11 @@ black-list:
 types:
   - "all"
   - "道具"
+# 排序, 如果无特殊要求可以不设置 sorts, 不设置时会直接使用 sorts.yml 中全部排序方式
+sorts:
+  - "default"
+  - "price_high"
+  - "price_low"
 ######################
 #
 # 全球市场界面配置文件
@@ -96,7 +101,7 @@ items:
     amount: 1
     data: 0
     name: " "
-    slot: 46,47,51,52
+    slot: 46,52
     lore: [ ]
   up:
     type: paper
@@ -114,6 +119,13 @@ items:
     slot: 53
     action: down
     lore: [ ]
+  refresh:
+    type: ARROW
+    amount: 1
+    data: 0
+    name: "&6刷新市场商品"
+    slot: 47
+    action: "refresh"
   changeType:
     type: STRING
     amount: 1
@@ -134,6 +146,13 @@ items:
     lore:
       - "&f"
       - "&f当前: &7%sortType%"
+  search:
+    type: HOPPER
+    amount: 1
+    data: 0
+    name: "&6搜索商品"
+    slot: 51
+    action: "search"
   store:
     type: chest
     amount: 1

@@ -52,31 +52,17 @@ public class ServerMarketApi {
         return null;
     }
 
+    /**
+     * Open the market; if the market ID is null, open the default market.
+     *
+     * @param player  target player
+     * @param context gui context
+     */
     public static void openMarket(Player player, GuiContext context) {
         String key = context.getMarketId();
         MarketData marketData = DataContainer.MARKET_DATA.containsKey(key) ? DataContainer.MARKET_DATA.get(key)
-                : DataContainer.MARKET_DATA.get(ServerMarket.getInstance().getConfig().getString("default-market"));
+                : DataContainer.MARKET_DATA.get(DataContainer.defaultMarket);
         if (marketData != null && player.hasPermission(marketData.getPermission())) {
-            new MarketGui(context).openGui(player);
-        }
-    }
-
-    /**
-     * 打开市场, 如果市场编号为 null 则打开默认市场
-     *
-     * @param player 目标玩家
-     * @param key    目标市场编号
-     */
-    public static void openMarket(Player player, String key, int page, FilterHandler filter) {
-        MarketData marketData = DataContainer.MARKET_DATA.containsKey(key) ? DataContainer.MARKET_DATA.get(key)
-                : DataContainer.MARKET_DATA.get(ServerMarket.getInstance().getConfig().getString("default-market"));
-        if (marketData == null) {
-            return;
-        }
-        if (player.hasPermission(marketData.getPermission())) {
-            GuiContext context = new GuiContext(marketData.getMarketKey());
-            context.setPage(page);
-            context.setFilter(filter);
             new MarketGui(context).openGui(player);
         }
     }

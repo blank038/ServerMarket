@@ -9,7 +9,6 @@ import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.api.entity.MarketData;
 import com.blank038.servermarket.internal.enums.MarketStatus;
-import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.api.handler.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.internal.gui.AbstractGui;
 import com.blank038.servermarket.internal.i18n.I18n;
@@ -39,22 +38,6 @@ public class MarketGui extends AbstractGui {
 
     public MarketGui(GuiContext context) {
         super(context);
-        this.initFilter();
-    }
-
-    public MarketGui(String sourceMarketKey, int currentPage, FilterHandler filter) {
-        super(null);
-    }
-
-    private void initFilter() {
-        if (this.context.getFilter() == null) {
-            this.context.setFilter(new FilterHandler());
-        }
-        if (this.context.getFilter().getTypeFilter() == null) {
-            this.context.getFilter().setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.context.getType())));
-        } else {
-            this.context.setType(((TypeFilterImpl) this.context.getFilter().getTypeFilter()).getTypes().get(0));
-        }
     }
 
     /**
@@ -232,7 +215,8 @@ public class MarketGui extends AbstractGui {
     }
 
     private void nextSort(Player clicker) {
-        List<String> sorts = new ArrayList<>(DataContainer.SORT_HANDLER_MAP.keySet());
+        MarketData marketData = DataContainer.MARKET_DATA.get(this.context.getMarketId());
+        List<String> sorts = marketData.getSorts().isEmpty() ? new ArrayList<>(DataContainer.SORT_HANDLER_MAP.keySet()) : marketData.getSorts();
         if (sorts.size() <= 1) {
             return;
         }

@@ -1,6 +1,8 @@
 package com.blank038.servermarket.internal.gui.context;
 
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
+import com.blank038.servermarket.api.handler.filter.impl.TypeFilterImpl;
+import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +17,18 @@ public class GuiContext {
 
     public GuiContext(String marketId) {
         this.marketId = marketId;
+        this.initFilter();
+    }
+
+    private void initFilter() {
+        if (this.filter == null) {
+            this.filter = new FilterHandler();
+        }
+        if (this.filter.getTypeFilter() == null) {
+            this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.type)));
+        } else {
+            this.type = ((TypeFilterImpl) this.filter.getTypeFilter()).getTypes().get(0);
+        }
     }
 
     public static GuiContext normal(String market) {

@@ -35,6 +35,7 @@ public class DataContainer {
     public static final Map<String, MarketData> MARKET_DATA = new HashMap<>();
     public static final Map<String, SortHandler> SORT_HANDLER_MAP = new HashMap<>();
     public static final Map<ClickType, ActionType> ACTION_TYPE_MAP = new HashMap<>();
+    public static String defaultMarket;
 
     public static void loadData() {
         ServerMarket.getInstance().saveResource("types.yml", "types.yml", false, (file) -> {
@@ -76,6 +77,8 @@ public class DataContainer {
         DataContainer.registerVirtualMarketCommands();
         // load actions
         DataContainer.loadActions();
+        // load default market
+        defaultMarket = ServerMarket.getInstance().getConfig().getString("default-market");
     }
 
     /**

@@ -67,7 +67,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "box":
                     if (sender instanceof Player) {
-                        new StoreContainerGui((Player) sender, GuiContext.normal(null)).open(1);
+                        new StoreContainerGui((Player) sender, GuiContext.normal(DataContainer.defaultMarket)).open(1);
                     }
                     break;
                 case "reload":

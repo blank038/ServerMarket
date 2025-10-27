@@ -89,7 +89,7 @@ public class ServerMarket extends AyPlugin {
         }
         // Initialize DataContainer
         DataContainer.loadData();
-        // register service
+        // Register service
         ConfigurationSection section = this.getConfig().getConfigurationSection("notify-option");
         String serviceType = section.getString("use", "self");
         ServerMarketApi.createService(serviceType, section.getConfigurationSection("type." + serviceType));

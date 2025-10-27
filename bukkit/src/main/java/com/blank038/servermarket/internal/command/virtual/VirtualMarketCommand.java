@@ -54,7 +54,15 @@ public class VirtualMarketCommand extends Command {
             return;
         }
         if (args.length == 0) {
-            new MarketGui(GuiContext.normal(this.marketData.getMarketKey())).openGui(player);
+            // Initialize context for the first time, reading settings from market configuration
+            GuiContext context = GuiContext.normal(this.marketData.getMarketKey());
+            if (!this.marketData.getSorts().isEmpty()) {
+                context.setSort(this.marketData.getSorts().get(0));
+            }
+            if (!this.marketData.getSaleTypes().isEmpty()) {
+                context.setType(this.marketData.getSaleTypes().get(0));
+            }
+            new MarketGui(context).openGui(player);
             return;
         }
         if (args.length == 1) {
