@@ -1,7 +1,6 @@
 package com.blank038.servermarket.internal.service.notify;
 
 import com.blank038.servermarket.internal.cache.other.NotifyCache;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 
 /**
@@ -13,7 +12,5 @@ public interface INotifyService {
 
     void push(NotifyCache notifyCache);
 
-    default void broadcast(String message) {
-        Bukkit.getOnlinePlayers().forEach((player) -> player.sendMessage(message));
-    }
+    void broadcast(String message);
 }
