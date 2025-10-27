@@ -2,6 +2,7 @@ package com.blank038.servermarket.api;
 
 import com.blank038.servermarket.api.platform.IPlatformApi;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -51,6 +52,15 @@ public class ServerMarketApi {
         return null;
     }
 
+    public static void openMarket(Player player, GuiContext context) {
+        String key = context.getMarketId();
+        MarketData marketData = DataContainer.MARKET_DATA.containsKey(key) ? DataContainer.MARKET_DATA.get(key)
+                : DataContainer.MARKET_DATA.get(ServerMarket.getInstance().getConfig().getString("default-market"));
+        if (marketData != null && player.hasPermission(marketData.getPermission())) {
+            new MarketGui(context).openGui(player);
+        }
+    }
+
     /**
      * 打开市场, 如果市场编号为 null 则打开默认市场
      *
@@ -64,7 +74,10 @@ public class ServerMarketApi {
             return;
         }
         if (player.hasPermission(marketData.getPermission())) {
-            new MarketGui(marketData.getMarketKey(), page, filter).openGui(player);
+            GuiContext context = new GuiContext(marketData.getMarketKey());
+            context.setPage(page);
+            context.setFilter(filter);
+            new MarketGui(context).openGui(player);
         }
     }
 

@@ -2,6 +2,7 @@ package com.blank038.servermarket.internal.command.virtual;
 
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.internal.cache.other.NotifyCache;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.api.event.PlayerSaleEvent;
 import com.blank038.servermarket.api.entity.MarketData;
@@ -53,7 +54,7 @@ public class VirtualMarketCommand extends Command {
             return;
         }
         if (args.length == 0) {
-            new MarketGui(this.marketData.getMarketKey(), 1, null).openGui(player);
+            new MarketGui(GuiContext.normal(this.marketData.getMarketKey())).openGui(player);
             return;
         }
         if (args.length == 1) {

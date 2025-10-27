@@ -2,6 +2,7 @@ package com.blank038.servermarket.internal.gui.impl;
 
 import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.handler.CacheHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
@@ -12,6 +13,7 @@ import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.api.handler.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.internal.gui.AbstractGui;
 import com.blank038.servermarket.internal.i18n.I18n;
+import com.blank038.servermarket.internal.provider.ActionProvider;
 import com.blank038.servermarket.internal.util.ItemUtil;
 import com.blank038.servermarket.internal.util.TextUtil;
 import com.google.common.collect.Lists;
@@ -22,6 +24,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -33,22 +36,24 @@ import java.util.stream.Collectors;
  * @author Blank038
  */
 public class MarketGui extends AbstractGui {
-    private final String sourceMarketKey;
-    private FilterHandler filter;
-    private int currentPage;
-    private String currentType = "all", currentSort = "default";
+
+    public MarketGui(GuiContext context) {
+        super(context);
+        this.initFilter();
+    }
 
     public MarketGui(String sourceMarketKey, int currentPage, FilterHandler filter) {
-        this.sourceMarketKey = sourceMarketKey;
-        this.currentPage = currentPage;
-        this.filter = filter;
-        if (this.filter == null) {
-            this.filter = new FilterHandler();
+        super(null);
+    }
+
+    private void initFilter() {
+        if (this.context.getFilter() == null) {
+            this.context.setFilter(new FilterHandler());
         }
-        if (this.filter.getTypeFilter() == null) {
-            this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
+        if (this.context.getFilter().getTypeFilter() == null) {
+            this.context.getFilter().setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.context.getType())));
         } else {
-            this.currentType = ((TypeFilterImpl) this.filter.getTypeFilter()).getTypes().get(0);
+            this.context.setType(((TypeFilterImpl) this.context.getFilter().getTypeFilter()).getTypes().get(0));
         }
     }
 
@@ -58,7 +63,7 @@ public class MarketGui extends AbstractGui {
      * @param player 目标玩家
      */
     public void openGui(Player player) {
-        MarketData marketData = DataContainer.MARKET_DATA.get(this.sourceMarketKey);
+        MarketData marketData = DataContainer.MARKET_DATA.get(this.context.getMarketId());
         if (marketData == null || marketData.getMarketStatus() == MarketStatus.ERROR) {
             player.sendMessage(I18n.getStrAndHeader("market-error"));
             return;
@@ -79,32 +84,33 @@ public class MarketGui extends AbstractGui {
         this.initializeDisplayItem(model, data);
         // Get sale list
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
-        List<SaleCache> saleList = CacheHandler.querySales(this.sourceMarketKey)
+        List<SaleCache> saleList = CacheHandler.querySales(this.context.getMarketId())
                 .values().stream()
-                .filter((entry) -> (filter == null || filter.check(entry)))
-                .sorted(DataContainer.SORT_HANDLER_MAP.get(this.currentSort))
+                .filter((entry) -> (this.context.getFilter() == null || this.context.getFilter().check(entry)))
+                .sorted(DataContainer.SORT_HANDLER_MAP.get(this.context.getSort()))
                 .collect(Collectors.toList());
         // 计算下标
         int maxPage = saleList.size() / slots.length;
         maxPage += (saleList.size() % slots.length) == 0 ? 0 : 1;
         // 判断页面是否超标, 如果是的话就设置为第一页
-        if (currentPage > maxPage) {
-            currentPage = 1;
+        if (this.context.getPage() > maxPage) {
+            this.context.setPage(1);
         }
+        int page = this.context.getPage();
         // 获得额外增加的信息
-        int start = slots.length * (currentPage - 1), end = slots.length * currentPage;
+        int start = slots.length * (page - 1), end = slots.length * page;
         for (int i = start, index = 0; i < end; i++, index++) {
             if (index >= slots.length || i >= saleList.size()) {
                 break;
             }
             SaleCache saleItem = saleList.get(i);
-            if (saleItem == null || (filter != null && !filter.check(saleItem))) {
+            if (saleItem == null || (this.context.getFilter() != null && !this.context.getFilter().check(saleItem))) {
                 --index;
                 continue;
             }
             model.setItem(slots[index], this.getShowItem(marketData, saleItem, data));
         }
-        final int lastPage = currentPage, finalMaxPage = maxPage;
+        final int finalMaxPage = maxPage;
         model.onClick((e) -> {
             e.setCancelled(true);
             if (e.getClickedInventory() == e.getInventory()) {
@@ -120,22 +126,22 @@ public class MarketGui extends AbstractGui {
                 NBTItem nbtItem = new NBTItem(itemStack);
                 String key = nbtItem.getString("SaleUUID"), action = nbtItem.getString("MarketAction");
                 if (key != null && !key.isEmpty()) {
-                    DataContainer.MARKET_DATA.get(this.sourceMarketKey).action(clicker, key, e.getClick(), lastPage, filter);
+                    this.onAction(clicker, key, e.getClick());
                 } else if (action != null && !action.isEmpty()) {
                     switch (action) {
                         case "up":
-                            if (lastPage == 1) {
+                            if (page == 1) {
                                 clicker.sendMessage(I18n.getStrAndHeader("no-previous-page"));
                             } else {
-                                this.currentPage -= 1;
+                                this.context.setPage(this.context.getPage() - 1);
                                 this.openGui(clicker);
                             }
                             break;
                         case "down":
-                            if (lastPage >= finalMaxPage) {
+                            if (page >= finalMaxPage) {
                                 clicker.sendMessage(I18n.getStrAndHeader("no-next-page"));
                             } else {
-                                this.currentPage += 1;
+                                this.context.setPage(this.context.getPage() + 1);
                                 this.openGui(clicker);
                             }
                             break;
@@ -146,10 +152,10 @@ public class MarketGui extends AbstractGui {
                             this.nextSort(clicker);
                             break;
                         case "store":
-                            new StoreContainerGui(clicker, lastPage, this.sourceMarketKey, this.filter).open(1);
+                            new StoreContainerGui(clicker, this.context).open(1);
                             break;
                         case "refresh":
-                            new MarketGui(this.sourceMarketKey, this.currentPage, this.filter).openGui(clicker);
+                            new MarketGui(this.context).openGui(clicker);
                             break;
                         default:
                             if (action.contains(":")) {
@@ -206,11 +212,11 @@ public class MarketGui extends AbstractGui {
     }
 
     private String getCurrentTypeDisplayName() {
-        return DataContainer.SALE_TYPE_DISPLAY_NAME.getOrDefault(this.currentType, this.currentType);
+        return DataContainer.SALE_TYPE_DISPLAY_NAME.getOrDefault(this.context.getType(), this.context.getType());
     }
 
     private String getCurrentSortDisplayName() {
-        return DataContainer.SORT_TYPE_DISPLAY_NAME.getOrDefault(this.currentSort, this.currentSort);
+        return DataContainer.SORT_TYPE_DISPLAY_NAME.getOrDefault(this.context.getSort(), this.context.getSort());
     }
 
     private void nextType(MarketData marketData, Player clicker) {
@@ -218,9 +224,9 @@ public class MarketGui extends AbstractGui {
         if (types.size() <= 1) {
             return;
         }
-        int index = types.indexOf(currentType);
-        this.currentType = (index == -1 || index == types.size() - 1) ? types.get(0) : types.get(index + 1);
-        this.filter.setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.currentType)));
+        int index = types.indexOf(this.context.getType());
+        this.context.setType((index == -1 || index == types.size() - 1) ? types.get(0) : types.get(index + 1));
+        this.context.getFilter().setTypeFilter(new TypeFilterImpl(Lists.newArrayList(this.context.getType())));
         this.openGui(clicker);
         clicker.sendMessage(I18n.getStrAndHeader("changeSaleType").replace("%type%", this.getCurrentTypeDisplayName()));
     }
@@ -230,8 +236,8 @@ public class MarketGui extends AbstractGui {
         if (sorts.size() <= 1) {
             return;
         }
-        int index = sorts.indexOf(currentSort);
-        this.currentSort = (index == -1 || index == sorts.size() - 1) ? sorts.get(0) : sorts.get(index + 1);
+        int index = sorts.indexOf(this.context.getSort());
+        this.context.setSort((index == -1 || index == sorts.size() - 1) ? sorts.get(0) : sorts.get(index + 1));
         this.openGui(clicker);
         clicker.sendMessage(I18n.getStrAndHeader("changeSortType").replace("%type%", this.getCurrentSortDisplayName()));
     }
@@ -270,5 +276,31 @@ public class MarketGui extends AbstractGui {
         NBTItem nbtItem = new NBTItem(itemStack);
         nbtItem.setString("SaleUUID", saleItem.getSaleUUID());
         return nbtItem.getItem();
+    }
+
+    /**
+     *
+     * Execute when a player attempts to interact with an item.
+     *
+     * @param player    action player
+     * @param uuid      sale unique id
+     * @param clickType click type
+     */
+    private void onAction(Player player, String uuid, ClickType clickType) {
+        MarketData marketData = DataContainer.MARKET_DATA.get(this.context.getMarketId());
+        if (marketData == null) {
+            player.sendMessage(I18n.getStrAndHeader("error-sale"));
+            return;
+        }
+        if (!ServerMarket.getStorageHandler().hasSale(this.context.getMarketId(), uuid)) {
+            player.sendMessage(I18n.getStrAndHeader("error-sale"));
+            return;
+        }
+        Optional<SaleCache> optionalSaleItem = ServerMarket.getStorageHandler().getSaleItem(this.context.getMarketId(), uuid);
+        if (optionalSaleItem.isPresent()) {
+            ActionProvider.runAction(marketData, player, uuid, optionalSaleItem.get(), clickType, this.context);
+        } else {
+            player.sendMessage(I18n.getStrAndHeader("error-sale"));
+        }
     }
 }

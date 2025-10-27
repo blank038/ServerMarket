@@ -4,14 +4,11 @@ import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.api.event.MarketLoadEvent;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
-import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.internal.enums.MarketStatus;
 import com.blank038.servermarket.internal.enums.PayType;
-import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.api.handler.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.api.handler.filter.interfaces.IFilter;
 import com.blank038.servermarket.internal.i18n.I18n;
-import com.blank038.servermarket.internal.provider.ActionProvider;
 import com.blank038.servermarket.internal.util.TextUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +17,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 
 import java.io.File;
 import java.util.*;
@@ -133,18 +129,5 @@ public class MarketData {
             }
         }
         return tax;
-    }
-
-    public void action(Player player, String uuid, ClickType clickType, int page, FilterHandler filter) {
-        if (!ServerMarket.getStorageHandler().hasSale(this.sourceId, uuid)) {
-            player.sendMessage(I18n.getStrAndHeader("error-sale"));
-            return;
-        }
-        Optional<SaleCache> optionalSaleItem = ServerMarket.getStorageHandler().getSaleItem(this.sourceId, uuid);
-        if (optionalSaleItem.isPresent()) {
-            ActionProvider.runAction(this, player, uuid, optionalSaleItem.get(), clickType, page, filter);
-        } else {
-            player.sendMessage(I18n.getStrAndHeader("error-sale"));
-        }
     }
 }

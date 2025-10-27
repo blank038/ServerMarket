@@ -3,10 +3,10 @@ package com.blank038.servermarket.internal.enums;
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.api.entity.MarketData;
 import com.blank038.servermarket.api.event.PlayerSaleEvent;
-import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.internal.config.GeneralOption;
 import com.blank038.servermarket.internal.economy.BaseEconomy;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.gui.impl.ConfirmPurchaseGui;
 import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import com.blank038.servermarket.internal.handler.CacheHandler;
@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public enum ActionType {
-    PURCHASE((marketData, buyer, uuid, saleCache, page, filter) -> {
+    PURCHASE((marketData, buyer, uuid, saleCache, context) -> {
         if (saleCache.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
             buyer.sendMessage(I18n.getStrAndHeader("is-owner"));
             return;
@@ -64,12 +64,12 @@ public enum ActionType {
             Bukkit.getPluginManager().callEvent(event);
             // send message to buyer
             buyer.sendMessage(I18n.getStrAndHeader("buy-item"));
-            new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
+            new MarketGui(context).openGui(buyer);
         } else {
             buyer.sendMessage(I18n.getStrAndHeader("error-sale"));
         }
     }),
-    UNSALE((marketData, buyer, uuid, saleCache, page, filter) -> {
+    UNSALE((marketData, buyer, uuid, saleCache, context) -> {
         if (saleCache.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
             ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
                     .ifPresent((sale) -> {
@@ -78,7 +78,7 @@ public enum ActionType {
                         // execute logic
                         ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), sale.getSaleItem(), "unsale");
                         buyer.sendMessage(I18n.getStrAndHeader("unsale"));
-                        new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
+                        new MarketGui(context).openGui(buyer);
                     });
         } else if (buyer.isOp() || buyer.hasPermission("servermarket.force-unsale")) {
             ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
@@ -89,7 +89,7 @@ public enum ActionType {
                         if (!GeneralOption.restitution) {
                             buyer.getInventory().addItem(saleCache.getSaleItem());
                             buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
-                            new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
+                            new MarketGui(context).openGui(buyer);
                         } else {
                             UUID ownerUUID = UUID.fromString(sale.getOwnerUUID());
                             Player target = Bukkit.getPlayer(ownerUUID);
@@ -98,19 +98,19 @@ public enum ActionType {
                                 target.sendMessage(I18n.getStrAndHeader("force-unsale-target"));
                             }
                             buyer.sendMessage(I18n.getStrAndHeader("force-unsale"));
-                            new MarketGui(marketData.getMarketKey(), page, filter).openGui(buyer);
+                            new MarketGui(context).openGui(buyer);
                         }
                     });
         } else {
             buyer.sendMessage(I18n.getStrAndHeader("not-owner"));
         }
     }),
-    CONFIRM_PURCHASE((marketData, buyer, uuid, saleCache, page, filter) -> {
+    CONFIRM_PURCHASE((marketData, buyer, uuid, saleCache, context) -> {
         if (saleCache.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
             buyer.sendMessage(I18n.getStrAndHeader("is-owner"));
             return;
         }
-        new ConfirmPurchaseGui().open(marketData, buyer, uuid, saleCache, page, filter);
+        new ConfirmPurchaseGui(context).open(marketData, buyer, uuid, saleCache);
     });
 
     private final ActionConsumer consumer;
@@ -119,13 +119,13 @@ public enum ActionType {
         this.consumer = consumer;
     }
 
-    public void run(MarketData marketData, Player player, String uuid, SaleCache saleCache, int page, FilterHandler filter) {
-        consumer.run(marketData, player, uuid, saleCache, page, filter);
+    public void run(MarketData marketData, Player player, String uuid, SaleCache saleCache, GuiContext context) {
+        consumer.run(marketData, player, uuid, saleCache, context);
     }
 
     @FunctionalInterface
     interface ActionConsumer {
 
-        void run(MarketData marketData, Player player, String uuid, SaleCache saleCache, int page, FilterHandler filter);
+        void run(MarketData marketData, Player player, String uuid, SaleCache saleCache, GuiContext context);
     }
 }

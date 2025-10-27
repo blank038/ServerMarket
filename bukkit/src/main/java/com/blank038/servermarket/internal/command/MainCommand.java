@@ -3,6 +3,7 @@ package com.blank038.servermarket.internal.command;
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.dto.AbstractStorageHandler;
 import com.blank038.servermarket.dto.IStorageHandler;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.handler.PatchHandler;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.data.DataContainer;
@@ -66,7 +67,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     break;
                 case "box":
                     if (sender instanceof Player) {
-                        new StoreContainerGui((Player) sender, 1, null, null).open(1);
+                        new StoreContainerGui((Player) sender, GuiContext.normal(null)).open(1);
                     }
                     break;
                 case "reload":
@@ -93,7 +94,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player)) {
             return;
         }
-        ServerMarketApi.openMarket((Player) sender, key, 1, null);
+        ServerMarketApi.openMarket((Player) sender, GuiContext.normal(key));
     }
 
     private void searchItemsAndOpenMarket(CommandSender sender, String[] args) {
@@ -108,10 +109,13 @@ public class MainCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(I18n.getStrAndHeader("wrong-key"));
             return;
         }
-        FilterHandler builder = new FilterHandler()
+        FilterHandler filterHandler = new FilterHandler()
                 .addKeyFilter(new KeyFilterImpl(args[2]))
                 .setTypeFilter(new TypeFilterImpl(Lists.newArrayList("none")));
-        ServerMarketApi.openMarket((Player) sender, args[1], 1, builder);
+
+        GuiContext context = GuiContext.normal(args[1]);
+        context.setFilter(filterHandler);
+        ServerMarketApi.openMarket((Player) sender, context);
     }
 
     private void show(CommandSender sender) {

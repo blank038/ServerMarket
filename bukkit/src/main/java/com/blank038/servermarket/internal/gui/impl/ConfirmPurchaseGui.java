@@ -3,11 +3,11 @@ package com.blank038.servermarket.internal.gui.impl;
 import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.api.entity.MarketData;
-import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.enums.ActionType;
 import com.blank038.servermarket.internal.gui.AbstractGui;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.util.ItemUtil;
@@ -29,7 +29,11 @@ import java.util.List;
  */
 public class ConfirmPurchaseGui extends AbstractGui {
 
-    public void open(MarketData marketData, Player player, String uuid, SaleCache saleCache, int page, FilterHandler filter) {
+    public ConfirmPurchaseGui(GuiContext context) {
+        super(context);
+    }
+
+    public void open(MarketData marketData, Player player, String uuid, SaleCache saleCache) {
         String key = DataContainer.isLegacy() ? "gui/confirm_purchase_legacy.yml" : "gui/confirm_purchase.yml";
         ServerMarket.getInstance().saveResource(key, "gui/confirm_purchase.yml", false, (file) -> {
             FileConfiguration data = YamlConfiguration.loadConfiguration(file);
@@ -59,10 +63,10 @@ public class ConfirmPurchaseGui extends AbstractGui {
                 }
                 switch (nbtItem.getString("ConfirmAction")) {
                     case "confirm":
-                        ActionType.PURCHASE.run(marketData, clicker, uuid, saleCache, page, filter);
+                        ActionType.PURCHASE.run(marketData, clicker, uuid, saleCache, context);
                         break;
                     case "cancel":
-                        new MarketGui(marketData.getMarketKey(), page, filter).openGui(clicker);
+                        new MarketGui(this.context).openGui(clicker);
                         break;
                     default:
                         break;

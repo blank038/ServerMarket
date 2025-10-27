@@ -2,6 +2,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'java'
+    id 'org.jetbrains.kotlin.jvm'
 }
 
 repositories {
@@ -9,6 +10,7 @@ repositories {
         name = "AyStudio-Repository"
         url = "https://repo.mc9y.com/snapshots"
     }
+    mavenCentral()
 }
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
@@ -25,6 +27,7 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.24")
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 processResources {
@@ -38,4 +41,6 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
+}
+compileKotlin {
 }
