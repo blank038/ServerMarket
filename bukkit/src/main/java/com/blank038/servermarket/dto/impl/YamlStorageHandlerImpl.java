@@ -17,12 +17,15 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Blank038
@@ -193,16 +196,36 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
 
     @Override
     public void save(String market, Map<String, SaleCache> map) {
-        File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", market + ".yml");
-        FileConfiguration data = new YamlConfiguration();
-        for (Map.Entry<String, SaleCache> entry : map.entrySet()) {
-            data.set(entry.getKey(), entry.getValue().toSection());
-        }
-        try {
-            data.save(file);
-        } catch (IOException e) {
-            ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "cannot save sale data: " + market);
-        }
+        // Create temp folder and temp file
+        String tempFileName = market + "_" + System.currentTimeMillis() + ".yml";
+        File tempFolder = new File(ServerMarket.getInstance().getDataFolder(), "temp");
+        tempFolder.mkdir();
+        File tempFile = new File(ServerMarket.getInstance().getDataFolder() + "/temp/", tempFileName);
+        // Create transaction
+        CompletableFuture.supplyAsync(() -> {
+                    FileConfiguration data = new YamlConfiguration();
+                    map.forEach((k, v) -> data.set(k, v.toSection()));
+                    try {
+                        data.save(tempFile);
+                    } catch (IOException e) {
+                        throw new CompletionException("Cannot save(temp) sale data: " + market, e);
+                    }
+                    return data;
+                })
+                .thenRunAsync(() -> {
+                    File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", market + ".yml");
+                    try {
+                        Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        throw new CompletionException("Cannot save sale data: " + market, e);
+                    }
+                })
+                .exceptionally((throwable) -> {
+                    Throwable rootCause = throwable.getCause() != null ? throwable.getCause() : throwable;
+                    ServerMarket.getInstance().getLogger().log(Level.WARNING, rootCause,
+                            () -> "Failed to save sale data for market: " + market);
+                    return null;
+                });
     }
 
     @Override
