@@ -3,9 +3,9 @@ package com.blank038.servermarket.internal.gui.impl;
 import com.aystudio.core.bukkit.util.common.CommonUtil;
 import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.api.ServerMarketApi;
+import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.cache.player.PlayerCache;
-import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.internal.gui.AbstractGui;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.provider.CustomNameProvider;
@@ -31,15 +31,10 @@ import java.util.Optional;
  */
 public class StoreContainerGui extends AbstractGui {
     private final Player target;
-    private final int marketPage;
-    private final String oldMarket;
-    private final FilterHandler filterHandler;
 
-    public StoreContainerGui(Player player, int marketPage, String oldMarket, FilterHandler filterHandler) {
+    public StoreContainerGui(Player player, GuiContext context) {
+        super(context);
         this.target = player;
-        this.marketPage = marketPage;
-        this.oldMarket = oldMarket;
-        this.filterHandler = filterHandler;
     }
 
     public void open(int currentPage) {
@@ -111,7 +106,7 @@ public class StoreContainerGui extends AbstractGui {
                     NBTItem nbtItem = new NBTItem(itemStack);
                     String storeId = nbtItem.getString("StoreID"), action = nbtItem.getString("action");
                     if ("market".equalsIgnoreCase(action)) {
-                        ServerMarketApi.openMarket(clicker, this.oldMarket, this.marketPage, this.filterHandler);
+                        ServerMarketApi.openMarket(clicker, context);
                     } else if (storeId != null && !storeId.isEmpty()) {
                         this.getItem(clicker, storeId, currentPage);
                     }
