@@ -57,6 +57,7 @@ cooldown: "你不能这么做, 正在冷却中."
 maximum-sale: "你已经达到上架数量上限."
 not-owner: "你不是该商品的拥有者."
 import-data: "成功导入数据."
+search: "请输入你要搜索的商品, 输入 cancel 取消搜索."
 show:
   - "&6市场用法"
   - " "

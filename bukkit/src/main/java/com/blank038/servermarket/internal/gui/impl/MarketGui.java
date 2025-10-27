@@ -13,6 +13,7 @@ import com.blank038.servermarket.api.handler.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.internal.gui.AbstractGui;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.provider.ActionProvider;
+import com.blank038.servermarket.internal.provider.GuiSearchProvider;
 import com.blank038.servermarket.internal.util.ItemUtil;
 import com.blank038.servermarket.internal.util.TextUtil;
 import com.google.common.collect.Lists;
@@ -139,6 +140,11 @@ public class MarketGui extends AbstractGui {
                             break;
                         case "refresh":
                             new MarketGui(this.context).openGui(clicker);
+                            break;
+                        case "search":
+                            clicker.sendMessage(I18n.getStrAndHeader("search"));
+                            clicker.closeInventory();
+                            GuiSearchProvider.add(clicker.getUniqueId(), this.context);
                             break;
                         default:
                             if (action.contains(":")) {
