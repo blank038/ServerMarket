@@ -8,6 +8,7 @@ import com.blank038.servermarket.api.entity.MarketData;
 import com.blank038.servermarket.internal.cache.sale.SaleCache;
 import com.blank038.servermarket.api.handler.filter.FilterHandler;
 import com.blank038.servermarket.api.handler.filter.impl.KeyFilterImpl;
+import com.blank038.servermarket.internal.i18n.client.ClientLanguageParser;
 import com.blank038.servermarket.internal.util.TextUtil;
 import de.tr7zw.nbtapi.utils.MinecraftVersion;
 import org.bukkit.Bukkit;
@@ -35,6 +36,7 @@ public class DataContainer {
     public static final Map<String, MarketData> MARKET_DATA = new HashMap<>();
     public static final Map<String, SortHandler> SORT_HANDLER_MAP = new HashMap<>();
     public static final Map<ClickType, ActionType> ACTION_TYPE_MAP = new HashMap<>();
+    public static final Map<String, String> CLIENT_LANGUAGE = new HashMap<>();
     public static String defaultMarket;
 
     public static void loadData() {
@@ -77,6 +79,8 @@ public class DataContainer {
         DataContainer.registerVirtualMarketCommands();
         // load actions
         DataContainer.loadActions();
+        // load client language
+        DataContainer.loadClientLanguage();
         // load default market
         defaultMarket = ServerMarket.getInstance().getConfig().getString("default-market");
     }
@@ -155,5 +159,37 @@ public class DataContainer {
 
     public static boolean isLegacy() {
         return !MinecraftVersion.isAtLeastVersion(MinecraftVersion.MC1_13_R1);
+    }
+
+    /**
+     * Load client language files from the clientLanguage directory.
+     * Only loads keys starting with "item." and "block."
+     */
+    private static void loadClientLanguage() {
+        CLIENT_LANGUAGE.clear();
+
+        File clientLanguageDir = new File(ServerMarket.getInstance().getDataFolder(), "clientLanguage");
+        if (!clientLanguageDir.exists()) {
+            ServerMarket.getInstance().saveResource("clientLanguage/example.json", "clientLanguage/example.json");
+        }
+
+        if (!clientLanguageDir.isDirectory()) {
+            return;
+        }
+
+        File[] jsonFiles = clientLanguageDir.listFiles((dir, name) -> name.endsWith(".json"));
+        if (jsonFiles == null) {
+            return;
+        }
+
+        for (File jsonFile : jsonFiles) {
+            try {
+                ClientLanguageParser parser = new ClientLanguageParser(jsonFile);
+                Map<String, String> parsedData = parser.parse();
+                CLIENT_LANGUAGE.putAll(parsedData);
+            } catch (Exception e) {
+                ServerMarket.getInstance().getLogger().log(Level.WARNING, "Failed to load client language file: " + jsonFile.getName(), e);
+            }
+        }
     }
 }
