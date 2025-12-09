@@ -197,10 +197,20 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
     @Override
     public void save(String market, Map<String, SaleCache> map) {
         // Create temp folder and temp file
-        String tempFileName = market + "_" + System.currentTimeMillis() + ".yml";
         File tempFolder = new File(ServerMarket.getInstance().getDataFolder(), "temp");
-        tempFolder.mkdir();
-        File tempFile = new File(ServerMarket.getInstance().getDataFolder() + "/temp/", tempFileName);
+        File saleDataFolder = new File(ServerMarket.getInstance().getDataFolder(), "saleData");
+
+        // Create necessary folder
+        try {
+            Files.createDirectories(tempFolder.toPath());
+            Files.createDirectories(saleDataFolder.toPath());
+        } catch (IOException e) {
+            this.pluign.getLogger().log(Level.WARNING, e, () -> "Cannot create necessary data directories (temp/saleData)");
+            return;
+        }
+
+        String tempFileName = market + "_" + System.currentTimeMillis() + ".yml";
+        File tempFile = new File(tempFolder, tempFileName);
         // Create transaction
         CompletableFuture.supplyAsync(() -> {
                     FileConfiguration data = new YamlConfiguration();
@@ -213,7 +223,7 @@ public class YamlStorageHandlerImpl extends AbstractStorageHandler {
                     return data;
                 })
                 .thenRunAsync(() -> {
-                    File file = new File(ServerMarket.getInstance().getDataFolder() + "/saleData/", market + ".yml");
+                    File file = new File(saleDataFolder, market + ".yml");
                     try {
                         Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
