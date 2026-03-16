@@ -12,6 +12,7 @@ import com.blank038.servermarket.internal.gui.impl.MarketGui;
 import com.blank038.servermarket.internal.handler.CacheHandler;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
+import com.blank038.servermarket.internal.provider.GuiSellProvider;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -111,6 +112,11 @@ public enum ActionType {
             return;
         }
         new ConfirmPurchaseGui(context).open(marketData, buyer, uuid, saleCache);
+    }),
+    SELL((marketData, buyer, uuid, saleCache, context) -> {
+        buyer.closeInventory();
+        buyer.sendMessage(I18n.getStrAndHeader("sell-input-price"));
+        GuiSellProvider.add(buyer.getUniqueId(), context.getMarketId());
     });
 
     private final ActionConsumer consumer;

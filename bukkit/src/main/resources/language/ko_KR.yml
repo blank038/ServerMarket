@@ -50,6 +50,8 @@ changeSaleType: "분류를 전환했습니다. 현재 분류: &b%type%"
 changeSortType: "정렬 방법을 변경했습니다. 현재 정렬: &b%type%"
 cooldown: "지금은 쿨타임 중입니다. 이 작업을 수행할 수 없습니다."
 maximum-sale: "판매 가능한 아이템의 최대 수에 도달했습니다."
+sell-input-price: "채팅에 판매 가격을 입력하세요. 취소하려면 'cancel'을 입력하세요."
+sell-cancelled: "판매가 취소되었습니다."
 show:
   - "&6시장 사용법"
   - " "

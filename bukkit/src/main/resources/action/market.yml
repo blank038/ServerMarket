@@ -1,4 +1,5 @@
 #right: purchase
 left: purchase
+right: sell
 shift_right: unsale
 shift_left: confirm_purchase

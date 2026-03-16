@@ -50,6 +50,8 @@ changeSaleType: "Has cambiado la categoría, categoría actual: &b%type%"
 changeSortType: "Has cambiado el método de ordenación, método actual de ordenación: &b%type%"
 cooldown: "No puedes hacer esto, está en cooldown."
 maximum-sale: "Ya has alcanzado el límite de cantidad de productos para vender."
+sell-input-price: "Por favor, introduce el precio de venta en el chat, escribe 'cancel' para cancelar."
+sell-cancelled: "Venta cancelada."
 show:
   - "&6Uso del mercado"
   - " "

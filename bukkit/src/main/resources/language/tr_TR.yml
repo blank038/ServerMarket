@@ -50,6 +50,8 @@ changeSaleType: "Sıralama türü değiştirildi. Şu anki tür: &b%type%."
 changeSortType: "Sıralama yöntemi değiştirildi. Şu anki yöntem: &b%type%."
 cooldown: "Şu anda molada bulunuyoruz. Bu işlemi gerçekleştiremiyoruz."
 maximum-sale: "Öğe satışının maksimum sınırına ulaşıldı."
+sell-input-price: "Lütfen sohbette satış fiyatını girin, iptal etmek için 'cancel' yazın."
+sell-cancelled: "Satış iptal edildi."
 show:
   - "&6Pazarın nasıl kullanılacağı"
   - " "

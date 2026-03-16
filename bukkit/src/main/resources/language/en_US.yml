@@ -55,6 +55,8 @@ maximum-sale: "You have reached the maximum number of listings."
 not-owner: "You are not the owner of this item."
 import-data: "Data imported successfully."
 search: "Please enter the item you want to search form, enter 'cancel' to cancel search."
+sell-input-price: "Please enter the listing price in chat, enter 'cancel' to cancel."
+sell-cancelled: "Listing cancelled."
 show:
   - "&6Market usage"
   - " "

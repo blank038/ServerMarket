@@ -58,6 +58,8 @@ maximum-sale: "你已经达到上架数量上限."
 not-owner: "你不是该商品的拥有者."
 import-data: "成功导入数据."
 search: "请输入你要搜索的商品, 输入 cancel 取消搜索."
+sell-input-price: "请在聊天栏输入上架价格, 输入 cancel 取消上架."
+sell-cancelled: "已取消上架."
 show:
   - "&6市场用法"
   - " "

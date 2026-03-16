@@ -3,6 +3,7 @@ package com.blank038.servermarket.internal.listen.impl;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.listen.AbstractListener;
 import com.blank038.servermarket.internal.provider.GuiSearchProvider;
+import com.blank038.servermarket.internal.provider.GuiSellProvider;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -36,12 +37,17 @@ public class PlayerCommonListener extends AbstractListener {
                 ServerMarket.getStorageHandler().setLock(uuid, false);
             }
         });
-        // Remove search cache
+        // Remove search/sell cache
         GuiSearchProvider.remove(uuid);
+        GuiSellProvider.remove(uuid);
     }
 
     @EventHandler
     public void onSearch(AsyncPlayerChatEvent event) {
+        if (GuiSellProvider.sell(event.getPlayer(), event.getMessage())) {
+            event.setCancelled(true);
+            return;
+        }
         if (GuiSearchProvider.search(event.getPlayer(), event.getMessage())) {
             event.setCancelled(true);
         }

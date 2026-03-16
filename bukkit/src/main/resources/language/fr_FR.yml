@@ -50,6 +50,8 @@ changeSaleType: "Type de vente changé, type actuel : &b%type%"
 changeSortType: "Type de tri changé, type actuel : &b%type%"
 cooldown: "Vous ne pouvez pas faire cela, il est en cooldown."
 maximum-sale: "Vous avez atteint la limite de nombre d'articles mis en vente."
+sell-input-price: "Veuillez saisir le prix de vente dans le chat, saisissez 'cancel' pour annuler."
+sell-cancelled: "Mise en vente annulée."
 show:
   - "&6Utilisation du marché"
   - " "
