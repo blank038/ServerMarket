@@ -4,7 +4,6 @@ import com.blank038.servermarket.internal.data.DataContainer;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
 import com.blank038.servermarket.internal.util.TextUtil;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -12,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class CustomNameProvider {
@@ -63,9 +63,11 @@ public class CustomNameProvider {
 
     private static String getClientName(ItemStack itemStack) {
         Material material = itemStack.getType();
-        NamespacedKey namespacedKey = material.getKey();
+        // Avoid Material#getKey() which was introduced in 1.13 and throws
+        // NoSuchMethodError on 1.8 - 1.12. Material is a vanilla-only enum so
+        // the namespace is always "minecraft"; the key is the lowercased enum name.
         String type = material.isBlock() ? "block" : "item";
-        String finalKey = type + "." + namespacedKey.getNamespace() + "." + namespacedKey.getKey();
-        return DataContainer.CLIENT_LANGUAGE.get(finalKey.toLowerCase());
+        String finalKey = type + ".minecraft." + material.name().toLowerCase(Locale.ROOT);
+        return DataContainer.CLIENT_LANGUAGE.get(finalKey);
     }
 }
