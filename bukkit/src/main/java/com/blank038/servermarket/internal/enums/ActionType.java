@@ -34,7 +34,7 @@ public enum ActionType {
             buyer.sendMessage(I18n.getStrAndHeader("lack-money").replace("%economy%", marketData.getEconomyName()));
             return;
         }
-        Optional<SaleCache> optional = ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid);
+        Optional<SaleCache> optional = ServerMarket.getStorageHandler().removeSaleItem(marketData.getMarketKey(), uuid);
         if (optional.isPresent()) {
             SaleCache saleItem = optional.get();
             BaseEconomy.getEconomyBridge(marketData.getPaymentType()).take(buyer, marketData.getEconomyType(), saleItem.getPrice());
@@ -57,7 +57,7 @@ public enum ActionType {
                         marketData.getEconomyType(), saleItem.getPrice(), marketData.getMarketKey());
             }
             // remove cache
-            CacheHandler.removeSaleCache(marketData.getSourceId(), saleItem.getSaleUUID());
+            CacheHandler.removeSaleCache(marketData.getMarketKey(), saleItem.getSaleUUID());
             // give sale item to buyer
             ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), saleItem, "buy");
             // call PlayerSaleEvent.Buy
@@ -72,20 +72,20 @@ public enum ActionType {
     }),
     UNSALE((marketData, buyer, uuid, saleCache, context) -> {
         if (saleCache.getOwnerUUID().equals(buyer.getUniqueId().toString())) {
-            ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
+            ServerMarket.getStorageHandler().removeSaleItem(marketData.getMarketKey(), uuid)
                     .ifPresent((sale) -> {
                         // remove cache
-                        CacheHandler.removeSaleCache(marketData.getSourceId(), uuid);
+                        CacheHandler.removeSaleCache(marketData.getMarketKey(), uuid);
                         // execute logic
                         ServerMarket.getStorageHandler().addItemToStore(buyer.getUniqueId(), sale.getSaleItem(), "unsale");
                         buyer.sendMessage(I18n.getStrAndHeader("unsale"));
                         new MarketGui(context).openGui(buyer);
                     });
         } else if (buyer.isOp() || buyer.hasPermission("servermarket.force-unsale")) {
-            ServerMarket.getStorageHandler().removeSaleItem(marketData.getSourceId(), uuid)
+            ServerMarket.getStorageHandler().removeSaleItem(marketData.getMarketKey(), uuid)
                     .ifPresent((sale) -> {
                         // remove cache
-                        CacheHandler.removeSaleCache(marketData.getSourceId(), uuid);
+                        CacheHandler.removeSaleCache(marketData.getMarketKey(), uuid);
                         // execute logic
                         if (!GeneralOption.restitution) {
                             buyer.getInventory().addItem(saleCache.getSaleItem());
