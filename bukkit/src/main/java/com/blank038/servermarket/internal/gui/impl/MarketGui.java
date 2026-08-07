@@ -64,6 +64,7 @@ public class MarketGui extends AbstractGui {
         FileConfiguration data = YamlConfiguration.loadConfiguration(marketData.getSourceFile());
         GuiModel model = new GuiModel(data.getString("title"), data.getInt("size"));
         model.registerListener(ServerMarket.getInstance());
+        this.preventInventoryDrag(model);
         model.setCloseRemove(true);
         // 设置界面物品
         this.initializeDisplayItem(model, data);

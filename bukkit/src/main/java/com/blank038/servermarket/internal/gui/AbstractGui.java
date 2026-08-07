@@ -1,8 +1,14 @@
 package com.blank038.servermarket.internal.gui;
 
+import com.aystudio.core.bukkit.util.inventory.GuiModel;
 import com.blank038.servermarket.api.ServerMarketApi;
 import com.blank038.servermarket.internal.gui.context.GuiContext;
 import com.blank038.servermarket.internal.plugin.ServerMarket;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryDragEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,5 +45,18 @@ public abstract class AbstractGui implements IGui {
         }
         COOLDOWN.put(uuid, System.currentTimeMillis() + ServerMarket.getInstance().getConfig().getInt("cooldown.action"));
         return false;
+    }
+
+    protected void preventInventoryDrag(GuiModel model) {
+        Listener listener = new Listener() {
+            @EventHandler
+            public void onInventoryDrag(InventoryDragEvent event) {
+                if (event.getInventory() == model.getInventory()) {
+                    event.setCancelled(true);
+                }
+            }
+        };
+        Bukkit.getPluginManager().registerEvents(listener, ServerMarket.getInstance());
+        model.onClose((event) -> HandlerList.unregisterAll(listener));
     }
 }

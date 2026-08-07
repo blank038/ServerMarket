@@ -57,6 +57,7 @@ public class PlayerSalesManageGui extends AbstractGui {
         FileConfiguration data = YamlConfiguration.loadConfiguration(file);
         GuiModel model = new GuiModel(data.getString("title"), data.getInt("size"));
         model.registerListener(ServerMarket.getInstance());
+        this.preventInventoryDrag(model);
         model.setCloseRemove(true);
 
         this.initializeDisplayItem(model, data);

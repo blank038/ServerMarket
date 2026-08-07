@@ -43,6 +43,7 @@ public class ConfirmPurchaseGui extends AbstractGui {
             model.setItem(data.getInt("item-slot"), saleCache.getSaleItem().clone());
 
             model.registerListener(ServerMarket.getInstance());
+            this.preventInventoryDrag(model);
             model.onClick((e) -> {
                 e.setCancelled(true);
                 if (e.getClickedInventory() != e.getInventory()) {

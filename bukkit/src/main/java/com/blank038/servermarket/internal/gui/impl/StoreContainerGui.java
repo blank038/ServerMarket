@@ -47,6 +47,7 @@ public class StoreContainerGui extends AbstractGui {
             GuiModel guiModel = new GuiModel(data.getString("title"), data.getInt("size"));
             // 设置界面状态
             guiModel.registerListener(ServerMarket.getInstance());
+            this.preventInventoryDrag(guiModel);
             guiModel.setCloseRemove(true);
             // 开始遍历设置物品
             if (data.contains("items")) {
