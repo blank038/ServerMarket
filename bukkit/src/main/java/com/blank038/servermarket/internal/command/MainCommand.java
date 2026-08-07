@@ -12,9 +12,11 @@ import com.blank038.servermarket.api.handler.filter.impl.KeyFilterImpl;
 import com.blank038.servermarket.api.handler.filter.impl.TypeFilterImpl;
 import com.blank038.servermarket.internal.i18n.I18n;
 import com.blank038.servermarket.api.entity.MarketData;
+import com.blank038.servermarket.internal.gui.impl.PlayerSalesManageGui;
 import com.blank038.servermarket.internal.gui.impl.StoreContainerGui;
 import com.blank038.servermarket.internal.util.TextUtil;
 import com.google.common.collect.Lists;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,8 +24,10 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author Blank038
@@ -70,6 +74,12 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                         new StoreContainerGui((Player) sender, GuiContext.normal(DataContainer.defaultMarket)).open(1);
                     }
                     break;
+                case "manage":
+                    this.openPlayerSalesManage(sender, args.length == 1 ? null : args[1]);
+                    break;
+                case "player":
+                    this.openPlayerSalesMarket(sender, args);
+                    break;
                 case "reload":
                     if (sender.hasPermission("servermarket.admin")) {
                         this.instance.loadConfig(false);
@@ -94,7 +104,35 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         if (!(sender instanceof Player)) {
             return;
         }
-        ServerMarketApi.openMarket((Player) sender, GuiContext.normal(key));
+        ServerMarketApi.openMarket((Player) sender, GuiContext.normal(this.resolveMarketKey(key)));
+    }
+
+    private void openPlayerSalesManage(CommandSender sender, String key) {
+        if (!(sender instanceof Player)) {
+            return;
+        }
+        new PlayerSalesManageGui(GuiContext.normal(this.resolveMarketKey(key))).openGui((Player) sender);
+    }
+
+    private void openPlayerSalesMarket(CommandSender sender, String[] args) {
+        if (!(sender instanceof Player)) {
+            return;
+        }
+        if (args.length == 1) {
+            sender.sendMessage(I18n.getStrAndHeader("wrong-market"));
+            return;
+        }
+        if (args.length == 2) {
+            sender.sendMessage(I18n.getStrAndHeader("wrong-player"));
+            return;
+        }
+        GuiContext context = GuiContext.normal(args[1]);
+        context.setOwnerName(args[2]);
+        ServerMarketApi.openMarket((Player) sender, context);
+    }
+
+    private String resolveMarketKey(String key) {
+        return key == null ? DataContainer.defaultMarket : key;
     }
 
     private void searchItemsAndOpenMarket(CommandSender sender, String[] args) {
@@ -185,9 +223,28 @@ public class MainCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        if (strings.length == 1) {
+            return this.filterCompletions(Arrays.asList(
+                    "open", "search", "show", "box", "manage", "player", "reload", "patch", "import"
+            ), strings[0]);
+        }
         if (strings.length == 2 && strings[0].equalsIgnoreCase("patch")) {
-            return new ArrayList<>(PatchHandler.getPatchIds());
+            return this.filterCompletions(new ArrayList<>(PatchHandler.getPatchIds()), strings[1]);
+        }
+        if (strings.length == 2 && Arrays.asList("open", "search", "manage", "player").contains(strings[0].toLowerCase())) {
+            return this.filterCompletions(new ArrayList<>(DataContainer.MARKET_DATA.keySet()), strings[1]);
+        }
+        if (strings.length == 3 && strings[0].equalsIgnoreCase("player")) {
+            return this.filterCompletions(Bukkit.getOnlinePlayers().stream()
+                    .map(Player::getName)
+                    .collect(Collectors.toList()), strings[2]);
         }
         return null;
+    }
+
+    private List<String> filterCompletions(List<String> values, String input) {
+        return values.stream()
+                .filter((value) -> value.toLowerCase().startsWith(input.toLowerCase()))
+                .collect(Collectors.toList());
     }
 }

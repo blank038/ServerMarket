@@ -1,0 +1,52 @@
+# 界面标题
+title: "&8我的上架商品"
+# 界面大小
+size: 54
+# 显示商品的槽位
+# 支持格式:
+#   > 数字(小)-数字(大) 例子: 0-44
+#   > 数字 例子: 0
+sale-item-slots: "0-44"
+# 商品物品名, 注意：如果需要使用译名则需注释或删掉此行
+sale-name: "&b%name%"
+# 物品信息
+sale-info:
+  - " "
+  - "&a售卖者: &f%seller%"
+  - "&a价格: &f%price%"
+  - "&a上架时间: &f%time%"
+  - "&c点击下架该商品"
+# 界面物品设定
+items:
+  refresh:
+    type: ARROW
+    amount: 1
+    data: 0
+    name: "&6刷新商品"
+    slot: 46
+    action: refresh
+    lore: [ ]
+  up:
+    type: PAPER
+    amount: 1
+    data: 0
+    name: "&f上一页"
+    slot: 45
+    action: up
+    lore: [ ]
+  down:
+    type: PAPER
+    amount: 1
+    data: 0
+    name: "&f下一页"
+    slot: 53
+    action: down
+    lore: [ ]
+  market:
+    type: CHEST
+    amount: 1
+    data: 0
+    name: "&e返回市场"
+    slot: 49
+    action: market
+    lore: [ ]

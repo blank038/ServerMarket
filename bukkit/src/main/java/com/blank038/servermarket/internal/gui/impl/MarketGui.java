@@ -71,6 +71,7 @@ public class MarketGui extends AbstractGui {
         Integer[] slots = CommonUtil.formatSlots(data.getString("sale-item-slots"));
         List<SaleCache> saleList = CacheHandler.querySales(this.context.getMarketId())
                 .values().stream()
+                .filter(this.context::checkOwner)
                 .filter((entry) -> (this.context.getFilter() == null || this.context.getFilter().check(entry)))
                 .sorted(DataContainer.SORT_HANDLER_MAP.get(this.context.getSort()))
                 .collect(Collectors.toList());
@@ -138,6 +139,9 @@ public class MarketGui extends AbstractGui {
                             break;
                         case "store":
                             new StoreContainerGui(clicker, this.context).open(1);
+                            break;
+                        case "manage":
+                            new PlayerSalesManageGui(GuiContext.normal(this.context.getMarketId())).openGui(clicker);
                             break;
                         case "refresh":
                             new MarketGui(this.context).openGui(clicker);

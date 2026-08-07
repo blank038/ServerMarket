@@ -96,7 +96,15 @@ items:
     amount: 1
     data: 15
     name: " "
-    slot: 46,52
+    slot: 52
+    lore: [ ]
+  manage:
+    type: chest
+    amount: 1
+    data: 0
+    name: "&e我的上架商品"
+    slot: 46
+    action: manage
     lore: [ ]
   up:
     type: paper

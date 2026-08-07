@@ -79,7 +79,7 @@ public class ServerMarket extends AyPlugin {
         // Run legacy converter
         LegacyBackup.check();
         // Save the default files
-        Lists.newArrayList("gui/store.yml").forEach((v) -> this.saveResource(v, v));
+        Lists.newArrayList("gui/store.yml", "gui/player_sales.yml").forEach((v) -> this.saveResource(v, v));
         if (start && this.isEnabled()) {
             // Initialize IStorageHandler
             AbstractStorageHandler.check();
