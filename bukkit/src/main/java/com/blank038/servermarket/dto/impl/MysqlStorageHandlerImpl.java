@@ -130,7 +130,7 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
                 ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to check sale item.");
             }
         }, "SELECT market,owner_uuid,owner_name,pay_type,eco_type,price,data,post_time FROM " + salesTable + " WHERE sale_uuid = ? AND market = ?;");
-        return Optional.of(reference.get());
+        return Optional.ofNullable(reference.get());
     }
 
     @Override
@@ -211,7 +211,7 @@ public class MysqlStorageHandlerImpl extends AbstractStorageHandler {
                 ServerMarket.getInstance().getLogger().log(Level.WARNING, e, () -> "Failed to check sale item.");
             }
         }, "DELETE FROM " + salesTable + " WHERE sale_uuid = ? AND market = ?;");
-        return Optional.of(reference.get());
+        return Optional.ofNullable(reference.get());
     }
 
     @Override
