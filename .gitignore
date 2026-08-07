@@ -100,6 +100,9 @@ gradle-app.setting
 .project
 # JDT-specific (Eclipse Java Development Tools)
 .classpath
+.settings/
+.factorypath
+**/bin/
 
 progress.md
 task_plan.md
